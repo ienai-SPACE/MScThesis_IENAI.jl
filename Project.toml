@@ -1,0 +1,13 @@
+name = "MScThesis_IENAI"
+uuid = "a6f97a21-93c4-462f-b59c-cf4b526cfc64"
+authors = ["Daniel Talavera Jiménez"]
+version = "0.1.0"
+
+[compat]
+julia = "1"
+
+[extras]
+Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
+
+[targets]
+test = ["Test"]
