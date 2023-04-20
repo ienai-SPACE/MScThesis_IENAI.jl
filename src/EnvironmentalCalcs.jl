@@ -42,6 +42,6 @@ f107A = 73.5       #81 day average of F10.7 flux (centered on day of year doy).
 f107 = 79      #Daily F10.7 flux for previous day.
 ap = 5.13        #Magnetic index.
 
-C, nrlmsise00_output.T_alt, PO, mmean = fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap)
+C, Talt, PO, mmean = fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap)
 
 #

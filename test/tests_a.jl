@@ -16,8 +16,8 @@ end
 
     Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
 
-    Aproj == 1.4142135623730947
-    Aref == 1.7320508075688772
+    @test Aproj == 1.4142135623730947
+    @test Aref == 1.7320508075688772
     @test OutFacets == [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703875 0.6154797086703875]
 end
 
@@ -33,6 +33,10 @@ end
     nrlmsise00_output = nrlmsise00(JD, alt, g_lat, g_long, f107A, f107, ap, output_si=true, dversion=true)
     @test OxyPartPress(nrlmsise00_output) == 1.8056322369751164e-5
 
-    @test fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap) == 
+    C, Talt, PO, mmean = fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap)
+    @test C == [0.0014285330240918048, 0.7731601312894321, 0.20321083664911124, 0.009497284958350873, 3.4239449619055476e-5, 0.011599903369159519]
+    Talt == 833.3451338126531
+    PO == 1.8056322369751164e-5
+    mmean == 17.387351734564074
 end
 
