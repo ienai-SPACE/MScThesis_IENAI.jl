@@ -13,13 +13,11 @@ include("NonConvex.jl")
 GOAL:
     - Obtaining all the areas of the triangular mesh elements that have been intercepted by the rays (areas are not projected onto the velocity directions)
         - The rays are originated on a plane which is perpendicular to the velocity vector, and far from the satellite body 
-
-
 INPUT:
     - rmax            :: radius of the circular plane from where rays originate
     - distance        :: distance at which the circular plane is located (it should be out from the satellite body)
-    - Vrel            :: relative velocity vector --> used to calculate the perpendicular plane to the satellite's velocity direction
-
+    - dir             :: direction of the oncoming particle
+    - triangles       :: vertices coordinates of the triangular/quad mesh element
 OUTPUT:
     - OutFacets    :: matrix storing the triangle index, area, and the angle between the normal and the velocity direction
         - Matrix{Float64} -> size: (3, number of intercepted triangles)
@@ -101,7 +99,7 @@ triangles = @SMatrix[4.394897596952136 -1.3063587207678875 4.012655067923802 3.3
 #Vrel = defined as global variable in 'EnvironmentalInputs'
 #direction vector
 dir = [-0.6988494037821777, -0.137916655763437, -0.7018464981007773]
-=#
+
 triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
 dir = @SVector [1, 1, 0]
 
@@ -114,3 +112,4 @@ distance = 10                       #distance at which the circular plane is loc
 
 
 Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
+=#

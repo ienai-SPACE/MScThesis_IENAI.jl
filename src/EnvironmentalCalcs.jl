@@ -33,7 +33,7 @@ end
 
 #TEST
 #---------------------------------
-#
+#=
 JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].
 alt = 300e3                                       #Altitude [m].
 g_lat = deg2rad(-22)      #Geodetic latitude [rad].
@@ -44,4 +44,4 @@ ap = 5.13        #Magnetic index.
 
 C, Talt, PO, mmean = fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap)
 
-#
+=#

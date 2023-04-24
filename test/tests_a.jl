@@ -1,6 +1,7 @@
 using Test
 
-@testset "AreasCovex" begin
+
+@testset "AreasConvex" begin
     vertices3 = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
     dir = [1 1 0]
     vertices4 = [0 0 0 0 1 0 0 1 1 0 0 1]
@@ -35,8 +36,37 @@ end
 
     C, Talt, PO, mmean = fEnvironmentlCalcs(JD, alt, g_lat, g_long, f107A, f107, ap)
     @test C == [0.0014285330240918048, 0.7731601312894321, 0.20321083664911124, 0.009497284958350873, 3.4239449619055476e-5, 0.011599903369159519]
-    Talt == 833.3451338126531
-    PO == 1.8056322369751164e-5
-    mmean == 17.387351734564074
+    @test Talt == 833.3451338126531
+    @test PO == 1.8056322369751164e-5
+    @test mmean == 17.387351734564074
+
+    outGSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
+    @test outGSP.C == [0.0014285330240918048, 0.7731601312894321, 0.20321083664911124, 0.009497284958350873, 3.4239449619055476e-5, 0.011599903369159519]
+    @test outGSP.Ta == 833.3451338126531
+    @test outGSP.PO == 1.8056322369751164e-5
+    @test outGSP.mmean == 17.387351734564074
+
+end
+
+@testset "Coefficients" begin
+    JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].
+    alt = 300e3                                       #Altitude [m].
+    g_lat = deg2rad(-22)      #Geodetic latitude [rad].
+    g_long = deg2rad(-45)     #Geodetic longitude [rad].
+    f107A = 73.5       #81 day average of F10.7 flux (centered on day of year doy).
+    f107 = 79      #Daily F10.7 flux for previous day.
+    ap = 5.13        #Magnetic index.
+
+
+    outMutableProps = MutableProperties()
+    outGSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
+    outLMNTs = [1.0 2.0; 0.8660254037844386 0.6154797086703875; 0.8660254037844386 0.6154797086703875]
+    Vrel_norm = 7000.0
+
+    CD, CL, CP, CTAU = CoefficientCalculations(outMutableProps, outGSP, OutLMNTs, Vrel_norm)
+    @test CD == 1.8552723200229477
+    @test CL == 0.15663734326247042
+    @test CP == 1.6052581182863217
+    @test CTAU == 0.9432481181659008
 end
 

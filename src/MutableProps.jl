@@ -1,5 +1,12 @@
 using StaticArrays
 
+"""
+    function : MutableProperties()
+GOAL
+        - Store properties of the satellite surface into a struct
+OUTPUT
+        - struct storing : generator efficienty, [K] temperature at the wall, specular reflectivity component, diffuse reflectivity component, [g/mol] atomic mass of the surface atom
+"""
 
 struct MutableProps{T}
     η::T       #generator efficienty

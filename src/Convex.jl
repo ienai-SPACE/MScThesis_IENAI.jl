@@ -83,6 +83,7 @@ end
 
 #TESTING
 #------------------------------------------------------
+#=
 vertices = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
 dir = [1 1 0]
 #results: [1.0, 0.7853981633974484 = pi/4]
@@ -93,3 +94,4 @@ dir = [1 1 0]
 
 
 area, delta = areasConvex(vertices, dir)
+=#

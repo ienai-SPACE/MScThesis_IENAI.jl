@@ -1,20 +1,16 @@
-""" Different Gas-Surface-Interaction models """
-
-
 using SpecialFunctions
 using StaticArrays
+"""
+function : DRIA_GSI(LMNT, ATMnDYN)
 
-function DRIA_GSI(LMNT, ATMnDYN)
+    Reference: [DOORNBOS 2012, Thermospheric Density and Wind Determination from Satellite Dynamics] + modification based on atomic oxygen abosption=#
 
-    #DRIA model#
-
-    #=[DOORNBOS 2012, Thermospheric Density and Wind Determination from Satellite Dynamics] + modification based on atomic oxygen abosption=#
-
-    #INPUTS:
-    #----------------------------------------------------------------------
-    #m_srf  :: mass of the atoms of the surface particles
-    #C      :: gas concentrations
-    #Afacet :: area of each facet
+    INPUTS:
+        - LMNT       :: struct with the area element properties
+            - m_srf  :: mass of the atoms of the surface particles
+        - ATMnDYN    :: struct with atmospheric and dynamic properties
+            - C      :: gas concentrations
+        #Afacet :: area of each facet
     # δ     :: incoming particle angle wrt surface's normal
     #----------------------------------------------------------------------
     #OUTPUTS:
@@ -23,17 +19,18 @@ function DRIA_GSI(LMNT, ATMnDYN)
     #CL     :: Total Lift Coefficient
     #CP     :: Total Pressure Coefficient
     #CTAU   :: Total Shear Coefficient
-    #----------------------------------------------------------------------
+
+"""
+
+function DRIA_GSI(LMNT, ATMnDYN)
 
     δ = LMNT.δ
-    C = LMNT.C
+    C = ATMnDYN.C
     m_srf = LMNT.SRF
-    P0 = LMNT.PO
+    P0 = ATMnDYN.PO
     Tw = LMNT.Tw
     Ta = ATMnDYN.Ta
     Vrel = ATMnDYN.Vrel
-
-
 
 
     K = 1.44e6                                  #Best-fit Langmuir adsorbate constants for DRIA GSI model

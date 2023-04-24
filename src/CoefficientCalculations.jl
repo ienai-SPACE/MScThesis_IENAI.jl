@@ -5,36 +5,35 @@ include("GSICalculations.jl")
 GOAL:
     - Calculate the total drag, lift, pressure, and shear coefficients 
         - Contribution of each area element are area-weighted and added up for all contributing areas
-
 INPUT:
-    - m_srf  :: [g/mol]    molar mass of the satellite surface material
-    - Afacet :: [m^2] area of the contributing element
-    - δ      :: [rad] angle between the normal to the surface and the velocity vector
-
+    - outMutableProps       : struct with mutable properties
+    - outGasStreamProps     : struct with gas stream properties
+    - OutLMNTs              : [index of the element, [m^2] area of the element, [rad] angle between oncoming direction vector and normal to the surface]
+    - Vrel_norm             : [m/s] magnitude of the relatice velocity
 OUTPUT:
     - Total CD, CL, CP, CTAU
     """
 
-mutable struct stLMNT{T}  #check this --> ::T returns the error: !Matched::T
-    C::MVector{T}
-    δ::Float64
-    SRF::Float64
-    PO::Float64
-    Tw::Float64
+struct stLMNT{T}  #check this --> ::T returns the error: !Matched::T
+    δ::T
+    SRF::T
+    Tw::T
 end
-struct stATMnDYN{T}  #check this --> ::T returns the error: !Matched::T
+mutable struct stATMnDYN{T}  #check this --> ::T returns the error: !Matched::T
     Ta::T
     Vrel::T
+    PO::T
+    C::MVector{6,T}
 end
 
 
 
-function CoefficientCalculations(outMutableProps, outGasStreamProps, OutTriangles, Vrel)
+function CoefficientCalculations(outMutableProps, outGasStreamProps, OutLMNTs, Vrel_norm)
 
     #---Pre-allocation--------------------------
     #m_srf = outMutableProps.m_srf
     #C = outGasStreamProps.C
-    Afacet = OutTriangles[2, :]
+    Afacet = OutLMNTs[2, :]
     #δ = OutTriangles[3, :]
 
     Cd_facet = @MMatrix zeros(length(Afacet), 1)                                  #drag coefficient at each facet
@@ -42,14 +41,14 @@ function CoefficientCalculations(outMutableProps, outGasStreamProps, OutTriangle
     Cp_facet = @MMatrix zeros(length(Afacet), 1)                                  #pressure coefficient at each facet
     Ctau_facet = @MMatrix zeros(length(Afacet), 1)                                #shear coefficient at each facet
 
-    ATMnDYN = stATMnDYN(outGasStreamProps.Ta, Vrel)
+    ATMnDYN = stATMnDYN(outGasStreamProps.Ta, Vrel_norm, outGasStreamProps.PO, outGasStreamProps.C)
     #--------------------------------------------
 
     A = sum(Afacet)
 
     for jj ∈ 1:Int(length(Afacet))
 
-        LMNT = stLMNT(outGasStreamProps.C, OutTriangles[3, jj], outMutableProps.m_srf, outGasStreamProps.PO, outMutableProps.Tw)
+        LMNT = stLMNT(OutLMNTs[3, jj], outMutableProps.m_srf, outMutableProps.Tw)
 
         #Cd, Cl, Cp, Ctau = DRIA_GSI(δ[jj], C, m_srf)
         Cd, Cl, Cp, Ctau = DRIA_GSI(LMNT, ATMnDYN)
