@@ -1,13 +1,13 @@
 
 #[A. Walker, P. M. Mehta, and J. Koller, “Drag coefficient model using the cercignani-lampis-lord gas- surface interaction model,” Journal of Spacecraft and Rockets, 2014]
 
-using StaticArrays
-using SatelliteToolbox
 
-# include("PermanentProperties.jl")
-# include("EnvironmentalConstants.jl")
+"""
+    oxygen_partial_pressure(nrlmsise00_output::SatelliteToolbox.NRLMSISE00Output)
 
-function OxyPartPress(nrlmsise00_output)
+Calculate the partial pressure of oxygen in the atmosphere.
+"""
+function oxygen_partial_pressure(nrlmsise00_output)
 
     #den_Total[kg/m^3], the rest of densities[1/m^3], Temperature [K]
     ρ_v = @SVector [nrlmsise00_output.den_He, nrlmsise00_output.den_O, nrlmsise00_output.den_N2, nrlmsise00_output.den_O2, nrlmsise00_output.den_H, nrlmsise00_output.den_N]
@@ -45,5 +45,7 @@ ap = 5.13        #Magnetic index.
 
 
 nrlmsise00_output = nrlmsise00(JD, alt, g_lat, g_long, f107A, f107, ap, output_si=true, dversion=true)
-OxyPartPress(nrlmsise00_output)
+oxygen_partial_pressure(nrlmsise00_output)
 =#
+
+export oxygen_partial_pressure
