@@ -4,8 +4,8 @@
 using StaticArrays
 using SatelliteToolbox
 
-include("PermanentProperties.jl")
-include("EnvironmentalConstants.jl")
+# include("PermanentProperties.jl")
+# include("EnvironmentalConstants.jl")
 
 function OxyPartPress(nrlmsise00_output)
 
