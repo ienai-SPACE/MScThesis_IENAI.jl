@@ -3,7 +3,7 @@
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 
 
-    O, Norig = RayOrigins(dir, rmax, distance)        #coordinates of ray origins, number of origins
+    O, Norig = generate_ray_origins(dir, rmax, distance)        #coordinates of ray origins, number of origins
 
     #------pre-allocation-------------------
     index = 0                                         #counter indicating the number of triangles intercepted by the same ray

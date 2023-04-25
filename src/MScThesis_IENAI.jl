@@ -2,6 +2,9 @@ module MScThesis_IENAI
 
 using LinearAlgebra, StaticArrays, SatelliteToolbox
 
+SV3{T} = SVector{3,T}
+
+include("geometry.jl")
 include("EnvironmentalConstants.jl")
 include("PermanentProperties.jl")
 include("SurfaceProps.jl")

@@ -28,3 +28,8 @@ end
 
 export SurfaceProps
 
+
+struct Face{G,T}
+    geometry::G
+    properties::SurfaceProps{T}
+end

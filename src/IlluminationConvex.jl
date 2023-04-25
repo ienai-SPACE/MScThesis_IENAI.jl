@@ -22,7 +22,7 @@ function : fIlluminationConvex(α, ϕ)
 """
 
 
-function fIlluminationConvex(α, ϕ)
+function fIlluminationConvex(triangles, α, ϕ)
 
 
 

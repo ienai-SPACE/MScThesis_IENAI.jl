@@ -62,7 +62,7 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
         intgeo.area
     end
     num = sum(aero_coeffs .* areas)
-    num / sum(areas)
+    num / sum(areas), sum(areas)
 end
 
 
