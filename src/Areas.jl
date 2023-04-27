@@ -92,6 +92,9 @@ function areas(rmax, distance, dir, triangles, convexFlag)
         InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii])
     end
 
+    #int_geos = [InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]) for ii ∈ 1:length(OutFacets[2, :])]
+    #int_geos = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))
+
     return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 
