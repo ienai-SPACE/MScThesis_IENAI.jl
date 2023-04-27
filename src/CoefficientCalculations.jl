@@ -2,29 +2,36 @@ import Base: +, -, /, *, zero
 
 include("GSICalculations.jl")
 
-""" function: CoefficientCalculations
+""" 
+    `compute_coefficients`
+    GOAL: compute the toal drag, lift, pressure, and shear coefficients evaluated for a single area element
+    INPUT:
+    - surfprops::SurfaceProps
+    - gasprops::GasStreamProperties
+    - intgeo::InteractionGeometry
+    - Vrel_norm : T     [m/s]
 
-GOAL:
-    - Calculate the total drag, lift, pressure, and shear coefficients 
-        - Contribution of each area element are area-weighted and added up for all contributing areas
-INPUT:
-    - outSurfaceProps       : struct with mutable properties
-    - outGasStreamProps     : struct with gas stream properties
-    - OutLMNTs              : [index of the element, [m^2] area of the element, [rad] angle between oncoming direction vector and normal to the surface]
-    - Vrel_norm             : [m/s] magnitude of the relatice velocity
-OUTPUT:
-    - Total CD, CL, CP, CTAU
+    `function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::Vector{<:InteractionGeometry}, Vrel_norm)`
+    GOAL: compute the toal drag, lift, pressure, and shear coefficients evaluated for all areas of the element
+    INPUT:
+    - surfprops::SurfaceProps
+    - gasprops::GasStreamProperties
+    - intgeo::Vector{<:InteractionGeometry}
+    - Vrel_norm : T
+    OUTPUT:
+    - Total CD, CL, CP, CTAU, Aref
     """
 
-struct ElementInteractionProps{T}  #check this --> ::T returns the error: !Matched::T
+struct ElementInteractionProps{T}
     δ::T    # angle between oncoming direction vector and normal to the surface
     SRF::T  # molecular mass of the surface atom
     Tw::T   # temperature at the wall
 end
 
+#check potential mistake here: ElementInteractionProps(angle, surfprops::SurfaceProps) 
 ElementInteractionProps(surfprops::SurfaceProps, angle) = ElementInteractionProps(angle, surfprops.m_srf, surfprops.Tw)
 
-mutable struct stATMnDYN{T}  #check this --> ::T returns the error: !Matched::T
+mutable struct stATMnDYN{T}
     Ta::T
     Vrel::T
     PO::T
@@ -66,6 +73,8 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
 end
 
 
+
+#=
 function CoefficientCalculations(outSurfaceProps, outGasStreamProps, OutLMNTs, Vrel_norm)
 
     #---Pre-allocation--------------------------
@@ -106,5 +115,5 @@ function CoefficientCalculations(outSurfaceProps, outGasStreamProps, OutLMNTs, V
     return CD, CL, CP, CTAU
 
 end
-
+=#
 export InteractionGeometry, compute_coefficients

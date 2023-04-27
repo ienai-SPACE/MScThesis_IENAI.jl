@@ -71,7 +71,7 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
 end
 
 
-
+#=
 
 function MTalgorithm(O, dir, V1, V2, V3)
 
@@ -151,3 +151,4 @@ function MTalgorithm(O, dir, V1, V2, V3)
     return area, flag, facing, u, v, t, γ_dir
 
 end
+=#

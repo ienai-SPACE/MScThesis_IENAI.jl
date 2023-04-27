@@ -40,6 +40,7 @@ f107A = 73.5                                #81 day average of F10.7 flux (cente
 f107 = 79                                   #Daily F10.7 flux for previous day.
 ap = 5.13                                   #Magnetic index.
 #----------------------------------------------------------------------------------------------------------------------
-=#
-
+#
+C, Talt, PO, mmean = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 #GASOUT = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
+=#

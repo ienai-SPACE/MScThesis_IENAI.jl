@@ -85,10 +85,12 @@ end
 
 #TESTING
 #-------------------------------------------------------
+#=
 α = deg2rad(25)
 ϕ = deg2rad(250)
 
 Aproj, Aref, OutFacets = fIlluminationConvex(α, ϕ)
+=#
 
 
 

@@ -1,4 +1,4 @@
-using Test, SatelliteToolbox, StaticArrays, MScThesis_IENAI
+using Test, SatelliteToolbox, StaticArrays #, MScThesis_IENAI
 
 @testset "Oxygen partial pressure other environmental calculations" begin
     JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].

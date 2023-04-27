@@ -22,15 +22,15 @@ function : DRIA_GSI(LMNT, ATMnDYN)
 
 """
 
-function DRIA_GSI(LMNT, ATMnDYN)
+function DRIA_GSI(element_interaction, gasprops, Vrel)
 
-    δ = LMNT.δ
-    C = ATMnDYN.C
-    m_srf = LMNT.SRF
-    P0 = ATMnDYN.PO
-    Tw = LMNT.Tw
-    Ta = ATMnDYN.Ta
-    Vrel = ATMnDYN.Vrel
+    δ = element_interaction.δ
+    C = gasprops.C
+    m_srf = element_interaction.SRF
+    P0 = gasprops.PO
+    Tw = element_interaction.Tw
+    Ta = gasprops.Ta
+
 
 
     K = 1.44e6                                  #Best-fit Langmuir adsorbate constants for DRIA GSI model
@@ -99,7 +99,7 @@ function DRIA_GSI(LMNT, ATMnDYN)
 
 end
 
-
+#=
 
 function DRIA_GSI(LMNT::ElementInteractionProps, ATMnDYN::GasStreamProperties, Vrel)
 
@@ -177,21 +177,7 @@ function DRIA_GSI(LMNT::ElementInteractionProps, ATMnDYN::GasStreamProperties, V
 
 end
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+=#
 
 
 

@@ -25,6 +25,13 @@ OUTPUT:
     - Aref            :: sum of all intercepted triangular areas
 """
 
+struct OutGeometry{T}
+    area::Vector{T}
+    angle::Vector{T}
+end
+
+
+
 
 function areas(rmax, distance, dir, triangles, convexFlag)
 
@@ -76,14 +83,23 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     end
     Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
 
+    OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
+
+
+    #InteractionGeometry_v = @MVector zeros(length(OutFacets[2, :]))
+    #for ii ∈ 1:length(OutFacets[2, :])
+    #    InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, :], OutFacets[3, :])
+    #end
 
 
 
 
-    return Aproj, Aref, OutFacets
+    return Aproj, Aref, OutLMNTs
 end
 
 
+
+export OutGeometry
 
 #TESTING
 #---------------------------------------------------------------------------------------------------------------------------------

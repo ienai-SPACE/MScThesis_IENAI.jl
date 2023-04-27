@@ -1,8 +1,8 @@
 
 using StaticArrays
 using SatelliteToolbox
-# include("PermanentProperties.jl")
-# include("EnvironmentalConstants.jl")
+#include("PermanentProperties.jl")
+#include("EnvironmentalConstants.jl")
 include("OPartPress.jl")
 
 """

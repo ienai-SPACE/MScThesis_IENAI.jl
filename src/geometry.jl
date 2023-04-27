@@ -14,3 +14,11 @@ struct TriangleFace{T} <: FaceGeometry
         new{T}(vertices, area, normal)
     end
 end
+
+#=
+v3 = @SVector[1, 2, 5]
+v2 = @SVector[1, 2, 3]
+v1 = @SVector[1, 2, 4]
+
+TriangleFace(v1, v2, v3)
+=#
