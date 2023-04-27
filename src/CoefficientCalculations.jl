@@ -65,12 +65,32 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     aero_coeffs = map(intgeo) do intgeo
         compute_coefficients(surfprops, gasprops, intgeo, Vrel_norm)
     end
-    areas = map(intgeo) do intgeo
-        intgeo.area
+    areas = map(intgeo) do x
+        x.area
     end
     num = sum(aero_coeffs .* areas)
     num / sum(areas), sum(areas)
 end
+
+# julia> map(x->x^2, 1:6)
+# 6-element Vector{Int64}:
+#   1
+#   4
+#   9
+#  16
+#  25
+#  36
+
+# julia> squares = map(1:6) do x
+#            x^2
+#        end
+# 6-element Vector{Int64}:
+#   1
+#   4
+#   9
+#  16
+#  25
+#  36
 
 
 
