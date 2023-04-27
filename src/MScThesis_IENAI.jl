@@ -1,4 +1,4 @@
-#module MScThesis_IENAI
+module MScThesis_IENAI
 
 using LinearAlgebra, StaticArrays, SatelliteToolbox
 
@@ -31,18 +31,19 @@ convexFlag = 1                                                                  
 MeshVerticesCoords, dir, rmax, distance = GeomInputs(Vrel_v, VdirFlag, convexFlag)      #mesh geometry defined inside
 # #-----------------------------------------------------------------------------------------------------------------------------
 
-Aproj, Aref, OutLMNTs = areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
+Aproj, Aref, OutLMNTs, int_geos = areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
 
-struct InteractionGeometry{T}
-    area::T
-    angle::T
-end
+# struct InteractionGeometry{T}
+#     area::T
+#     angle::T
+# end
 
-InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
+interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
 
 Vrel_norm = 7000.0
 #surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::Vector{<:InteractionGeometry}, Vrel_norm
-CD, CL, CP, CTAU = compute_coefficients(outSurfaceProps, outGasStreamProps, InteractionGeometry, Vrel_norm)
+coeffs, A = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
 
+(; Cd, Cl, Cp, Ctau) = coeffs
 
-#end
+end

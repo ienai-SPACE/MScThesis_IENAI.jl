@@ -30,7 +30,7 @@ struct OutGeometry{T}
     angle::Vector{T}
 end
 
-
+_eltype(::OutGeometry{T}) where {T} = T
 
 
 function areas(rmax, distance, dir, triangles, convexFlag)
@@ -84,17 +84,15 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
 
     OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
+    T = _eltype(OutLMNTs)
 
+    InteractionGeometry_v = Vector{InteractionGeometry{T}}(undef, length(OutFacets[2, :]))
 
-    #InteractionGeometry_v = @MVector zeros(length(OutFacets[2, :]))
-    #for ii ∈ 1:length(OutFacets[2, :])
-    #    InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, :], OutFacets[3, :])
-    #end
+    for ii ∈ 1:length(OutFacets[2, :])
+        InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii])
+    end
 
-
-
-
-    return Aproj, Aref, OutLMNTs
+    return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 
 
