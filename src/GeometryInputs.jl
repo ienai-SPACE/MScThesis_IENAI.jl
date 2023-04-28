@@ -28,7 +28,7 @@ function GeomInputs(Vrel_v, VdirFlag, convexFlag)
         #direction vector
         dir = -(Vrel_v / norm(Vrel_v))'
     elseif VdirFlag == 0
-        dir = @SVector [1, 1, 0]
+        dir = @SVector [1 / sqrt(2), 1 / sqrt(2), 0]
     end
 
 

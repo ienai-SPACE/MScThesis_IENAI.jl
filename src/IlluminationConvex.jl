@@ -5,7 +5,7 @@ include("Convex.jl")
 
 
 """
-function : fIlluminationConvex(α, ϕ)
+function : fIlluminationConvex(triangles, α, ϕ)
 
     INPUT:
         - gas properties??
@@ -21,6 +21,13 @@ function : fIlluminationConvex(α, ϕ)
         - Aref            :: sum of all intercepted triangular areas
 """
 
+struct impinged_geometries{T}
+    area::T
+    angle::T
+end
+
+
+_eltype(::impinged_geometries{T}) where {T} = T
 
 function fIlluminationConvex(triangles, α, ϕ)
 
@@ -31,24 +38,27 @@ function fIlluminationConvex(triangles, α, ϕ)
     uy = cos(ϕ) * sin(α)
     uz = sin(ϕ)
     dir = [ux, uy, uz] #unitary directional vector (opposite sense to oncoming ray beam)
-
-
+    print(dir)
+    print("illumination")
+    #dir = [1 1 0]
     #Number of triangles/facets
     Nfacet = size(triangles, 1)
 
-    #loop to iterate over all triangles
-    for jj ∈ 1:Nfacet
-        MeshVerticesCoords = triangles[jj, 1:9]
-        OutAreaConvex = areasConvex(MeshVerticesCoords, dir)
+
+
+
+    for jj ∈ 1:Nfacet #for loop to iterate over all triangles/quads
+        vertices = triangles[jj, 1:9]
+        OutAreaConvex = areasConvex(vertices, dir)
         if jj == 1
             if OutAreaConvex[1] == 0
-                OutFacets = @SVector [0, 0, 0]
+                OutFacets = @SVector [0.0, 0.0, 0.0]
             else
                 OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2]]
             end
         else
             if OutAreaConvex[1] == 0
-                OutFacets = hcat(OutFacets, [0, 0, 0])
+                OutFacets = hcat(OutFacets, [0.0, 0.0, 0.0])
             else
                 OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2]])
             end
@@ -58,6 +68,12 @@ function fIlluminationConvex(triangles, α, ϕ)
     #eliminate non-intercepted triangle entries and size down the output matrix
     OutFacets = filter(!iszero, OutFacets)
     OutFacets = reshape(OutFacets, (3, Int(length(OutFacets) / 3)))
+
+    # if iszero(OutFacets)
+    #     OutFacets = [0.0; 0.0; 0.0]
+    # end
+
+
 
 
 
@@ -77,7 +93,27 @@ function fIlluminationConvex(triangles, α, ϕ)
     Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
 
 
-    return Aproj, Aref, OutFacets
+    OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
+
+
+    imp_geo = impinged_geometries(OutFacets[2, :], OutFacets[3, :])
+    T = _eltype(imp_geo)
+
+    #area_and_angle = Vector{InteractionGeometry{T}}(undef, length(OutFacets[2, :]))
+    areas_and_angles = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))
+
+
+
+    if Aproj == 0
+        Aproj = 0.0
+    end
+    if Aref == 0
+        Aref = 0.0
+    end
+
+
+
+    return Aproj, Aref, OutLMNTs, areas_and_angles
 
 
 end

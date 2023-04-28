@@ -16,6 +16,9 @@ include("Areas.jl")
 include("GeometryInputs.jl")
 include("Orbit&DateInputs.jl")
 
+include("IlluminationConvex.jl")
+include("DragOrientationConvex.jl")
+
 
 outSurfaceProps = SurfaceProps()                                                   #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
@@ -31,19 +34,27 @@ convexFlag = 1                                                                  
 MeshVerticesCoords, dir, rmax, distance = GeomInputs(Vrel_v, VdirFlag, convexFlag)      #mesh geometry defined inside
 # #-----------------------------------------------------------------------------------------------------------------------------
 
-Aproj, Aref, OutLMNTs, int_geos = areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
+Aproj, Atot, OutLMNTs, int_geos = areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
+print(int_geos)
 
-# struct InteractionGeometry{T}
-#     area::T
-#     angle::T
-# end
-
-interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
-
+α = deg2rad(45)
+ϕ = 0
 Vrel_norm = 7000.0
-#surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::Vector{<:InteractionGeometry}, Vrel_norm
-coeffs, A = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
 
-(; Cd, Cl, Cp, Ctau) = coeffs
+
+MeshVerticesCoords = @SMatrix[1 1 0 0 1 1 1 0 1]
+
+coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
+
+#interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
+
+#coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
+#(; Cd, Cl, Cp, Ctau) = coeffs
+#print(coeffs)
+
+print(coeffs2)
+print(Atot2)
+print(Aproj2)
 
 end
+

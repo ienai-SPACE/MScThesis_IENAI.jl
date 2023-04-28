@@ -35,6 +35,9 @@ _eltype(::OutGeometry{T}) where {T} = T
 
 function areas(rmax, distance, dir, triangles, convexFlag)
 
+    print(dir)
+    print("areas function")
+
     #Number of triangles
     Ntri = size(triangles, 1)
 
@@ -86,11 +89,13 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
     T = _eltype(OutLMNTs)
 
+    #pre-allocation of the vector to be populated by structs
     InteractionGeometry_v = Vector{InteractionGeometry{T}}(undef, length(OutFacets[2, :]))
 
     for ii ∈ 1:length(OutFacets[2, :])
         InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii])
     end
+
 
     #int_geos = [InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]) for ii ∈ 1:length(OutFacets[2, :])]
     #int_geos = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))

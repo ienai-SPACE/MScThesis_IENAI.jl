@@ -31,12 +31,12 @@ end
 #check potential mistake here: ElementInteractionProps(angle, surfprops::SurfaceProps) 
 ElementInteractionProps(surfprops::SurfaceProps, angle) = ElementInteractionProps(angle, surfprops.m_srf, surfprops.Tw)
 
-mutable struct stATMnDYN{T}
-    Ta::T
-    Vrel::T
-    PO::T
-    C::SVector{6,T}
-end
+# mutable struct stATMnDYN{T}
+#     Ta::T
+#     Vrel::T
+#     PO::T
+#     C::SVector{6,T}
+# end
 
 struct InteractionGeometry{T}
     area::T
@@ -68,10 +68,19 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     areas = map(intgeo) do x
         x.area
     end
+    angles = map(intgeo) do x
+        x.angle
+    end
     num = sum(aero_coeffs .* areas)
-    num / sum(areas), sum(areas)
+
+    # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
+    num / sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
+
+
 end
 
+
+#EXAMPLES
 # julia> map(x->x^2, 1:6)
 # 6-element Vector{Int64}:
 #   1

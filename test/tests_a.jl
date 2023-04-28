@@ -1,4 +1,5 @@
-using Test, SatelliteToolbox, StaticArrays #, MScThesis_IENAI
+using Test, SatelliteToolbox, StaticArrays, MScThesis_IENAI
+
 
 @testset "Oxygen partial pressure other environmental calculations" begin
     JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].
@@ -40,10 +41,10 @@ end
     dir = @SVector [1, 1, 0]
     convexFlag = 1
 
-    Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
+    Aproj, Atot, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
 
     @test Aproj == 1.4142135623730947
-    @test Aref == 1.7320508075688772
+    @test Atot == 1.7320508075688772
     @test OutFacets == [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703875 0.6154797086703875]
 end
 
@@ -60,15 +61,27 @@ end
 
     outSurfaceProps = SurfaceProps()
     outGSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
-    outLMNTs = [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703875 0.6154797086703875]
+    #test a single struct as input: intgeo::InteractionGeometry
+    interactions_geometries = InteractionGeometry(0.8660254037844386, 0.6154797086703875)
     Vrel_norm = 7000.0
 
-    CD, CL, CP, CTAU = CoefficientCalculations(outSurfaceProps, outGSP, OutLMNTs, Vrel_norm)
-    @test CD == 1.8552723200229477
-    @test CL == 0.15663734326247042
-    @test CP == 1.6052581182863217
-    @test CTAU == 0.9432481181659008
+    coeffs = compute_coefficients(outSurfaceProps, outGSP, interactions_geometries, Vrel_norm)
+    @test coeffs.Cd ≈ 2.2722352589828807
+    @test coeffs.Cl ≈ 0.19184078282911463
+    @test coeffs.Cp ≈ 1.9660316476308861
+    @test coeffs.Ctau ≈ 1.155238295173455
+
+
+    #test vector of structs as input: intgeo::Vector{<:InteractionGeometry}
+    int_geos = [InteractionGeometry(0.8660254037844386, 0.6154797086703875), InteractionGeometry(0.8660254037844386, 0.6154797086703875)]
+    coeffs2, areas = compute_coefficients(outSurfaceProps, outGSP, int_geos, Vrel_norm)
 
     # modify test with new function
+    @test coeffs2.Cd ≈ 2.2722352589828807
+    @test coeffs2.Cl ≈ 0.19184078282911463
+    @test coeffs2.Cp ≈ 1.9660316476308861
+    @test coeffs2.Ctau ≈ 1.155238295173455
+    @test areas ≈ 1.7320508075688772
+
 end
 
