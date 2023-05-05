@@ -5,16 +5,12 @@ using SatelliteToolbox
 
 
 """
-function : GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
+    GasStreamProperties{T}
 
-    GOAL: make environmental calculations based on the atmospheric model and store the results in a struct
-
-    INPUT:
-        - Julian date, altitude, g_lat, g_long, f107A, f107, ap, relative velocity vector
-    
-    OUTPUT:
-        - struct : GasStreamProperties(C, PO, mmean, Ta)
-            - Gases concentrations, [Pa] partial oxygen pressure, [g/mol] mean molecular mass, [K] ambient temperature
+- `C::SVector{6, Float64}`
+- `PO::Float64`
+- `mmean::Float64`
+- `Ta::Float64`
 """
 
 struct GasStreamProperties{T}

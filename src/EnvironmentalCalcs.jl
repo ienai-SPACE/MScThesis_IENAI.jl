@@ -8,12 +8,33 @@ include("OPartPress.jl")
 """
     GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 
-Computes the concentration of the 6 gases in the atmosphere, the temperature, the oxygen partial pressure and the mean molecular mass.
+Access atomospheric model function `nrlmsise00`
+
+INPUT:
+- `Julian date::Number`
+- `altitude::Number`
+- `g_lat::Number`
+- `g_long::Number`
+- `f107A::Number`
+- `f107::Number`
+- `ap::Number`
+
+OUTPUT:
+- `GasStreamProperties(nrlmsise00_output)`
 """
 function GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
     nrlmsise00_output = nrlmsise00(JD, alt, g_lat, g_long, f107A, f107, ap, output_si=true, dversion=true) #JD::Number, alt::Number, g_lat::Number, g_long::Number [, f107A::Number, f107::Number, ap::Union{Number,AbstractVector}]; output_si::Bool = true, dversion::Bool = true
     GasStreamProperties(nrlmsise00_output)
 end
+
+"""
+    GasStreamProperties(nrlmsise00_output::SatelliteToolbox.NRLMSISE00_Output)
+
+Compute the concentration of the 6 main gas species in the thermosphere, the temperature, the oxygen partial pressure and the mean molecular mass.
+
+OUTPUT:
+- `GasStreamProperties(C, PO, mmean, nrlmsise00_output.T_alt)::GasStreamProperties{T}`
+"""
 
 function GasStreamProperties(nrlmsise00_output::SatelliteToolbox.NRLMSISE00_Output)
     out = nrlmsise00_output
@@ -47,6 +68,6 @@ f107A = 73.5       #81 day average of F10.7 flux (centered on day of year doy).
 f107 = 79      #Daily F10.7 flux for previous day.
 ap = 5.13        #Magnetic index.
 
-C, Talt, PO, mmean = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
+GSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 
 =#

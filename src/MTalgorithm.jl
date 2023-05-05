@@ -37,17 +37,20 @@ end
 struct RayTriangleIntersection{M,T}
     t::T
     γ_dir::T
+    area::T
 end
 
-RayTriangleIntersection{M}(t::T, γ_dir::T) where {M,T} = RayTriangleIntersection{M,T}(t, γ_dir)
-no_intersection(::Type{T}) where {T} = RayTriangleIntersection{NoIntersection}(zero(T), zero(T))
+mode(rti::RayTriangleIntersection{M}) where {M} = M
+
+RayTriangleIntersection{M}(t::T, γ_dir::T, area::T) where {M,T} = RayTriangleIntersection{M,T}(t, γ_dir, area)
+no_intersection(::Type{T}) where {T} = RayTriangleIntersection{NoIntersection}(zero(T), zero(T), zero(T))
 
 
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
     dot_prod = dot(triangle.normal, ray.direction)
     γ_dir = acos(dot_prod)
     if abs(dot_prod) < ϵ
-        return no_intersection(T) # TODO: refine 
+        return no_intersection(T), mode(no_intersection(T)) # TODO: refine 
     end
     which_face = dot_prod > 0.0 ? BackFaceIntersection : FrontFaceIntersection
 
@@ -59,16 +62,32 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
     invDet = 1 / det
     tvec = ray.origin - V[1]
     u = invDet * dot(tvec, pvec)
+    #calculation of triangle's area
+    crossProd = cross(edge1, edge2)
+    area = norm(crossProd) / 2        #area of the triangle
 
-    (u < 0.0 || u > 1) && return no_intersection(T)
+    (u < 0.0 || u > 1) && return (no_intersection(T), mode(no_intersection(T)))
 
     qvec = cross(tvec, edge1)
-    v = invDet * dot(dir, qvec)
+    v = invDet * dot(ray.direction, qvec)
 
-    (v < 0.0 || u + v > 1.0) && return no_intersection(T)
+    (v < 0.0 || u + v > 1.0) && return (no_intersection(T), mode(no_intersection(T)))
     t = invDet * dot(edge2, qvec) # distance from the ray origin to P 
-    RayTriangleIntersection{which_face}(t, γ_dir)
+
+    RayTriangleIntersection{which_face}(t, γ_dir, area), mode(RayTriangleIntersection{which_face}(t, γ_dir, area))
 end
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #=

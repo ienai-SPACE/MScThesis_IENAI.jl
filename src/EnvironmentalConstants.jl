@@ -2,16 +2,9 @@
 
 - Gravitational parameter of the Earth
 - Boltzmann constant
+- Gas constant [J K^-1 mol^-1]
 - Avogadro's number
 - Earth radius
-- Semi-major axis
-- Eccentricity
-- Orbit perigee and apogee
-- Mean altitude of the orbit
-- Atmospheric, spacecraft, and relative velocity
-- Oxygen concentration
-- Mean molecular mass
-- Thermal speed of the gas
 =#
 
 using StaticArrays
@@ -25,6 +18,28 @@ const R = 8.31446261815324; # Gas constant [J K^-1 mol^-1]
 const NA = 6.0221408e23;
 #Earth radius
 const R_E = 6371;   #[km]
+
+export mu, kb, R, NA, R_E
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 #=
 #Orbital elements
@@ -58,4 +73,3 @@ const Ta = 943.83;       #[K] ambient temperature
 #const s = Vsc*1000/sqrt(2*kb*Ta/mmean);   # [-] thermal speed of the gas
 =#
 
-export mu, kb, R, NA, R_E

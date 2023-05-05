@@ -1,10 +1,15 @@
-using LinearAlgebra
-using StaticArrays
-include("Convex.jl")
+using StaticArrays, LinearAlgebra
+SV3{T} = SVector{3,T}
+include("geometry.jl")
+include("Origins.jl")
+include("MTalgorithm.jl")
+include("NonConvex.jl")
+include("Areas.jl")
+#-----------------------------------
 
 
 """
-fIlluminationConvex(triangles, α, ϕ)
+fIlluminationNonConvex(triangles, α, ϕ)
 
 #INPUT:
 - `triangles::SMatrix{number of triangles, 9, Float64, 9*number of triangles}` : coordinates of facets' vertices
@@ -26,46 +31,23 @@ end
 
 _eltype(::impinged_geometries{T}) where {T} = T
 
-function fIlluminationConvex(triangles, α, ϕ)
+function fIlluminationNonConvex(triangles, α, ϕ)
 
 
     #from spherical to cartesian coordinates
     ux = cos(ϕ) * cos(α)
     uy = cos(ϕ) * sin(α)
     uz = sin(ϕ)
-    dir = [ux, uy, uz] #unitary directional vector (opposite sense to oncoming ray beam)
-    # print(dir)
-    # print("illumination")
-    #dir = [1 1 0]
-    #Number of triangles/facets
-    Nfacet = size(triangles, 1)
+    dir = @SVector([ux, uy, uz]) #unitary directional vector (opposite sense to oncoming ray beam)
+    print(typeof(dir))
+    #number of triangles
+    Ntri = size(triangles, 1)
+    # default distance at which the perpendicular plane is placed. The ray origins lay on this plane
+    distance = 100
+    #radius of the perpendicular circular plane
+    rmax = triangles |> x -> x .^ 2 |> maximum |> sqrt
 
-
-    for jj ∈ 1:Nfacet #for loop to iterate over all triangles/quads
-        vertices = triangles[jj, 1:9]
-        OutAreaConvex = areasConvex(vertices, dir)
-        if jj == 1
-            if OutAreaConvex[1] == 0
-                OutFacets = @SVector [0.0, 0.0, 0.0]
-            else
-                OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2]]
-            end
-        else
-            if OutAreaConvex[1] == 0
-                OutFacets = hcat(OutFacets, [0.0, 0.0, 0.0])
-            else
-                OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2]])
-            end
-        end
-    end
-
-    #eliminate non-intercepted triangle entries and size down the output matrix
-    OutFacets = filter(!iszero, OutFacets)
-    OutFacets = reshape(OutFacets, (3, Int(length(OutFacets) / 3)))
-
-    # if iszero(OutFacets)
-    #     OutFacets = [0.0; 0.0; 0.0]
-    # end
+    OutFacets = areasConcave(dir, rmax, distance, triangles, Ntri)
 
     #sum of all intercepted triangular areas
     Aref = sum(OutFacets[2, :])
@@ -111,12 +93,15 @@ end
 
 #TESTING
 #-------------------------------------------------------
-#=
-α = deg2rad(25)
-ϕ = deg2rad(250)
 
-Aproj, Aref, OutFacets = fIlluminationConvex(α, ϕ)
-=#
+# α = deg2rad(25)
+# ϕ = deg2rad(250)
+
+# MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+
+
+# Aproj, Aref, OutFacets, AandA = fIlluminationNonConvex(MeshVerticesCoords, α, ϕ)
+
 
 
 

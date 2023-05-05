@@ -1,15 +1,17 @@
 using LinearAlgebra
 
 
-""" function: areasConvex 
+""" 
+    areasConvex(vertices, dir) 
 
-GOAL:
-    - Obtain the area of a triangle/quad if the angle between the normal and the direction of assessment is 0 < θ < π/2
-INPUT:
-    - vertices :: vector with the coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3...]
-    - dir      :: vector with the direction to be analyzed
-OUTPUT:
-    - area
+Obtain the area of a triangle/quad if the angle between the normal and the direction of assessment is 0 < θ < π/2
+
+#INPUT:
+- `vertices` : vector with the coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3...]
+- `dir`      : vector with the direction to be analyzed
+#OUTPUT:
+- `area`     : [m^2] area of the element
+- `γ_dir`    : [rad] angle between the normal of the surface and the vector directions
     """
 
 

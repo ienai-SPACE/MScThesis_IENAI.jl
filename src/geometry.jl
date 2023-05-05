@@ -1,5 +1,15 @@
 abstract type FaceGeometry end
 
+"""
+    TriangleFace{T} <: FaceGeometry 
+    
+Calculate the area and the normal of a 3D triangular surface defined by three static vectors (one per vertex)
+
+- `vertices::SVector{3,SV3{T}}`
+- `area::T`
+- `normal::SVector{3,T}`
+"""
+
 struct TriangleFace{T} <: FaceGeometry
     vertices::SVector{3,SV3{T}}
     area::T

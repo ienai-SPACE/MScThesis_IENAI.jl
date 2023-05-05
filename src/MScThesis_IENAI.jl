@@ -35,26 +35,27 @@ MeshVerticesCoords, dir, rmax, distance = GeomInputs(Vrel_v, VdirFlag, convexFla
 # #-----------------------------------------------------------------------------------------------------------------------------
 
 Aproj, Atot, OutLMNTs, int_geos = areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
-print(int_geos)
+# # print(int_geos)
 
 α = deg2rad(45)
 ϕ = 0
 Vrel_norm = 7000.0
 
 
-MeshVerticesCoords = @SMatrix[1 1 0 0 1 1 1 0 1]
+# MeshVerticesCoords = @SMatrix[1 1 0 0 1 1 1 0 1]
 
-coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
+#coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
 
 #interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
 
-#coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
+coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
+#coeffs = compute_coefficients(outSurfaceProps, outGasStreamProps, interactions_geometries, Vrel_norm)
 #(; Cd, Cl, Cp, Ctau) = coeffs
 #print(coeffs)
 
-print(coeffs2)
-print(Atot2)
-print(Aproj2)
+# print(coeffs2)
+# print(Atot2)
+# print(Aproj2)
 
-end
+#end
 

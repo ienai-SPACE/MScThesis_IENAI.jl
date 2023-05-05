@@ -1,24 +1,24 @@
-"""   function: Origins
 
-GOAL: 
-     - Define the coordinates of the origins of the rays
-     - The origins are placed on a plane, perpendicular to the velocity vector
-     - The source of origins has a circular shape
+using LinearAlgebra, StaticArrays, SatelliteToolbox
+SV3{T} = SVector{3,T}
 
-INPUTS:
-     - Vrel
-     - distance: distance from body center to perpendicular plane from where the rays iniciate (the plane should be outside of the satellite body)  
-     - rmax: radius of the ray source on the perpendicular plane 
-OUTPUTS:
-      - O         :: coordinates on the perpendicular plane from where the rays iniciate
-      - Norig     :: number of ray origins
-
-      PENDING:
-      *unify the 'Areas' module
-      *verify against the spherical tri-mesh
-"""
+using Random
 
 abstract type RaySampler end
+
+"""
+    Sampler <: RaySampler
+
+Definition of the method to be used to populate the disk of ray origins
+
+#Sampler options
+-`GridFilter`
+-`FibonacciSampler`
+-`MonteCarlSampler`
+
+#field
+-`ray_density::Float64` : [rays / m²]
+"""
 
 struct GridFilter <: RaySampler
     ray_density::Float64 # rays / m²
@@ -29,8 +29,21 @@ struct MonteCarloSampler <: RaySampler
 end
 
 struct FibonacciSampler <: RaySampler
-    ray_density::Float64 # rays / m²
+    ray_density::Float64 # rays / m²  
+
 end
+
+"""
+    generate_two_normals(u::SV3)
+
+Generate an orthogonal plane defined by unit vectors `v` and `w` w.r.t. the input vector `u`
+
+#INPUT:
+-`u::SVector{3,T}`
+#OUTPUT:
+-`v::Vector`
+-`w::Vector`
+"""
 
 function generate_two_normals(u::SV3)
     u = normalize(u)
@@ -45,6 +58,21 @@ function generate_two_normals(u::SV3)
     (v, w)
 end
 
+"""
+    generate_ray_origins(gf::GridFilter, dir, rmax, distance)
+
+Create a uniformly distributed source of rays
+
+#INPUTS:
+-`gf::GridFilter` : density of rays [rays/m^2]
+-`dir`
+-`rmax`
+-`distance`
+#OUTPUT:
+-`points_new::SVector{3,Float64}`
+-`Norig::Int` : number of ray origins 
+"""
+
 function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
     step = 1 / sqrt(gf.ray_density)
     x_grid = -rmax:step:rmax
@@ -57,16 +85,119 @@ function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
     size_y = size(y_coords)[1] * size(y_coords)[2]
     x_c = reshape(x_coords, (size_x,))
     y_c = reshape(y_coords, (size_y,))
-    points = collect(zip(x_c, y_c)) |> filter(p -> norm(p) <= rmax)
+    points = filter(p -> norm(p) <= rmax, collect(zip(x_c, y_c)))
+    #points = collect(zip(x_c, y_c)) |> filter(p -> norm(p) <= rmax)
     center = dir * distance
     points_new = zeros(SVector{3,Float64}, length(points))
     v, w = generate_two_normals(dir)
     for (i, p) ∈ enumerate(points)
         points_new[i] = center + p[1] * v + p[2] * w
     end
-    points_new
+    points_new, Int(length(points))
 end
 
+
+"""
+    generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
+
+Create a uniformly distributed source of rays using Fibonacci algorithm
+Source: http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
+
+#INPUTS:
+-`gf::FibonacciSampler` : density of rays [rays/m^2]
+-`dir`
+-`rmax`
+-`distance`
+#OUTPUT:
+-`points_new::SVector{3,Float64}`
+-`Norig::Int` : number of ray origins 
+"""
+
+function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
+
+    goldenRatio = (1 + sqrt(5)) / 2
+    n = ceil(gf.ray_density * (π * rmax^2)) #number of distributed points inside the disk of radius rmax
+
+    x_v = LinRange(0, n, Int(n + 1)) / goldenRatio
+    y_v = LinRange(0, n, Int(n + 1)) / n
+    θ = 2 * π * x_v
+    r = sqrt.(y_v) * rmax
+    x_coords = cos.(θ) .* r
+    y_coords = sin.(θ) .* r
+
+    center = dir * distance
+    points_new = zeros(SVector{3,Float64}, length(x_coords))
+    v, w = generate_two_normals(dir)
+    for ii ∈ 1:length(collect(x_coords))
+        points_new[ii] = center + x_coords[ii] * v + y_coords[ii] * w
+    end
+    points_new, Int(length(x_coords))
+end
+
+
+"""
+    generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
+
+Create a randomly distributed source of rays using Monte Carlo algorithm, based on test particle Monte Carlo method
+Source: Xuhong Jina et al,"Monte Carlo simulation for aerodynamic coefficients of satellites in LowEarth Orbit"
+
+#INPUTS:
+-`gf::FibonacciSampler` : density of rays [rays/m^2]
+-`dir`
+-`rmax`
+-`distance`
+#OUTPUT:
+-`points_new::SVector{3,Float64}`
+-`Norig::Int` : number of ray origins 
+"""
+
+function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
+
+    n = ceil(gf.ray_density * (4 * rmax^2)) #number of randomly distributed points inside the disk of radius rmax
+    rng = Xoshiro(1234) # create a new Xoshiro random number generator object
+    R1 = rand(rng, Int(n))   # generate a random number using the rng object
+    R2 = rand(rng, Int(n))
+    R3 = rand(rng, Int(n))
+    R4 = rand(rng, Int(n))
+
+    Rc = rmax
+
+    x_c = Rc * sqrt.(R1) .* cos.(2 * π * R2)
+    y_c = Rc * sqrt.(R3) .* cos.(2 * π * R4)
+
+    points = filter(p -> norm(p) <= rmax, collect(zip(x_c, y_c)))
+
+    center = dir * distance
+    points_new = zeros(SVector{3,Float64}, length(points))
+    v, w = generate_two_normals(dir)
+    for (i, p) ∈ enumerate(points)
+        points_new[i] = center + p[1] * v + p[2] * w
+
+    end
+    points_new, Int(length(points))
+end
+
+
+# export generate_two_normals
+
+#TEST
+#-------------------------------
+
+# dir = SV3([1 / sqrt(2) 1 / sqrt(2) 0])
+# rmax = 2
+# distance = 10
+# samplerG = GridFilter(10)
+# samplerF = FibonacciSampler(10)
+# samplerMC = MonteCarloSampler(1)
+# PN, Norig = generate_ray_origins(samplerMC, dir, rmax, distance);
+
+
+
+
+
+
+
+#=
 function generate_ray_origins_old(dir, rmax::T, distance) where {T}
 
 
@@ -109,3 +240,5 @@ function generate_ray_origins_old(dir, rmax::T, distance) where {T}
     Norig = rmax * Int(360 / Dangle)
     return Xg, Norig
 end
+=#
+

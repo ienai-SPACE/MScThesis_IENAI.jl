@@ -1,12 +1,24 @@
 
+using StaticArrays, LinearAlgebra
+SV3{T} = SVector{3,T}
+include("geometry.jl")
+include("Origins.jl")
+include("MTalgorithm.jl")
+#--------------------------------------------
+
+
 
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 
+    #select the sampling method and the density of the sampler [rays/m^2]
+    samplerG = GridFilter(10)
+    samplerF = FibonacciSampler(10)
+    samplerMC = MonteCarloSampler(10)
 
-    O, Norig = generate_ray_origins(dir, rmax, distance)        #coordinates of ray origins, number of origins
+    O, Norig = generate_ray_origins(samplerMC, dir, rmax, distance)        #coordinates of ray origins, number of origins
 
     #------pre-allocation-------------------
-    index = 0                                         #counter indicating the number of triangles intercepted by the same ray
+    index = 0                                          #counter indicating the number of triangles intercepted by the same ray
     intercept_dummy = zeros(Ntri, 4)                   #triangle index, distance from origin to intercept, area of the triangle, angle between velocity vector and triangle's normal
     triIntercept = zeros(3, Norig)                     #triangle index, area of the triangle, angle between velocity vector and triangle's normal
     #---------------------------------------
@@ -19,16 +31,26 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
             V2 = [triangles[ii, 4], triangles[ii, 5], triangles[ii, 6]]
             V3 = [triangles[ii, 7], triangles[ii, 8], triangles[ii, 9]]
 
-            area, flag, facing, u, v, t, γ_dir = MTalgorithm(O[jj, :], dir, V1, V2, V3)
 
-            if flag == 0
+            orig = O[jj, :]
+            orig_new = reduce(vcat, orig)
+            RTI, modo = MTalgorithm(TriangleFace(SV3(V1), SV3(V2), SV3(V3)), Ray(SV3(orig_new), dir))
 
-            elseif flag == 1   #the triangle is intercepted by the ray
+            # print(RTI.t)
+            # print(RTI.γ_dir)
+            t = RTI.t
+            gamma = RTI.γ_dir
+            area = RTI.area
+
+
+            if modo == NoIntersection
+
+            elseif modo == BackFaceIntersection || modo == FrontFaceIntersection   #the triangle is intercepted by the ray
 
                 global index
                 index += 1
 
-                intercept_dummy[index, :] = [ii, t, area, γ_dir]
+                intercept_dummy[index, :] = [ii, t, area, gamma]
 
                 if index > 1 #if more than one triangle intercepted by the same ray
                     if abs(intercept_dummy[index, 2]) < abs(intercept_dummy[index-1, 2])   #select the most forward triangle to be intercepted
@@ -37,7 +59,7 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
 
                     end
                 else
-                    triIntercept[:, jj] = [intercept_dummy[index, 1] intercept_dummy[index, 3] intercept_dummy[index, 4]]           #triangle index, area of the triangle, angle between velocity vector and triangle's normal
+                    triIntercept[:, jj] = [intercept_dummy[index, 1] intercept_dummy[index, 3] intercept_dummy[index, 4]]        #triangle index, area of the triangle, angle between velocity vector and triangle's normal
                 end
             end
         end
@@ -75,3 +97,15 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
     return OutTriangles
 
 end
+
+#TEST
+#---------------------------------
+
+
+triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+dir = @SVector [1.0, 1.0, 0.0]
+rmax = 3                            #radius of the circular plane from where rays originate
+distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
+Ntri = size(triangles, 1)
+
+OutTriangles = areasConcave(dir, rmax, distance, triangles, Ntri)

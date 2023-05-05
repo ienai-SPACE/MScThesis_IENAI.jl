@@ -8,21 +8,11 @@ include("Origins.jl")
 include("Convex.jl")
 include("NonConvex.jl")
 
+"""
+    OutGeometry{T}
 
-""" Areas:
-GOAL:
-    - Obtaining all the areas of the triangular mesh elements that have been intercepted by the rays (areas are not projected onto the velocity directions)
-        - The rays are originated on a plane which is perpendicular to the velocity vector, and far from the satellite body 
-INPUT:
-    - rmax            :: radius of the circular plane from where rays originate
-    - distance        :: distance at which the circular plane is located (it should be out from the satellite body)
-    - dir             :: direction of the oncoming particle
-    - triangles       :: vertices coordinates of the triangular/quad mesh element
-OUTPUT:
-    - OutFacets    :: matrix storing the triangle index, area, and the angle between the normal and the velocity direction
-        - Matrix{Float64} -> size: (3, number of intercepted triangles)
-    - Aproj           :: projection of the intercepted triangular areas onto the velocity direction 
-    - Aref            :: sum of all intercepted triangular areas
+- `area::Vector{T}`
+- `angle::Vector{T}`
 """
 
 struct OutGeometry{T}
@@ -33,10 +23,27 @@ end
 _eltype(::OutGeometry{T}) where {T} = T
 
 
+""" 
+    areas(rmax, distance, dir, triangles, convexFlag)
+
+Obtaining all the areas and perpendicular angles of the triangular mesh elements that have been intercepted by the rays 
+        - It has two inner functions `areasConvex(vertices, dir)` and `areasConcave(dir, rmax, distance, triangles, Ntri)`, for convex and non-convex shapes, respectively
+#INPUT:
+- `rmax`            : radius of the circular plane from where rays originate
+- `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
+- `dir`             : direction of the oncoming particle
+- `triangles`       : vertices coordinates of the triangular/quad mesh element
+#OUTPUT:
+- `OutLMNTs:: OutGeometry{T}`                                   : struct of two fields (`area` and `angle`) each containing a vector with the respective magnitude of all intercepted surfaces
+- `InteractionGeometry_v::Vector{InteractionGeometry{T}}`       : vector of struct storing the areas and angles of all intercepted surfaces       
+- `Aproj`                                                       : projection of the intercepted triangular areas onto the selected direction 
+- `Aref`                                                        : sum of all intercepted triangular areas
+"""
+
 function areas(rmax, distance, dir, triangles, convexFlag)
 
-    print(dir)
-    print("areas function")
+    # print(dir)
+    # print("areas function")
 
     #Number of triangles
     Ntri = size(triangles, 1)
@@ -100,6 +107,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     #int_geos = [InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]) for ii ∈ 1:length(OutFacets[2, :])]
     #int_geos = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))
 
+    #print(OutLMNTs)
     return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 

@@ -1,4 +1,4 @@
-using Test, SatelliteToolbox, StaticArrays, MScThesis_IENAI
+using Test, SatelliteToolbox, StaticArrays#, MScThesis_IENAI
 
 
 @testset "Oxygen partial pressure other environmental calculations" begin
@@ -41,11 +41,17 @@ end
     dir = @SVector [1, 1, 0]
     convexFlag = 1
 
-    Aproj, Atot, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
+    Aproj, Atot, OutLMNTs, InteractionGeometry_v = areas(rmax, distance, dir, triangles, convexFlag)
 
-    @test Aproj == 1.4142135623730947
-    @test Atot == 1.7320508075688772
-    @test OutFacets == [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703875 0.6154797086703875]
+    @test Aproj ≈ 1.4142135623730947
+    @test Atot ≈ 1.7320508075688772
+    # @test OutFacets ≈ [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703871 0.6154797086703871]
+    @test OutLMNTs.area ≈ [0.8660254037844386; 0.8660254037844386]
+    @test OutLMNTs.angle ≈ [0.6154797086703871; 0.6154797086703871]
+    @test InteractionGeometry_v[1].area ≈ 0.8660254037844386
+    @test InteractionGeometry_v[2].area ≈ 0.8660254037844386
+    @test InteractionGeometry_v[1].angle ≈ 0.6154797086703875
+    @test InteractionGeometry_v[2].angle ≈ 0.6154797086703875
 end
 
 
@@ -66,11 +72,10 @@ end
     Vrel_norm = 7000.0
 
     coeffs = compute_coefficients(outSurfaceProps, outGSP, interactions_geometries, Vrel_norm)
-    @test coeffs.Cd ≈ 2.2722352589828807
-    @test coeffs.Cl ≈ 0.19184078282911463
-    @test coeffs.Cp ≈ 1.9660316476308861
-    @test coeffs.Ctau ≈ 1.155238295173455
-
+    @test coeffs.Cd ≈ 1.855272320022949
+    @test coeffs.Cl ≈ 0.15663734326247042
+    @test coeffs.Cp ≈ 1.6052581182863233
+    @test coeffs.Ctau ≈ 0.9432481181659013
 
     #test vector of structs as input: intgeo::Vector{<:InteractionGeometry}
     int_geos = [InteractionGeometry(0.8660254037844386, 0.6154797086703875), InteractionGeometry(0.8660254037844386, 0.6154797086703875)]

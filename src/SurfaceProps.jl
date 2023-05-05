@@ -1,10 +1,11 @@
+""" 
+    SurfaceProps{T}
 
-"""
-    function : SurfaceProps()
-GOAL
-        - Store properties of the satellite surface into a struct
-OUTPUT
-        - struct storing : generator efficiency , [K] temperature at the wall, specular reflectivity component, diffuse reflectivity component, [g/mol] atomic mass of the surface atom
+- `η::T       generator efficiency`
+- `Tw::T      [K] temperature at the wall `
+- `s_cr::T    specular reflectivity component`
+- `s_cd::T    diffuse reflectivity component`
+- `m_srf::T   [g/mol] atomic mass of the surface atom`
 """
 
 struct SurfaceProps{T}
@@ -14,6 +15,14 @@ struct SurfaceProps{T}
     s_cd::T    #diffuse reflectivity component
     m_srf::T   #[g/mol] atomic mass of the surface atom
 end
+
+"""
+    SurfaceProps()
+
+Store properties of the satellite surface into a struct
+
+- `SurfaceProps{T}`
+"""
 
 "Default constructor - assumes aluminum at 300 K"
 function SurfaceProps()
@@ -28,6 +37,13 @@ end
 
 export SurfaceProps
 
+
+"""
+    struct Face{G,T}
+
+- `geometry::G`
+- `properties::SurfaceProps{T}`
+"""
 
 struct Face{G,T}
     geometry::G
