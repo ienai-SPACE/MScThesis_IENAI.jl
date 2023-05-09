@@ -20,7 +20,12 @@ struct TriangleFace{T} <: FaceGeometry
         edge2 = v3 - v2
         crossProd = cross(edge1, edge2)
         area = norm(crossProd) / 2
-        normal = crossProd / (2area)
+        if area == 0
+            normal = zeros(3)
+        elseif area != 0
+            normal = crossProd / (2area)
+        end
+
         new{T}(vertices, area, normal)
     end
 end

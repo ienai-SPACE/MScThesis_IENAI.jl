@@ -21,7 +21,12 @@ function OrbitandDate()
     Vatm = 0.1        #[km/s] (h = 200-300 km) velocity of rotation of the atmosphere
     Vsc = sqrt(2 * mu / (h + R_E) - mu / (a))          #[km/s] velocity of the spacecraft
     Vrel = (Vsc - Vatm) * 1000  #[m/s] relative velocity between spacecraft and atmosphere
-    Vrel_v = [1, 1, 0] / norm([1, 1, 0]) * Vrel
+
+
+
+    Vrel_v = [1, 1, 0] / norm([1, 1, 0]) * Vrel #this vectorial velocity depends on the attitude of the S/C, since Vrel_v is given wrt body ref.frame
+
+
 
 
     #-----------NRLMSISE-00 INPUTS: Julian date, geodetic coordinates, and solar/magnetic indices-------------------------------

@@ -78,11 +78,17 @@ end
 #TEST
 #-------------------------------------
 # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-# step = pi / 20
+
+using FileIO
+
+mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh.obj")
+
+
+step = pi / 20
 # aa = pi
 # pp = pi / 2
 
 
-# AlphaPhiStorage = sweep(MeshVerticesCoords, step)
+AlphaPhiStorage = sweep(MeshVerticesCoords, step)
 
 

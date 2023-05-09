@@ -1,29 +1,46 @@
 
-using StaticArrays, LinearAlgebra
-SV3{T} = SVector{3,T}
+# using StaticArrays, LinearAlgebra, GeometryBasics
+# SV3{T} = SVector{3,T}
+
+# include("GeometryInputs.jl")
+
+# # triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+# dir = @SVector [1.0, 1.0, 0.0]
+# Vrel_v = [5395.145235865259 5395.145235865259 0.0];
+
+# triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
+
+# rmax = 3                            #radius of the circular plane from where rays originate
+# distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
+# Ntri = size(triangles, 1)
+
+# # OutTriangles = areasConcave(dir, rmax, distance, MeshVerticesCoords, Ntri)
+
+#--------------------------------------------
+
 include("geometry.jl")
 include("Origins.jl")
 include("MTalgorithm.jl")
-#--------------------------------------------
-
 
 
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 
     #select the sampling method and the density of the sampler [rays/m^2]
-    samplerG = GridFilter(10)
-    samplerF = FibonacciSampler(10)
-    samplerMC = MonteCarloSampler(10)
+    samplerG = GridFilter(10000)
+    samplerF = FibonacciSampler(10000)
+    samplerMC = MonteCarloSampler(10000)
 
     O, Norig = generate_ray_origins(samplerMC, dir, rmax, distance)        #coordinates of ray origins, number of origins
 
     #------pre-allocation-------------------
-    index = 0                                          #counter indicating the number of triangles intercepted by the same ray
+    # index = 0                                          #counter indicating the number of triangles intercepted by the same ray
     intercept_dummy = zeros(Ntri, 4)                   #triangle index, distance from origin to intercept, area of the triangle, angle between velocity vector and triangle's normal
     triIntercept = zeros(3, Norig)                     #triangle index, area of the triangle, angle between velocity vector and triangle's normal
     #---------------------------------------
 
     for jj ∈ 1:Norig       #iterate over the set of ray origins
+        global index
+        index = 0
         for ii ∈ 1:Ntri    #iterate over all triangles
 
             #definition of the triangle vertices
@@ -47,7 +64,9 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
 
             elseif modo == BackFaceIntersection || modo == FrontFaceIntersection   #the triangle is intercepted by the ray
 
+                # print(index)
                 global index
+
                 index += 1
 
                 intercept_dummy[index, :] = [ii, t, area, gamma]
@@ -64,11 +83,12 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
             end
         end
 
-        global index
-        index = 0
-        fill!(intercept_dummy, 0)
+
+        fill!(intercept_dummy, 0.0)
 
     end
+
+
 
 
     #------pre-allocation-------------------
@@ -89,10 +109,16 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
         end
     end
 
+    # print(OutTriangles)
+
     #eliminate non-intercepted triangle entries and size down the output matrix
     OutTriangles = filter(!iszero, OutTriangles)
-    OutTriangles = reshape(OutTriangles, (3, Int(length(OutTriangles) / 3)))
 
+    # print(OutTriangles)
+
+    OutTriangles = reshape(OutTriangles, (3, Int(lastindex(OutTriangles) / 3)))
+
+    # lastindex(OutTriangles), length(OutTriangles), Int(length(OutTriangles) / 3)
 
     return OutTriangles
 
@@ -101,11 +127,14 @@ end
 #TEST
 #---------------------------------
 
+# triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+# dir = @SVector [1.0, 1.0, 0.0]
+# Vrel_v = [5395.145235865259 5395.145235865259 0.0];
 
-triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-dir = @SVector [1.0, 1.0, 0.0]
-rmax = 3                            #radius of the circular plane from where rays originate
-distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
-Ntri = size(triangles, 1)
+# triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
 
-OutTriangles = areasConcave(dir, rmax, distance, triangles, Ntri)
+# rmax = 3                            #radius of the circular plane from where rays originate
+# distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
+# Ntri = size(triangles, 1)
+
+# OutTriangles = areasConcave(dir, rmax, distance, triangles, Ntri)

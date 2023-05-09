@@ -1,6 +1,6 @@
 
-using LinearAlgebra, StaticArrays, SatelliteToolbox
-SV3{T} = SVector{3,T}
+# using LinearAlgebra, StaticArrays, SatelliteToolbox
+# SV3{T} = SVector{3,T}
 
 using Random
 

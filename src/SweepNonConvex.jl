@@ -46,7 +46,7 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 - `step::Float64`      : step used in the definition of `α::StepRangeLen{Float64}` `ϕ::StepRangeLen{Float64}`
 
 #OUTPUTS:
-- AlphaPhiStorage:: Matrix(undef, lastindex(ϕ), lastindex(α))
+- AlphaPhiStorage:: Matrix(undef, lastindex(ϕ), lastindex(α))    : fields `azimuth`, `altitude`, `Aproj`, `Aref`, `OutLMNTs`
 """
 
 

@@ -112,6 +112,7 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
 
 end
 
+export InteractionGeometry, compute_coefficients
 
 #EXAMPLES
 # julia> map(x->x^2, 1:6)
@@ -178,4 +179,3 @@ function CoefficientCalculations(outSurfaceProps, outGasStreamProps, OutLMNTs, V
 
 end
 =#
-export InteractionGeometry, compute_coefficients

@@ -1,10 +1,10 @@
-using StaticArrays, LinearAlgebra
-SV3{T} = SVector{3,T}
-include("geometry.jl")
-include("Origins.jl")
-include("MTalgorithm.jl")
-include("NonConvex.jl")
-include("Areas.jl")
+# using StaticArrays, LinearAlgebra
+# SV3{T} = SVector{3,T}
+# include("geometry.jl")
+# include("Origins.jl")
+# include("MTalgorithm.jl")
+# include("NonConvex.jl")
+# include("Areas.jl")
 #-----------------------------------
 
 
