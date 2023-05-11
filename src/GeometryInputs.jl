@@ -3,6 +3,57 @@ import FilePathsBase
 using FilePathsBase: /
 # using GeometryBasics
 
+@enum GeometryType Convex NonConvex
+
+struct Geometry{GT,F<:Face}
+    faces::Vector{F}
+    rmax::Float64
+    function Geometry{GT}(faces::Vector{F}) where {GT,F}
+        rmax = maximum([_max_coord(face) for face in faces])
+        new{GT,F}(faces, rmax)
+    end
+end
+
+struct HomogeneousGeometry{GT,T,F<:FaceGeometry}
+    faces::Vector{F}
+    surface_props::SurfaceProps{T}
+    rmax::Float64
+    function HomogeneousGeometry{GT}(faces::Vector{F}, surface_props::SurfaceProps{T}) where {GT,F,T}
+        rmax = maximum([_max_coord(face) for face in faces])
+        new{GT,T,F}(geometry, surface_props, rmax)
+    end
+end
+
+_max_coord(face::Face) = _max_coord(face.geometry)
+_max_coord(face::TriangleFace) = maximum([maximum(v) for v ∈ face.vertices])
+
+function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
+    mesh = load(path)
+    faces = Face{TriangleFace{Float64},Float64}[]
+    for triangle in mesh
+        points = map(i -> triangle.points[i].data |> SVector{3,Float64}, 1:3)
+        face_geometry = TriangleFace(points...)
+        push!(faces, face_geometry)
+    end
+    gtype = is_convex ? Convex : NonConvex
+    HomogeneousGeometry{gtype}(faces, surface_props)
+end
+
+# regular Geometry
+# function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
+#     mesh = load(path)
+#     faces = Face{TriangleFace{Float64},Float64}[]
+#     for triangle in mesh
+#         points = map(i -> triangle.points[i].data |> SVector{3,Float64}, 1:3)
+#         geometry = TriangleFace(points...)
+#         push!(faces, Face(geometry, surface_props))
+#     end
+#     gtype = is_convex ? Convex : NonConvex
+#     Geometry{gtype}(faces)
+# end
+
+export load_geometry
+
 include("inputMesh.jl")
 
 """

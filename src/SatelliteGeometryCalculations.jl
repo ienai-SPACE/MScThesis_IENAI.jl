@@ -1,8 +1,6 @@
-module MScThesis_IENAI
+module SatelliteGeometryCalculations
 
 using LinearAlgebra, StaticArrays, SatelliteToolbox, GeometryBasics, TickTock
-
-
 
 SV3{T} = SVector{3,T}
 

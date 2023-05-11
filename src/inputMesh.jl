@@ -11,7 +11,7 @@ Transform the input `mesh` into the approapriate format: x1y1z1x2y2z2x3y3z3 such
 -`MeshVerticesCoords`
 """
 
-function finputMesh(mesh)
+function finputMesh(mesh; scale=1e-3) # assumes mm input by default
 
 
     #radius of the sphere = 500 mm
@@ -34,7 +34,7 @@ function finputMesh(mesh)
 
     end
     # s_matrix = map(x -> x, inputMesh)
-    Float64.(inputMesh ./ 1000)                 #pass from [mm] --> [m] & convert from Float32 to Float64
+    Float64.(inputMesh .* scale)                 #pass from [mm] --> [m] & convert from Float32 to Float64
 end
 
 #TEST

@@ -1,4 +1,4 @@
-module MScThesis_IENAI
+module SatelliteGeometryCalculations
 
 using LinearAlgebra, StaticArrays, SatelliteToolbox
 

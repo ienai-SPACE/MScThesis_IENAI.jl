@@ -1,4 +1,4 @@
-using Test, SatelliteToolbox, StaticArrays, MScThesis_IENAI
+using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations
 
 
 @testset "Oxygen partial pressure other environmental calculations" begin
@@ -42,7 +42,7 @@ end
 #     dir = @SVector [1, 1, 0]
 #     convexFlag = 1
 
-#     Aproj, Atot, OutLMNTs, InteractionGeometry_v = MScThesis_IENAI.areas(rmax, distance, dir, triangles, convexFlag)
+#     Aproj, Atot, OutLMNTs, InteractionGeometry_v = SatelliteGeometryCalculations.areas(rmax, distance, dir, triangles, convexFlag)
 
 #     @test Aproj ≈ 1.4142135623730947
 #     @test Atot ≈ 1.7320508075688772
@@ -93,11 +93,11 @@ end
 
 
 @testset "main" begin
-    using MScThesis_IENAI
+    using SatelliteGeometryCalculations
     outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
     #----Orbit and date inputs-------------------------------------------------------------------------------------------------
-    JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = MScThesis_IENAI.OrbitandDate()
+    JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
     #-----------------------------------------------------------------------------------------------------------------------------
 
     outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
@@ -105,10 +105,10 @@ end
     #----Area calculation inputs-------------------------------------------------------------------------------------------------
     VdirFlag = 0           # 0: specify direction; 1: direction indicated by velocity vector
     convexFlag = 0         # set if the satellite is convex (flag == 1) or non-convex (flag == 0)
-    MeshVerticesCoords, dir, rmax, distance = MScThesis_IENAI.GeomInputs(Vrel_v, VdirFlag, convexFlag)     #mesh geometry & direction defined inside
+    MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInputs(Vrel_v, VdirFlag, convexFlag)     #mesh geometry & direction defined inside
     # #-----------------------------------------------------------------------------------------------------------------------------
 
-    Aproj, Atot, OutLMNTs, int_geos = MScThesis_IENAI.areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
+    Aproj, Atot, OutLMNTs, int_geos = SatelliteGeometryCalculations.areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
 
     # # # print(int_geos)
 
