@@ -1,5 +1,3 @@
-import Base: +, -, /, *, zero
-
 include("GSICalculations.jl")
 
 
@@ -54,10 +52,10 @@ struct AerodynamicCoefficients{T}
     Ctau::T
 end
 
-*(a::Real, c::AerodynamicCoefficients) = AerodynamicCoefficients(a * c.Cd, a * c.Cl, a * c.Cp, a * c.Ctau)
-*(c::AerodynamicCoefficients, a::Real) = a * c
-+(a::AerodynamicCoefficients, b::AerodynamicCoefficients) = AerodynamicCoefficients(a.Cd + b.Cd, a.Cl + b.Cl, a.Cp + b.Cp, a.Ctau + b.Ctau)
-/(a::AerodynamicCoefficients, d::Real) = AerodynamicCoefficients(a.Cd / d, a.Cl / d, a.Cp / d, a.Ctau / d)
+Base.:*(a::Real, c::AerodynamicCoefficients) = AerodynamicCoefficients(a * c.Cd, a * c.Cl, a * c.Cp, a * c.Ctau)
+Base.:*(c::AerodynamicCoefficients, a::Real) = a * c
+Base.:+(a::AerodynamicCoefficients, b::AerodynamicCoefficients) = AerodynamicCoefficients(a.Cd + b.Cd, a.Cl + b.Cl, a.Cp + b.Cp, a.Ctau + b.Ctau)
+Base.:/(a::AerodynamicCoefficients, d::Real) = AerodynamicCoefficients(a.Cd / d, a.Cl / d, a.Cp / d, a.Ctau / d)
 
 """
     compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometry, Vrel_norm)

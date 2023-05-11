@@ -18,10 +18,6 @@
 
 #--------------------------------------------
 
-include("geometry.jl")
-include("Origins.jl")
-include("MTalgorithm.jl")
-
 
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 

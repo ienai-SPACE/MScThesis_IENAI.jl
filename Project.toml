@@ -5,6 +5,7 @@ version = "0.1.0"
 
 [deps]
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
 FiniteMesh = "d3ebd857-6980-4843-ad12-8da20c4645b4"
 GeometryBasics = "5c1252a2-5f33-56bf-86c9-59e7332b4326"
 LinearAlgebra = "37e2e46d-f89d-539d-b4ee-838fcccc9c8e"
@@ -14,6 +15,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SatelliteToolbox = "6ac157d9-b43d-51bb-8fab-48bf53814f4a"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+TestItems = "1c621080-faea-4a02-84b6-bbd5e436b8fe"
 TickTock = "9ff05d80-102d-5586-aa04-3a8bd1a90d20"
 
 [compat]

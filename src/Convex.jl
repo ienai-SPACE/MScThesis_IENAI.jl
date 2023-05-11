@@ -82,6 +82,7 @@ function areasConvex(vertices, dir)
     return [area, γ_dir]
 end
 
+export areasConvex
 
 #TESTING
 #------------------------------------------------------

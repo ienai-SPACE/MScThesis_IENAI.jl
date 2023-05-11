@@ -1,6 +1,5 @@
 using LinearAlgebra
 using StaticArrays
-include("Convex.jl")
 
 
 """

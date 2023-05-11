@@ -1,4 +1,6 @@
 using FileIO
+import FilePathsBase
+using FilePathsBase: /
 # using GeometryBasics
 
 include("inputMesh.jl")
@@ -28,7 +30,8 @@ function GeomInputs(Vrel_v, VdirFlag, convexFlag)
     # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
 
     #load the mesh
-    mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh4.obj")
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh = load(pkg_path / "test" / "samples" / "sphereMesh4.obj")
 
     MeshVerticesCoords = finputMesh(mesh)
 
