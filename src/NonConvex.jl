@@ -26,11 +26,11 @@ include("MTalgorithm.jl")
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 
     #select the sampling method and the density of the sampler [rays/m^2]
-    samplerG = GridFilter(10000)
-    samplerF = FibonacciSampler(10000)
-    samplerMC = MonteCarloSampler(10000)
+    samplerG = GridFilter(50000)
+    samplerF = FibonacciSampler(50000)
+    samplerMC = MonteCarloSampler(50000)
 
-    O, Norig = generate_ray_origins(samplerMC, dir, rmax, distance)        #coordinates of ray origins, number of origins
+    O, Norig = generate_ray_origins(samplerG, dir, rmax, distance)        #coordinates of ray origins, number of origins
 
     #------pre-allocation-------------------
     # index = 0                                          #counter indicating the number of triangles intercepted by the same ray

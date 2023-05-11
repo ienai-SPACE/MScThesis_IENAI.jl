@@ -14,6 +14,7 @@ Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SatelliteToolbox = "6ac157d9-b43d-51bb-8fab-48bf53814f4a"
 SpecialFunctions = "276daf66-3868-5448-9aa4-cd146d93841b"
 StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
+TickTock = "9ff05d80-102d-5586-aa04-3a8bd1a90d20"
 
 [compat]
 julia = "1"
