@@ -7,12 +7,13 @@ using LinearAlgebra
 Obtain the area of a triangle/quad if the angle between the normal and the direction of assessment is 0 < θ < π/2
 
 #INPUT:
-- `vertices` : vector with the coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3...]
-- `dir`      : vector with the direction to be analyzed
+- `vertices`     : vector with the coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3...]
+- `dir`          : vector with the direction to be analyzed
 #OUTPUT:
-- `area`     : [m^2] area of the element
-- `γ_dir`    : [rad] angle between the normal of the surface and the vector directions
-    """
+- `area`         : [m^2] area of the element
+- `γ_dir`        : [rad] angle between the normal of the surface and the vector directions
+- `u_n::Vector` : unitary normal vector (split into components to adapt to functions output)
+"""
 
 
 function areasConvex(vertices, dir)
@@ -77,9 +78,10 @@ function areasConvex(vertices, dir)
     dot_prod = dot(crossProd, dir)
     γ_dir = acos(dot_prod / (norm(crossProd) * norm(dir)))    #[radians]
 
+    #normalize normal vector
+    u_n = n |> normalize
 
-
-    return [area, γ_dir]
+    return [area, γ_dir, u_n[1], u_n[2], u_n[3]]
 end
 
 export areasConvex

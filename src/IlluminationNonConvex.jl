@@ -8,8 +8,20 @@
 #-----------------------------------
 
 
+struct impinged_geometries{T}
+    area::T
+    angle::T
+end
+
+struct auxOutGeometry{T}
+    area::Vector{T}
+    angle::Vector{T}
+end
+
+_eltype(::impinged_geometries{T}) where {T} = T
+
 """
-fIlluminationNonConvex(triangles, α, ϕ)
+    fIlluminationNonConvex(triangles, α, ϕ)
 
 #INPUT:
 - `triangles::SMatrix{number of triangles, 9, Float64, 9*number of triangles}` : coordinates of facets' vertices
@@ -22,14 +34,6 @@ fIlluminationNonConvex(triangles, α, ϕ)
 - `areas_and_angles::Vector{impinged_geometries{T}}` : vector storing struct with fields 
      
 """
-
-struct impinged_geometries{T}
-    area::T
-    angle::T
-end
-
-
-_eltype(::impinged_geometries{T}) where {T} = T
 
 function fIlluminationNonConvex(triangles, α, ϕ)
 
@@ -65,7 +69,7 @@ function fIlluminationNonConvex(triangles, α, ϕ)
     Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
 
 
-    OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
+    OutLMNTs = auxOutGeometry(OutFacets[2, :], OutFacets[3, :])
 
 
     imp_geo = impinged_geometries(OutFacets[2, :], OutFacets[3, :])

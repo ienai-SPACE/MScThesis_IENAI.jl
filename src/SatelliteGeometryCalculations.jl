@@ -19,7 +19,13 @@ include("Areas.jl") #
 include("GeometryInputs.jl")
 include("Orbit&DateInputs.jl")
 include("IlluminationConvex.jl")
+include("IlluminationNonConvex.jl")
 include("DragOrientationConvex.jl")
+
+# include("VectorizeCoefficients.jl")
+
+# include("SweepConvex.jl")
+# include("SweepNonConvex.jl")
 
 end
 

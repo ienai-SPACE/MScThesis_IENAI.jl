@@ -1,34 +1,20 @@
 #---------------------------------------------------------------------
-using StaticArrays
-using LinearAlgebra, StaticArrays, SatelliteToolbox
-
-SV3{T} = SVector{3,T}
-
-include("geometry.jl")
-include("EnvironmentalConstants.jl")
-include("PermanentProperties.jl")
-include("SurfaceProps.jl")
-include("GasStreamProps.jl")
-include("CoefficientCalculations.jl") # -----
-include("Areas.jl")
-include("GeometryInputs.jl")
-include("Orbit&DateInputs.jl")
-include("DragOrientationConvex.jl")
-#---------------------------------------------------------------------
+using SatelliteGeometryCalculations, StaticArrays, LinearAlgebra
 
 include("IlluminationConvex.jl")
+#---------------------------------------------------------------------
 
 struct SweepStorage{Float64}
     azimuth::Float64
     altitude::Float64
     Aproj::Float64
-    Aref::Float64
-    OutLMNTs::OutGeometry{Float64}
+    Atot::Float64
+    OutLMNTs::auxOutGeometry{Float64} #previously: OutGeometry{Float64}
 end
 #_eltype(::SweepStorage{T}) where {T} = T
 
 
-function sweep(triangles::SMatrix, step)
+function sweep(triangles::Matrix, step)
 
     #step = pi / 20
     α = 0:step:pi/2
@@ -79,15 +65,23 @@ end
 #-------------------------------------
 # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
 
-using FileIO
 
-mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh.obj")
+
+# mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh.obj")
+
+#load the mesh
+using FileIO
+using FilePathsBase
+using FilePathsBase: /
+pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
 
 
 step = pi / 20
 # aa = pi
 # pp = pi / 2
 
+MeshVerticesCoords = SatelliteGeometryCalculations.finputMesh(mesh; scale=1e-3)
 
 AlphaPhiStorage = sweep(MeshVerticesCoords, step)
 

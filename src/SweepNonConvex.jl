@@ -1,22 +1,14 @@
 #---------------------------------------------------------------------
-using StaticArrays
-using LinearAlgebra, StaticArrays, SatelliteToolbox
-
+using SatelliteGeometryCalculations, StaticArrays, LinearAlgebra
 SV3{T} = SVector{3,T}
-
 include("geometry.jl")
-include("EnvironmentalConstants.jl")
-include("PermanentProperties.jl")
-include("SurfaceProps.jl")
-include("GasStreamProps.jl")
-include("CoefficientCalculations.jl") # -----
-include("Areas.jl")
-include("GeometryInputs.jl")
-include("Orbit&DateInputs.jl")
-include("DragOrientationConvex.jl")
+include("IlluminationNonConvex.jl")
+include("NonConvex.jl")
+include("Origins.jl")
+include("MTalgorithm.jl")
 #---------------------------------------------------------------------
 
-include("IlluminationNonConvex.jl")
+
 
 """
     SweepStorage{Float64}
@@ -25,19 +17,19 @@ include("IlluminationNonConvex.jl")
 -`altitude::Float64`
 -`Aproj::Float64`
 -`Aref::Float64`
--`OutLMNTs::OutGeometry{Float64}`
+-`OutLMNTs::auxOutGeometry{Float64}`
 """
 struct SweepStorage{Float64}
     azimuth::Float64
     altitude::Float64
     Aproj::Float64
     Aref::Float64
-    OutLMNTs::OutGeometry{Float64}
+    OutLMNTs::auxOutGeometry{Float64}
 end
 
 
 """
-    sweep(triangles::SMatrix, step)
+    sweep(triangles::Matrix, step)
 
 Create a 2D matrix as function of azimuth and elevation storing the projected `Aproj` and total area `Aref`, and the specific data of each impinged element `OutLMNTs`
 
@@ -50,7 +42,7 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 """
 
 
-function sweep(triangles::SMatrix, step)
+function sweep(triangles::Matrix, step)
 
     #step = pi / 20
     α = 0:step:pi/2
@@ -82,12 +74,27 @@ end
 
 #TEST
 #-------------------------------------
-MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-step = pi / 20
-aa = pi
-pp = pi / 2
+# MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+# step = pi / 20
+# aa = pi
+# pp = pi / 2
 
+
+# AlphaPhiStorage = sweep(MeshVerticesCoords, step)
+
+
+#load the mesh
+using FileIO
+using FilePathsBase
+using FilePathsBase: /
+pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
+
+
+step = pi / 20
+# aa = pi
+# pp = pi / 2
+
+MeshVerticesCoords = SatelliteGeometryCalculations.finputMesh(mesh; scale=1e-3)
 
 AlphaPhiStorage = sweep(MeshVerticesCoords, step)
-
-

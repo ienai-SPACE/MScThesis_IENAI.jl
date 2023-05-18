@@ -64,7 +64,7 @@ Define if the direction of "particle impingement" is set manually or by the velo
 Load the the meshed element
 
 #INPUT:
--`Vrel_v`      : [m/s] relative velocity vector
+- `Vrel_v`      : [m/s] relative velocity vector
 - `VdirFlag`   : flag for direction criterion
 - `convexFlag` : flag = 1 for convex shape and flag = 0 for non-convex
 #OUTPUT:
@@ -78,13 +78,14 @@ Load the the meshed element
 
 function GeomInputs(Vrel_v, VdirFlag, convexFlag)
 
-    # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "sphereMesh4.obj")
+    mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
 
     MeshVerticesCoords = finputMesh(mesh)
+    # MeshVerticesCoords = Float64.([1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1])
 
     if convexFlag == 0
         rmax = maximum(MeshVerticesCoords[:, :])          #radius of the circular plane from where rays originate

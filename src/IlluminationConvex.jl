@@ -3,7 +3,7 @@ using StaticArrays
 
 
 """
-fIlluminationConvex(triangles, α, ϕ)
+    fIlluminationConvex(triangles, α, ϕ)
 
 #INPUT:
 - `triangles::SMatrix{number of triangles, 9, Float64, 9*number of triangles}` : coordinates of facets' vertices
@@ -20,6 +20,11 @@ fIlluminationConvex(triangles, α, ϕ)
 struct impinged_geometries{T}
     area::T
     angle::T
+end
+
+struct auxOutGeometry{T}
+    area::Vector{T}
+    angle::Vector{T}
 end
 
 
@@ -82,7 +87,7 @@ function fIlluminationConvex(triangles, α, ϕ)
     Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
 
 
-    OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :])
+    OutLMNTs = auxOutGeometry(OutFacets[2, :], OutFacets[3, :]) #previously: outGeometry(OutFacets[2, :], OutFacets[3, :])
 
 
     imp_geo = impinged_geometries(OutFacets[2, :], OutFacets[3, :])

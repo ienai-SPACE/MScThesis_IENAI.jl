@@ -2,7 +2,7 @@ using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations
 
 
 @testset "Oxygen partial pressure other environmental calculations" begin
-    JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].
+    JD = date_to_jd(2018, 6, 19, 18, 35, 0)           #Julian Day [UTC].
     alt = 300e3                                       #Altitude [m].
     g_lat = deg2rad(-22)      #Geodetic latitude [rad].
     g_long = deg2rad(-45)     #Geodetic longitude [rad].
@@ -28,32 +28,33 @@ using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations
 end
 
 @testset "AreasConvex" begin
-    vertices3 = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
+    vertices3 = [0, 0, 0, 0, 1, 1, 0, -1, 1] #x1y1z1x2y2z2x3y3z3
     dir = [1 1 0]
     vertices4 = [0 0 0 0 1 0 0 1 1 0 0 1]
 
-    @test areasConvex(vertices3, dir) == [1.0, 0.7853981633974484]
-    @test areasConvex(vertices4, dir) == [1.0, 0.7853981633974484]
+    @test areasConvex(vertices3, dir) == [1.0, 0.7853981633974484, 1.0, 0.0, 0.0]
+    @test areasConvex(vertices4, dir) == [1.0, 0.7853981633974484, 1.0, 0.0, 0.0]
 end
 
-# TODO: fix
-# @testset "area function with convex shape" begin
-#     triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-#     dir = @SVector [1, 1, 0]
-#     convexFlag = 1
+@testset "area function with convex shape" begin
+    triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+    dir = [1, 1, 0]
+    convexFlag = 1
+    rmax = 2
+    distance = 10
 
-#     Aproj, Atot, OutLMNTs, InteractionGeometry_v = SatelliteGeometryCalculations.areas(rmax, distance, dir, triangles, convexFlag)
+    Aproj, Atot, OutLMNTs, InteractionGeometry_v = SatelliteGeometryCalculations.areas(rmax, distance, dir, triangles, convexFlag)
 
-#     @test Aproj ≈ 1.4142135623730947
-#     @test Atot ≈ 1.7320508075688772
-#     # @test OutFacets ≈ [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703871 0.6154797086703871]
-#     @test OutLMNTs.area ≈ [0.8660254037844386; 0.8660254037844386]
-#     @test OutLMNTs.angle ≈ [0.6154797086703871; 0.6154797086703871]
-#     @test InteractionGeometry_v[1].area ≈ 0.8660254037844386
-#     @test InteractionGeometry_v[2].area ≈ 0.8660254037844386
-#     @test InteractionGeometry_v[1].angle ≈ 0.6154797086703875
-#     @test InteractionGeometry_v[2].angle ≈ 0.6154797086703875
-# end
+    @test Aproj ≈ 1.4142135623730947
+    @test Atot ≈ 1.7320508075688772
+    # @test OutFacets ≈ [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703871 0.6154797086703871]
+    @test OutLMNTs.area ≈ [0.8660254037844386; 0.8660254037844386]
+    @test OutLMNTs.angle ≈ [0.6154797086703871; 0.6154797086703871]
+    @test InteractionGeometry_v[1].area ≈ 0.8660254037844386
+    @test InteractionGeometry_v[2].area ≈ 0.8660254037844386
+    @test InteractionGeometry_v[1].angle ≈ 0.6154797086703875
+    @test InteractionGeometry_v[2].angle ≈ 0.6154797086703875
+end
 
 
 @testset "Coefficients" begin
@@ -70,9 +71,10 @@ end
     outGSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
     #test a single struct as input: intgeo::InteractionGeometry
     interactions_geometries = InteractionGeometry(0.8660254037844386, 0.6154797086703875)
-    Vrel_norm = 7000.0
+    Vrel_v = [1 / sqrt(2), 1 / sqrt(2), 0] * 7000.0
+    normals = [@SVector[0.5773502691896258, 0.5773502691896258, 0.5773502691896258]]
 
-    coeffs = compute_coefficients(outSurfaceProps, outGSP, interactions_geometries, Vrel_norm)
+    coeffs = compute_coefficients(outSurfaceProps, outGasStreamProps, interactions_geometries, Vrel_v, normals)
     @test coeffs.Cd ≈ 1.855272320022949
     @test coeffs.Cl ≈ 0.15663734326247042
     @test coeffs.Cp ≈ 1.6052581182863233
@@ -80,20 +82,62 @@ end
 
     #test vector of structs as input: intgeo::Vector{<:InteractionGeometry}
     int_geos = [InteractionGeometry(0.8660254037844386, 0.6154797086703875), InteractionGeometry(0.8660254037844386, 0.6154797086703875)]
-    coeffs2, areas = compute_coefficients(outSurfaceProps, outGSP, int_geos, Vrel_norm)
 
-    # modify test with new function
-    @test coeffs2.Cd ≈ 2.2722352589828807
-    @test coeffs2.Cl ≈ 0.19184078282911463
-    @test coeffs2.Cp ≈ 1.9660316476308861
-    @test coeffs2.Ctau ≈ 1.155238295173455
+    normals2 = [@SVector[0.5773502691896258, 0.5773502691896258, 0.5773502691896258], @SVector[-0.5773502691896258, -0.5773502691896258, 0.5773502691896258]]
+
+    coeffs2, areas, Aproj = compute_coefficients(outSurfaceProps, outGSP, int_geos, Vrel_v, normals2)
+
+
+    @test coeffs2[1] ≈ 2.2722352589828807
+    @test coeffs2[3] ≈ 0.19184078282911463
+    @test coeffs2[5] ≈ 1.1350889009950158
+    @test coeffs2[7] ≈ 0.6669771406965588
     @test areas ≈ 1.7320508075688772
+    @test Aproj ≈ 1.4142135623730947
 
 end
 
 
 @testset "main" begin
-    using SatelliteGeometryCalculations
+    # using SatelliteGeometryCalculations
+    # outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
+
+    # #----Orbit and date inputs-------------------------------------------------------------------------------------------------
+    # JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    # #-----------------------------------------------------------------------------------------------------------------------------
+
+    # outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
+
+    # #----Area calculation inputs-------------------------------------------------------------------------------------------------
+    # VdirFlag = 0           # 0: specify direction; 1: direction indicated by velocity vector
+    # convexFlag = 0         # set if the satellite is convex (flag == 1) or non-convex (flag == 0)
+    # MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInputs(Vrel_v, VdirFlag, convexFlag)     #mesh geometry & direction defined inside
+    # # #-----------------------------------------------------------------------------------------------------------------------------
+
+    # Aproj, Atot, OutLMNTs, int_geos = SatelliteGeometryCalculations.areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
+
+    # # # # print(int_geos)
+
+    # # α = deg2rad(45)
+    # # ϕ = 0
+    # Vrel_norm = 7000.0
+
+
+    # # #coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
+
+    # # #interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
+
+    # coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
+    # # #coeffs = compute_coefficients(outSurfaceProps, outGasStreamProps, interactions_geometries, Vrel_norm)
+    # # #(; Cd, Cl, Cp, Ctau) = coeffs
+    # # #print(coeffs)
+
+    # print(size(MeshVerticesCoords, 1), //)
+    # print(Atot, //)
+    # print(Aproj, //)
+    # print(coeffs, //)
+
+    using SatelliteGeometryCalculations, StaticArrays, LinearAlgebra
     outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
     #----Orbit and date inputs-------------------------------------------------------------------------------------------------
@@ -106,29 +150,32 @@ end
     VdirFlag = 0           # 0: specify direction; 1: direction indicated by velocity vector
     convexFlag = 0         # set if the satellite is convex (flag == 1) or non-convex (flag == 0)
     MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInputs(Vrel_v, VdirFlag, convexFlag)     #mesh geometry & direction defined inside
+    # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+    # dir = @SVector([1, 1, 0])
+    # distance = 10
+    # rmax = 2
     # #-----------------------------------------------------------------------------------------------------------------------------
 
     Aproj, Atot, OutLMNTs, int_geos = SatelliteGeometryCalculations.areas(rmax, distance, dir, MeshVerticesCoords, convexFlag)      #calculation of areas and normals to the impinged surfaces
 
-    # # # print(int_geos)
 
-    # α = deg2rad(45)
-    # ϕ = 0
-    Vrel_norm = 7000.0
+    Vrel_norm = norm(Vrel_v)
 
 
-    # #coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
+    # coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
 
-    # #interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
+    interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
 
-    coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_norm)
-    # #coeffs = compute_coefficients(outSurfaceProps, outGasStreamProps, interactions_geometries, Vrel_norm)
-    # #(; Cd, Cl, Cp, Ctau) = coeffs
-    # #print(coeffs)
-
-    print(size(MeshVerticesCoords, 1), //)
-    print(Atot, //)
-    print(Aproj, //)
-    print(coeffs, //)
+    coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_v, OutLMNTs.normals)
 
 end
+
+# using LinearAlgebra
+# v1 = [1, 1, 0]
+# v2 = [0, 1, -1]
+# v3 = [1, 0, -1]
+# # v2 = [1, 1, 0, 1, 0, -1, 0, 1, -1]
+# # v3 = [0.5, 0.5, 0, 1, 1, 1, 0, 0, 1]
+# edge1 = v2 - v1
+# edge2 = v3 - v2
+# crossProd = cross(edge1, edge2) |> LinearAlgebra.normalize
