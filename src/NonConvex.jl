@@ -43,7 +43,7 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
     samplerF = FibonacciSampler(50000)
     samplerMC = MonteCarloSampler(50000)
 
-    O, Norig = generate_ray_origins(samplerG, dir, rmax, distance)        #coordinates of ray origins, number of origins
+    O, Norig = generate_ray_origins(samplerF, dir, rmax, distance)        #coordinates of ray origins, number of origins
 
     #------pre-allocation-------------------
     # index = 0                                          #counter indicating the number of triangles intercepted by the same ray
@@ -107,46 +107,62 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
 
 
     #------pre-allocation-------------------
-    OutTriangles = zeros(6, Norig)            #matrix storing the triangle index, area, and the angle between the normal and the velocity direction
+    # OutTriangles = zeros(6, Norig)            #matrix storing the triangle index, area, and the angle between the normal and the velocity direction
     triangleCount = 0
     indexList = zeros(Norig, 1)               #list to store the indices of the triangles that are intercepted
+    OutFacets = []
     #---------------------------------------
 
-    #check the triangles that have been intercepted and store their properties
+    #store the triangles that have been intercepted --> there could be triangles intercepted by more than 1 ray
     for jj ∈ 1:Norig
         if Int(triIntercept[1, jj]) != 0
             if !(triIntercept[1, jj] ∈ indexList)
 
+                # triangleCount += 1
+                # OutTriangles[:, triangleCount] = triIntercept[:, jj]
+                # indexList[triangleCount] = triIntercept[1, jj]
                 triangleCount += 1
-                OutTriangles[:, triangleCount] = triIntercept[:, jj]
-                indexList[triangleCount] = triIntercept[1, jj]
+                # print(triangleCount)
+                if triangleCount == 1
+                    OutFacets = @SVector [triIntercept[1, jj], triIntercept[2, jj], triIntercept[3, jj], triIntercept[4, jj], triIntercept[5, jj], triIntercept[6, jj]]
+                    indexList[triangleCount] = triIntercept[1, jj]
+
+                else
+                    OutFacets = hcat(OutFacets, [triIntercept[1, jj], triIntercept[2, jj], triIntercept[3, jj], triIntercept[4, jj], triIntercept[5, jj], triIntercept[6, jj]])
+                    indexList[triangleCount] = triIntercept[1, jj]
+                end
             end
         end
     end
 
-    # print(OutTriangles)
+    # print(typeof(OutFacets), //)
+    # print(size(OutFacets))
+
 
     #eliminate non-intercepted triangle entries and size down the output matrix
-    OutTriangles = filter(!iszero, OutTriangles)
+    # OutTriangles = filter(!iszero, OutTriangles)
 
-    # print(OutTriangles)
+    # print(OutTriangles, //)
+    # print(lastindex(OutTriangles), //)
 
-    OutTriangles = reshape(OutTriangles, (6, Int(lastindex(OutTriangles) / 6)))
+    # OutTriangles = reshape(OutTriangles, (6, Int(lastindex(OutTriangles) / 6)))
 
     # lastindex(OutTriangles), length(OutTriangles), Int(length(OutTriangles) / 3)
 
-    return OutTriangles
+    return OutFacets
 
 end
+
+export areasConcave
 
 #TEST
 #---------------------------------
 
-# triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+# triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
 # dir = @SVector [1.0, 1.0, 0.0]
 # Vrel_v = [5395.145235865259 5395.145235865259 0.0];
 
-# # triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
+# # # triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
 
 # rmax = 3                            #radius of the circular plane from where rays originate
 # distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)

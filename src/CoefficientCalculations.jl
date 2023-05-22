@@ -131,8 +131,11 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     # num = sum(aero_coeffs .* areas)
     num = aero_coeffs .* areas
 
-    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v)
-    typeof(coeffs_vec)
+    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,C, C
+
+    # print(coeffs_vec, //)
+    # print(areas, //)
+    # print(cos.(angles), //)
     # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
     CoefficientsVectorized(coeffs_vec ./ sum(areas .* cos.(angles))), sum(areas), sum(areas .* cos.(angles))
     # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))

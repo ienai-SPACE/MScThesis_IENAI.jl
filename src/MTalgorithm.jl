@@ -48,7 +48,7 @@ no_intersection(::Type{T}) where {T} = RayTriangleIntersection{NoIntersection}(z
 
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
     dot_prod = dot(triangle.normal, ray.direction)
-    γ_dir = acos(dot_prod)
+    γ_dir = acos(dot_prod / (norm(triangle.normal) * norm(ray.direction)))
     if abs(dot_prod) < ϵ
         return no_intersection(T), mode(no_intersection(T)) # TODO: refine 
     end

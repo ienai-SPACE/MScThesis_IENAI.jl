@@ -76,20 +76,21 @@ Load the the meshed element
         - distance           : distance between source origin and local coordinate system for ray-tracing algorithm
 """
 
-function GeomInputs(Vrel_v, VdirFlag, convexFlag)
+function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
 
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
+    mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj") #T_SatMesh  sphereMesh
+
 
     MeshVerticesCoords = finputMesh(mesh)
     # MeshVerticesCoords = Float64.([1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1])
 
     if convexFlag == 0
         rmax = maximum(MeshVerticesCoords[:, :])          #radius of the circular plane from where rays originate
-        distance = rmax * 10                                                    #distance at which the circular plane is located (it should be out from the satellite body)
+        distance = rmax * 10.0                                                    #distance at which the circular plane is located (it should be out from the satellite body)
     else
         rmax = 0
         distance = 0
@@ -97,9 +98,9 @@ function GeomInputs(Vrel_v, VdirFlag, convexFlag)
 
     if VdirFlag == 1
         #direction vector
-        dir = (Vrel_v / norm(Vrel_v))'
+        dir = SV3(-Vrel_v / norm(Vrel_v))   #direction defined in the opposite direction to velocity
     elseif VdirFlag == 0
-        dir = @SVector [1 / sqrt(2), 1 / sqrt(2), 0]
+        dir = Float64.(@SVector [1, 0, 0])
     end
 
 

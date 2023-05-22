@@ -7,18 +7,19 @@
 # include("Areas.jl")
 #-----------------------------------
 
+#ALRADY DEFINED IN ILLUMINATIONCONVEX -------------------------------------
+# struct impinged_geometries{T}
+#     area::T
+#     angle::T
+# end
 
-struct impinged_geometries{T}
-    area::T
-    angle::T
-end
+# struct auxOutGeometry{T}
+#     area::Vector{T}
+#     angle::Vector{T}
+# end
 
-struct auxOutGeometry{T}
-    area::Vector{T}
-    angle::Vector{T}
-end
-
-_eltype(::impinged_geometries{T}) where {T} = T
+# _eltype(::impinged_geometries{T}) where {T} = T
+#-----------------------------------------------------------------------------
 
 """
     fIlluminationNonConvex(triangles, α, ϕ)

@@ -12,7 +12,7 @@ function vectorizeCoeffs(aero_coeffs, normals, Vrel_v)
 
     for ii ∈ 1:Int(size(aero_coeffs, 1))
 
-        u_D, u_L, u_tau, u_P = unitaryDirections(Vrel_v, normals[ii])
+        u_D, u_L, u_P, u_tau, = unitaryDirections(Vrel_v, normals[ii])
 
         coeffs_vec_ii = [aero_coeffs[ii].Cd * u_D, aero_coeffs[ii].Cl * u_L, aero_coeffs[ii].Cp * u_P, aero_coeffs[ii].Ctau * u_tau]
         coeffs_vec += coeffs_vec_ii

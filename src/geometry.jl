@@ -17,7 +17,7 @@ struct TriangleFace{T} <: FaceGeometry
     function TriangleFace(v1::SV3{T}, v2::SV3{T}, v3::SV3{T}) where {T}
         vertices = SVector(v1, v2, v3)
         edge1 = v2 - v1
-        edge2 = v3 - v2
+        edge2 = v3 - v1
         crossProd = cross(edge1, edge2)
         area = norm(crossProd) / 2
         if area == 0

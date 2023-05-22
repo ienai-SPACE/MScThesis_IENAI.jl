@@ -50,28 +50,38 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     Ntri = size(triangles, 1)
 
     if convexFlag == 1
-
+        counter = 0
         for jj ∈ 1:Ntri #for loop to iterate over all triangles/quads
             vertices = triangles[jj, 1:9]
             OutAreaConvex = areasConvex(vertices, dir)
-            if jj == 1
-                if OutAreaConvex[1] == 0
-                    OutFacets = @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-                else
+            # if jj == 1
+            #     if OutAreaConvex[1] == 0
+            #         OutFacets = @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+            #     else
+            #         OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]
+            #     end
+            # else
+            #     if OutAreaConvex[1] == 0
+            #         OutFacets = hcat(OutFacets, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
+            #     else
+            #         OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
+            #     end
+            # end
+            if OutAreaConvex[1] != 0
+                counter += 1
+                if counter == 1
                     OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]
-                end
-            else
-                if OutAreaConvex[1] == 0
-                    OutFacets = hcat(OutFacets, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
                 else
                     OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
                 end
             end
+
+
         end
 
-        #eliminate non-intercepted triangle entries and size down the output matrix
-        OutFacets = filter(!iszero, OutFacets)
-        OutFacets = reshape(OutFacets, (6, Int(length(OutFacets) / 6)))
+        # #eliminate non-intercepted triangle entries and size down the output matrix
+        # OutFacets = filter(!iszero, OutFacets)
+        # OutFacets = reshape(OutFacets, (6, Int(length(OutFacets) / 6)))
 
 
     elseif convexFlag == 0
@@ -151,3 +161,5 @@ distance = 10                       #distance at which the circular plane is loc
 
 Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
 =#
+
+aa = [1]
