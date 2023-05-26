@@ -13,7 +13,11 @@ convexFlag = 0        # set if the satellite is convex (flag == 1) or non-convex
 
 
 
-MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInputs(Vrel_v, VdirFlag, convexFlag)     #mesh geometry & direction defined inside
+MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInputs(Vrel_v, VdirFlag, convexFlag);     #mesh geometry & direction defined inside
+
+# print(Vrel_v, //, dir, //, rmax, //, distance)
+
+
 # MeshVerticesCoords = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
 # dir = @SVector([1, 1, 0])
 # distance = 10
@@ -30,7 +34,7 @@ Aproj, Atot, OutLMNTs, int_geos = SatelliteGeometryCalculations.areas(rmax, dist
 
 # coeffs2, Atot2, Aproj2 = drag_for_orientation_convex(MeshVerticesCoords, outGasStreamProps, outSurfaceProps, α, ϕ, Vrel_norm)
 
-interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
+# interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
 
 coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_v, OutLMNTs.normals)
 

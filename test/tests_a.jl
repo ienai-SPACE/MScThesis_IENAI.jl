@@ -29,7 +29,7 @@ end
 
 @testset "AreasConvex" begin
     vertices3 = [0, 0, 0, 0, 1, 1, 0, -1, 1] #x1y1z1x2y2z2x3y3z3
-    dir = [1 1 0]
+    dir = [-1 -1 0]
     vertices4 = [0 0 0 0 1 0 0 1 1 0 0 1]
 
     @test areasConvex(vertices3, dir) == [1.0, 0.7853981633974484, 1.0, 0.0, 0.0]
@@ -38,7 +38,7 @@ end
 
 @testset "area function with convex shape" begin
     triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-    dir = [1, 1, 0]
+    dir = [-1, -1, 0]
     convexFlag = 1
     rmax = 2
     distance = 10

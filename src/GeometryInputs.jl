@@ -82,7 +82,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj") #T_SatMesh  sphereMesh
+    mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj") #T_SatMesh  sphereMesh cubeMesh
 
 
     MeshVerticesCoords = finputMesh(mesh)
@@ -90,7 +90,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     if convexFlag == 0
         rmax = maximum(MeshVerticesCoords[:, :])          #radius of the circular plane from where rays originate
-        distance = rmax * 10.0                                                    #distance at which the circular plane is located (it should be out from the satellite body)
+        distance = rmax * 100.0                                                    #distance at which the circular plane is located (it should be out from the satellite body)
     else
         rmax = 0
         distance = 0
@@ -98,7 +98,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     if VdirFlag == 1
         #direction vector
-        dir = SV3(-Vrel_v / norm(Vrel_v))   #direction defined in the opposite direction to velocity
+        dir = SV3(Vrel_v / norm(Vrel_v))   #direction defined in the opposite direction to velocity
     elseif VdirFlag == 0
         dir = Float64.(@SVector [1, 0, 0])
     end

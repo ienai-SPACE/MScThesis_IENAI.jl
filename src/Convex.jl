@@ -2,7 +2,7 @@ using LinearAlgebra
 
 
 """ 
-    areasConvex(vertices, dir) 
+    areasConvex(vertices, Vdir) 
 
 Obtain the area of a triangle/quad if the angle between the normal and the direction of assessment is 0 < θ < π/2
 
@@ -16,7 +16,9 @@ Obtain the area of a triangle/quad if the angle between the normal and the direc
 """
 
 
-function areasConvex(vertices, dir)
+function areasConvex(vertices, Vdir)
+
+    dir = -Vdir
 
     if length(vertices) == 9         #triangular mesh
 
@@ -26,20 +28,29 @@ function areasConvex(vertices, dir)
         V3 = [vertices[7], vertices[8], vertices[9]]
 
 
+
         #indices should be numbered in c.c.w direction
         edge1 = V2 - V1
         edge2 = V3 - V1
+
+
         n = cross(edge1, edge2)
+
+        # print(n, //)
+
 
         #θ = acos(dot(dir, n) / (norm(dir)*norm(n)))
 
+
         dotProd = dot(dir, n)
+
 
         if dotProd > 0
             area = norm(n) / 2        #area of the triangle
         else
             area = 0.0
         end
+
 
     elseif length(vertices) == 12     #quads
 
@@ -74,12 +85,20 @@ function areasConvex(vertices, dir)
 
 
     #Calculate the angle between triangle's normal and velocity direction
-    crossProd = n
-    dot_prod = dot(crossProd, dir)
-    γ_dir = acos(dot_prod / (norm(crossProd) * norm(dir)))    #[radians]
+    if norm(n) == 0.0
+        γ_dir = 0.0    #default value for when norm(n) = 0
+    else
+        γ_dir = acos(dotProd / (norm(n) * norm(dir)))    #[radians]
+    end
 
     #normalize normal vector
-    u_n = n |> normalize
+    if n == [0.0, 0.0, 0.0]
+        u_n = [0.0, 0.0, 0.0]
+    else
+        u_n = n |> normalize
+    end
+
+    # print(rad2deg(γ_dir), /, area, /, u_n, //)
 
     return [area, γ_dir, u_n[1], u_n[2], u_n[3]]
 end
@@ -88,9 +107,9 @@ export areasConvex
 
 #TESTING
 #------------------------------------------------------
-#=
-vertices = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
-dir = [1 1 0]
+#
+# vertices = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
+# dir = [1 0 0]
 #results: [1.0, 0.7853981633974484 = pi/4]
 
 #vertices = [0 0 0 0 1 0 0 1 1 0 0 1] 
@@ -98,5 +117,8 @@ dir = [1 1 0]
 #results: [1.0, 0.7853981633974484 = pi/4]
 
 
-area, delta = areasConvex(vertices, dir)
-=#
+# vertices = [-0.5 -0.5 0 -0.5 0.5 0 -0.5 0.5 0.5]
+# dir = [1 0 0]
+
+# area, delta = areasConvex(vertices, dir)
+# #

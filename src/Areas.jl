@@ -162,4 +162,3 @@ distance = 10                       #distance at which the circular plane is loc
 Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
 =#
 
-aa = [1]
