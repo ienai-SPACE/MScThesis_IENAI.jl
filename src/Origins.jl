@@ -91,7 +91,7 @@ function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
     points_new = zeros(SVector{3,Float64}, length(points))
     v, w = generate_two_normals(dir)
     for (i, p) ∈ enumerate(points)
-        points_new[i] = center + p[1] * v + p[2] * w #center to displace the plane in the opposite direction to the `dir`
+        points_new[i] = center + p[1] * v + p[2] * w #`center` to displace the plane in the opposite direction to the satellite
     end
     points_new, Int(length(points))
 end

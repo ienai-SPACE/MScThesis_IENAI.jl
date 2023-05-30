@@ -65,13 +65,30 @@ struct CoefficientsVectorized{T}
 
     function CoefficientsVectorized(coeffs_vec::Vector{AbstractVector{Float64}})
         CD_norm = norm(coeffs_vec[1])
-        CD_dir = coeffs_vec[1] / norm(coeffs_vec[1])
         CL_norm = norm(coeffs_vec[2])
-        CL_dir = coeffs_vec[2] / norm(coeffs_vec[2])
         CP_norm = norm(coeffs_vec[3])
-        CP_dir = coeffs_vec[3] / norm(coeffs_vec[3])
         CTau_norm = norm(coeffs_vec[4])
-        CTau_dir = coeffs_vec[4] / norm(coeffs_vec[4])
+
+        if CD_norm == 0
+            CD_dir = [0.0, 0.0, 0.0]
+        else
+            CD_dir = coeffs_vec[1] / norm(coeffs_vec[1])
+        end
+        if CL_norm == 0
+            CL_dir = [0.0, 0.0, 0.0]
+        else
+            CL_dir = coeffs_vec[2] / norm(coeffs_vec[2])
+        end
+        if CP_norm == 0
+            CP_dir = [0.0, 0.0, 0.0]
+        else
+            CP_dir = coeffs_vec[3] / norm(coeffs_vec[3])
+        end
+        if CTau_norm == 0
+            CTau_dir = [0.0, 0.0, 0.0]
+        else
+            CTau_dir = coeffs_vec[4] / norm(coeffs_vec[4])
+        end
 
         return CD_norm, CD_dir, CL_norm, CL_dir, CP_norm, CP_dir, CTau_norm, CTau_dir
     end
@@ -131,14 +148,18 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     # num = sum(aero_coeffs .* areas)
     num = aero_coeffs .* areas
 
+    # print(normals, //)
+
     coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,C, C
 
     # print(coeffs_vec, //)
     # print(areas, //)
     # print(cos.(angles), //)
+    # print(rad2deg.(angles), //)
     # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
-    CoefficientsVectorized(coeffs_vec ./ sum(areas .* cos.(angles))), sum(areas), sum(areas .* cos.(angles))
+    CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
     # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
+
 
 end
 

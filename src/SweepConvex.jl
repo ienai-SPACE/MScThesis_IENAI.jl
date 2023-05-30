@@ -69,20 +69,20 @@ end
 
 # mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh.obj")
 
-#load the mesh
-using FileIO
-using FilePathsBase
-using FilePathsBase: /
-pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
+# #load the mesh
+# using FileIO
+# using FilePathsBase
+# using FilePathsBase: /
+# pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+# mesh = load(pkg_path / "test" / "samples" / "sphereMesh.obj")
 
 
-step = pi / 20
-# aa = pi
-# pp = pi / 2
+# step = pi / 20
+# # aa = pi
+# # pp = pi / 2
 
-MeshVerticesCoords = SatelliteGeometryCalculations.finputMesh(mesh; scale=1e-3)
+# MeshVerticesCoords = SatelliteGeometryCalculations.finputMesh(mesh; scale=1e-3)
 
-AlphaPhiStorage = sweep(MeshVerticesCoords, step)
+# AlphaPhiStorage = sweep(MeshVerticesCoords, step)
 
 

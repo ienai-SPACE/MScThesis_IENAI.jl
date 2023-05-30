@@ -38,6 +38,8 @@ A ray-tracing algorithm is used. The sampler for the generation of the rays can 
 
 function areasConcave(dir, rmax, distance, triangles, Ntri)
 
+    dir = -dir   #opposite direction to velocity vector
+
     #select the sampling method and the density of the sampler [rays/m^2]
     samplerG = GridFilter(50000)
     samplerF = FibonacciSampler(50000)
@@ -67,12 +69,12 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
             RTI, modo = MTalgorithm(TriangleFace(SV3(V1), SV3(V2), SV3(V3)), Ray(SV3(orig_new), dir))
 
             # print(RTI.t)
-            # print(RTI.γ_dir)
+            # print(RTI.γ_dir, //)
             t = RTI.t
             gamma = RTI.γ_dir
             area = RTI.area
             u_n = TriangleFace(SV3(V1), SV3(V2), SV3(V3)).normal |> normalize
-            # print(u_n)
+            # print(u_n, //)
 
 
             if modo == NoIntersection

@@ -67,7 +67,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
             #         OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
             #     end
             # end
-            if OutAreaConvex[1] != 0
+            if OutAreaConvex[1] != 0.0
                 counter += 1
                 if counter == 1
                     OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]

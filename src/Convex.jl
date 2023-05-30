@@ -45,7 +45,7 @@ function areasConvex(vertices, Vdir)
         dotProd = dot(dir, n)
 
 
-        if dotProd > 0
+        if dotProd > 1e-5   #theoretically > 0, but 1e-5 to account for numerical errors
             area = norm(n) / 2        #area of the triangle
         else
             area = 0.0
@@ -70,7 +70,9 @@ function areasConvex(vertices, Vdir)
         #θ = acos(dot(dir, n) / (norm(dir) * norm(n)))
         dotProd = dot(dir, n)
 
-        if dotProd > 0
+
+
+        if dotProd > 1e-5 #theoretically > 0, but 1e-5 to account for numerical errors  
             edge3 = V4 - V3
             edge4 = V3 - V2
             n2 = cross(edge3, edge4)

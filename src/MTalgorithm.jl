@@ -52,7 +52,7 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
     if abs(dot_prod) < ϵ
         return no_intersection(T), mode(no_intersection(T)) # TODO: refine 
     end
-    which_face = dot_prod > 0.0 ? BackFaceIntersection : FrontFaceIntersection
+    which_face = dot_prod > 1e-5 ? BackFaceIntersection : FrontFaceIntersection
 
     V = triangle.vertices
     edge1 = V[2] - V[1]
