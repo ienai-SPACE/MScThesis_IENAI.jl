@@ -35,7 +35,7 @@ MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInpu
 
 step = deg2rad(45);
 LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep(rmax, distance, MeshVerticesCoords, convexFlag, step)
-writedlm("delim_file.txt", AprojLookUpTable)
+writedlm("AprojLookUpTable.txt", AprojLookUpTable)
 
 
 # interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
