@@ -34,6 +34,7 @@ Obtaining all the areas and perpendicular angles of the triangular mesh elements
 - `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
 - `dir`             : direction of the oncoming particle
 - `triangles`       : vertices coordinates of the triangular/quad mesh element
+- `convexFlag`      :1 for convex, 0 for non-convex
 #OUTPUT:
 - `OutLMNTs:: OutGeometry{T}`                                   : struct of 3 fields (`area`, `angle`, and `normals`) each containing a vector with the respective magnitude of all intercepted surfaces
 - `InteractionGeometry_v::Vector{InteractionGeometry{T}}`       : vector of struct storing the areas and angles of all intercepted surfaces       
@@ -43,9 +44,6 @@ Obtaining all the areas and perpendicular angles of the triangular mesh elements
 
 function areas(rmax, distance, dir, triangles, convexFlag)
 
-    # print(dir)
-    # print("areas function")
-
     #Number of triangles
     Ntri = size(triangles, 1)
 
@@ -54,19 +52,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
         for jj ∈ 1:Ntri #for loop to iterate over all triangles/quads
             vertices = triangles[jj, 1:9]
             OutAreaConvex = areasConvex(vertices, dir)
-            # if jj == 1
-            #     if OutAreaConvex[1] == 0
-            #         OutFacets = @SVector [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-            #     else
-            #         OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]
-            #     end
-            # else
-            #     if OutAreaConvex[1] == 0
-            #         OutFacets = hcat(OutFacets, [0.0, 0.0, 0.0, 0.0, 0.0, 0.0])
-            #     else
-            #         OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
-            #     end
-            # end
+
             if OutAreaConvex[1] != 0.0
                 counter += 1
                 if counter == 1
@@ -78,11 +64,6 @@ function areas(rmax, distance, dir, triangles, convexFlag)
 
 
         end
-
-        # #eliminate non-intercepted triangle entries and size down the output matrix
-        # OutFacets = filter(!iszero, OutFacets)
-        # OutFacets = reshape(OutFacets, (6, Int(length(OutFacets) / 6)))
-
 
     elseif convexFlag == 0
         OutFacets = areasConcave(dir, rmax, distance, triangles, Ntri)
