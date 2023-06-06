@@ -20,7 +20,7 @@ struct HomogeneousGeometry{GT,T,F<:FaceGeometry}
     rmax::Float64
     function HomogeneousGeometry{GT}(faces::Vector{F}, surface_props::SurfaceProps{T}) where {GT,F,T}
         rmax = maximum([_max_coord(face) for face in faces])
-        new{GT,T,F}(geometry, surface_props, rmax)
+        new{GT,T,F}(faces, surface_props, rmax)
     end
 end
 
@@ -29,9 +29,9 @@ _max_coord(face::TriangleFace) = maximum([maximum(v) for v ∈ face.vertices])
 
 function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
     mesh = load(path)
-    faces = Face{TriangleFace{Float64},Float64}[]
+    faces = TriangleFace{Float64}[]
     for triangle in mesh
-        points = map(i -> triangle.points[i].data |> SVector{3,Float64}, 1:3)
+        points = map(i -> triangle.points[i].main.data |> SVector{3,Float64}, 1:3)
         face_geometry = TriangleFace(points...)
         push!(faces, face_geometry)
     end
