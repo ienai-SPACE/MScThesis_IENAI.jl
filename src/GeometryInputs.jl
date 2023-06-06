@@ -5,7 +5,9 @@ using FilePathsBase: /
 
 @enum GeometryType Convex NonConvex
 
-struct Geometry{GT,F<:Face}
+abstract type AbstractGeometry{GT} end
+
+struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
     function Geometry{GT}(faces::Vector{F}) where {GT,F}
@@ -14,7 +16,7 @@ struct Geometry{GT,F<:Face}
     end
 end
 
-struct HomogeneousGeometry{GT,T,F<:FaceGeometry}
+struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     faces::Vector{F}
     surface_props::SurfaceProps{T}
     rmax::Float64
@@ -24,20 +26,37 @@ struct HomogeneousGeometry{GT,T,F<:FaceGeometry}
     end
 end
 
+is_convex(geo::AbstractGeometry{Convex}) = true
+is_convex(geo::AbstractGeometry{NonConvex}) = false
+
 _max_coord(face::Face) = _max_coord(face.geometry)
 _max_coord(face::TriangleFace) = maximum([maximum(v) for v ∈ face.vertices])
 
-function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
+get_point_data(point) = point.main.data
+get_point_data(point::Point) = point.data
+
+n_faces(geo::AbstractGeometry) = length(geo.faces)
+
+
+function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, scale_factor=1e-3)
     mesh = load(path)
     faces = TriangleFace{Float64}[]
     for triangle in mesh
-        points = map(i -> triangle.points[i].main.data |> SVector{3,Float64}, 1:3)
+        points = map(i -> get_point_data(triangle.points[i]) |> SVector{3,Float64} |> p -> p * scale_factor, 1:3)
         face_geometry = TriangleFace(points...)
         push!(faces, face_geometry)
     end
     gtype = is_convex ? Convex : NonConvex
     HomogeneousGeometry{gtype}(faces, surface_props)
 end
+
+function Viewpoint(geo::AbstractGeometry, azimuth, elevation)
+    rmax = get_rmax(geo)
+    distance = 100 * rmax
+    Viewpoint(rmax, distance, azimuth, elevation)
+end
+
+get_rmax(geo::AbstractGeometry) = geo.rmax
 
 # regular Geometry
 # function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
@@ -107,3 +126,16 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
     return MeshVerticesCoords, dir, rmax, distance
 
 end
+
+function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
+    new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
+    HomogeneousGeometry{GT}(new_faces, geometry.surface_props)
+end
+
+function is_visible(face::TriangleFace, viewpoint::Viewpoint)
+    normal = face.normal
+    dot(normal, viewpoint.direction) < 0
+end
+
+shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)
+face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area

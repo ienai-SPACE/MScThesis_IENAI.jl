@@ -184,3 +184,57 @@ distance = 10                       #distance at which the circular plane is loc
 Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
 =#
 
+function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
+    if is_convex(geometry)
+        return nothing #areas_convex(viewpoint, geometry)
+    else
+        return areas_nonconvex(geometry, viewpoint)
+    end
+end
+
+function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+    samplerG = GridFilter(50000)
+    samplerF = FibonacciSampler(50000)
+    samplerMC = MonteCarloSampler(50000)
+    sampler = samplerF
+    rti_vec, w = raytrace(geometry, viewpoint, sampler)
+    valid_rti = rti_vec |> Filter(rti -> rti.mode != NoIntersection) |> tcollect
+    Aproj = w * length(valid_rti)
+    faces_hit_idx_nonunique = rti_vec .|> rti -> rti.face_index
+    faces_hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
+    Aref = sum(face_area(geometry, idx) for idx in faces_hit_idx)
+    Aproj, Aref
+end
+
+
+function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
+    Ntri = n_faces(geometry)
+    Ntri_preculling = Ntri
+    rmax = viewpoint.rmax
+    println("Ntri_preculling=", Ntri_preculling)
+    println("max in MeshVertices (preculling)=", viewpoint.rmax)
+    #back-face culling
+    filtered_geometry = filter_backfaces(geometry, viewpoint)
+    #Number of triangles
+    Ntri = n_faces(filtered_geometry)
+    new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
+    println("culling ratio =", Ntri / Ntri_preculling)
+    println("max in MeshVertices=", new_viewpoint.rmax)
+    return _raytrace(filtered_geometry, new_viewpoint, sampler)
+end
+
+function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
+    dir = viewpoint.direction
+    rmax = viewpoint.rmax
+    O, Norig = generate_ray_origins(sampler, dir, rmax, viewpoint.distance)        #coordinates of ray origins, number of origins
+    m = Map(jj -> begin
+        orig = O[jj]
+        ray = Ray(SV3(orig), dir)
+        rti = ray_mesh_intersection(geometry, ray)
+    end)
+
+    rti_vec = 1:Norig |> m |> tcollect
+    return rti_vec, (π * rmax^2) / Norig
+end
+
+export analyze_areas

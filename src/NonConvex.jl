@@ -31,7 +31,7 @@ function normal_of_triangle_by_coords(triangle)
 end
 
 
-function ray_mesh_intersection(triangles, ray::Ray)
+function ray_mesh_intersection(triangles::Matrix, ray::Ray)
     Ntri = size(triangles, 1)
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
@@ -49,7 +49,18 @@ function ray_mesh_intersection(triangles, ray::Ray)
         rti = MTalgorithm(face, ray)
         @set rti.face_index = ii
     end)
-    foldxt(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
+    foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
+end
+
+function ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
+    Ntri = n_faces(geo)
+    f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
+    m = Map(ii -> begin   #iterate over all triangles
+        face = geo.faces[ii]
+        rti = MTalgorithm(face, ray)
+        @set rti.face_index = ii
+    end)
+    foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(T))
 end
 
 
@@ -108,6 +119,8 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
             ]
         end
     end
+
+
 
 
 
@@ -175,3 +188,46 @@ export areasConcave
 # Ntri = size(triangles, 1)
 
 # OutTriangles = areasConcave(dir, rmax, distance, triangles, Ntri)
+
+
+# function raytrace(sampler, Vdir, rmax, distance, MeshVertices, Ntri)
+
+#     dir = -Vdir   #opposite direction to velocity vector
+#     Ntri_preculling = Ntri
+
+#     println("Ntri_preculling=", Ntri_preculling)
+#     println("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
+#     #back-face culling
+#     triangles = culling(MeshVertices, dir)
+#     #Number of triangles
+#     Ntri = size(triangles, 1)
+#     println("culling ratio =", Ntri / Ntri_preculling)
+#     println("max in MeshVertices=", maximum(MeshVertices[:, :]))
+
+
+#     #select the sampling method and the density of the sampler [rays/m^2]
+#     samplerG = GridFilter(50000)
+#     samplerF = FibonacciSampler(50000)
+#     samplerMC = MonteCarloSampler(50000)
+
+#     O, Norig = generate_ray_origins(samplerF, dir, rmax, distance)        #coordinates of ray origins, number of origins
+
+
+#     #------pre-allocation-------------------
+#     # index = 0                                          #counter indicating the number of triangles intercepted by the same ray
+#     intercept_dummy = zeros(Ntri, 7)                   #triangle index, distance from origin to intercept, area of the triangle, angle between velocity vector and triangle's normal
+#     triIntercept = zeros(6, Norig)                     #triangle index, area of the triangle, angle between velocity vector and triangle's normal
+#     #---------------------------------------
+
+#     for jj ∈ 1:Norig       #iterate over the set of ray origins
+#         orig = O[jj]
+#         ray = Ray(SV3(orig), dir)
+#         rti = ray_mesh_intersection(triangles, ray)
+#         if mode(rti) ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
+#             ii = rti.face_index
+#             u_n = normal_of_triangle_by_coords(@view triangles[ii, :])
+#             triIntercept[:, jj] .= [
+#                 ii, rti.area, rti.γ_dir, u_n[1], u_n[2], u_n[3]
+#             ]
+#         end
+#     end
