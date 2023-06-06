@@ -1,5 +1,0 @@
-using SatelliteGeometryCalculations
-
-
-
-Tw

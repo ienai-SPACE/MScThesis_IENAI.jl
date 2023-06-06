@@ -41,8 +41,8 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 function sweep(rmax, distance, MeshVerticesCoords, convexFlag, step)
 
 
-    α = -π/2:step:π/2
-    ϕ = -π:step:π
+    α = -π:step:π
+    ϕ = -π/2:step:π/2
 
     #pre-allocation of the vector to be populated by structs
     #T = _eltype(SweepStorage{T})

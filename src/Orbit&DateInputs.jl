@@ -24,7 +24,7 @@ function OrbitandDate()
 
 
 
-    Vrel_v = [0.0, -1.0, 0.0] / norm([0.0, 0.0, 1.0]) * Vrel #this vectorial velocity depends on the attitude of the S/C, since Vrel_v is given wrt body ref.frame
+    Vrel_v = [0.0, 1.0, 0.0] / norm([0.0, 0.0, 1.0]) * Vrel #this vectorial velocity depends on the attitude of the S/C, since Vrel_v is given wrt body ref.frame
 
 
 

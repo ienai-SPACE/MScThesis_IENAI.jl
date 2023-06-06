@@ -42,7 +42,7 @@ Obtaining all the areas and perpendicular angles of the triangular mesh elements
 - `Aref`                                                        : sum of all intercepted triangular areas
 """
 
-function areas(rmax, distance, dir, triangles, convexFlag)
+function areas(rmax, distance, Vdir, triangles, convexFlag)
 
     #Number of triangles
     Ntri = size(triangles, 1)
@@ -51,7 +51,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
         counter = 0
         for jj ∈ 1:Ntri #for loop to iterate over all triangles/quads
             vertices = triangles[jj, 1:9]
-            OutAreaConvex = areasConvex(vertices, dir)
+            OutAreaConvex = areasConvex(vertices, Vdir)
 
             if OutAreaConvex[1] != 0.0
                 counter += 1
@@ -66,9 +66,8 @@ function areas(rmax, distance, dir, triangles, convexFlag)
         end
 
     elseif convexFlag == 0
-        OutFacets = areasConcave(dir, rmax, distance, triangles, Ntri)
+        OutFacets = areasConcave(Vdir, rmax, distance, triangles, Ntri)
     end
-
 
 
     #store normal vector components into vector
@@ -76,7 +75,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     for ii ∈ 1:lastindex(OutFacets[2, :])
         normal_v[ii] = SVector(OutFacets[4, ii], OutFacets[5, ii], OutFacets[6, ii])
     end
-    # print(normal_v)
+
 
     #sum of all intercepted triangular areas
     Aref = sum(OutFacets[2, :])

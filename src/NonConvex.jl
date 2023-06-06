@@ -21,6 +21,8 @@
 
 #--------------------------------------------
 
+include("culling.jl")
+
 """ 
     areasConcave(dir, rmax, distance, triangles, Ntri) 
 
@@ -36,9 +38,20 @@ A ray-tracing algorithm is used. The sampler for the generation of the rays can 
 - `OutTriangles::Matrix(6,_)` : it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
 """
 
-function areasConcave(dir, rmax, distance, triangles, Ntri)
+function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
 
-    dir = -dir   #opposite direction to velocity vector
+    dir = -Vdir   #opposite direction to velocity vector
+    Ntri_preculling = Ntri
+
+    print("Ntri_preculling=", Ntri_preculling)
+    print("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
+    #back-face culling
+    triangles = culling(MeshVertices, dir)
+    #Number of triangles
+    Ntri = size(triangles, 1)
+    print("culling ratio =", Ntri / Ntri_preculling)
+    print("max in MeshVertices=", maximum(MeshVertices[:, :]))
+
 
     #select the sampling method and the density of the sampler [rays/m^2]
     samplerG = GridFilter(50000)
@@ -46,6 +59,7 @@ function areasConcave(dir, rmax, distance, triangles, Ntri)
     samplerMC = MonteCarloSampler(50000)
 
     O, Norig = generate_ray_origins(samplerF, dir, rmax, distance)        #coordinates of ray origins, number of origins
+
 
     #------pre-allocation-------------------
     # index = 0                                          #counter indicating the number of triangles intercepted by the same ray
