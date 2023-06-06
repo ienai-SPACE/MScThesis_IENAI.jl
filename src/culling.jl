@@ -1,5 +1,4 @@
 function culling(MeshVertices, dir)
-
     #Number of triangles
     Ntri = size(MeshVertices, 1)
 

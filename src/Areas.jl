@@ -41,32 +41,30 @@ Obtaining all the areas and perpendicular angles of the triangular mesh elements
 - `Aproj`                                                       : projection of the intercepted triangular areas onto the selected direction 
 - `Aref`                                                        : sum of all intercepted triangular areas
 """
+function areas(rmax, distance, dir, triangles, convexFlag)
+    if convexFlag == 1
+        areas_convex(rmax, distance, dir, triangles)
+    else
+        areas_nonconvex(rmax, distance, dir, triangles)
+    end
+end
 
-function areas(rmax, distance, Vdir, triangles, convexFlag)
-
+function areas_convex(rmax, distance, Vdir, triangles)
     #Number of triangles
     Ntri = size(triangles, 1)
 
-    if convexFlag == 1
-        counter = 0
-        for jj ∈ 1:Ntri #for loop to iterate over all triangles/quads
-            vertices = triangles[jj, 1:9]
-            OutAreaConvex = areasConvex(vertices, Vdir)
-
-            if OutAreaConvex[1] != 0.0
-                counter += 1
-                if counter == 1
-                    OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]
-                else
-                    OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
-                end
+    counter = 0
+    for jj ∈ 1:Ntri #for loop to iterate over all triangles/quads
+        vertices = triangles[jj, 1:9]
+        OutAreaConvex = areasConvex(vertices, Vdir)
+        if OutAreaConvex[1] != 0.0
+            counter += 1
+            if counter == 1
+                OutFacets = @SVector [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]]
+            else
+                OutFacets = hcat(OutFacets, [jj, OutAreaConvex[1], OutAreaConvex[2], OutAreaConvex[3], OutAreaConvex[4], OutAreaConvex[5]])
             end
-
-
         end
-
-    elseif convexFlag == 0
-        OutFacets = areasConcave(Vdir, rmax, distance, triangles, Ntri)
     end
 
 
@@ -109,7 +107,51 @@ function areas(rmax, distance, Vdir, triangles, convexFlag)
     return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 
+function areas_nonconvex(rmax, distance, Vdir, triangles)
 
+    #Number of triangles
+    Ntri = size(triangles, 1)
+    OutFacets = areasConcave(Vdir, rmax, distance, triangles, Ntri)
+
+
+    #store normal vector components into vector
+    normal_v = Vector{SVector{3,Float64}}(undef, size(OutFacets, 2))
+    for ii ∈ 1:lastindex(OutFacets[2, :])
+        normal_v[ii] = SVector(OutFacets[4, ii], OutFacets[5, ii], OutFacets[6, ii])
+    end
+
+
+    #sum of all intercepted triangular areas
+    Aref = sum(OutFacets[2, :])
+
+    #Project all intercepted triangular areas and find projected total area
+
+    #------pre-allocation-------------------
+    Aproj = zeros(size(OutFacets, 2), 1)
+    #---------------------------------------
+
+    for ii ∈ 1:Int(size(OutFacets, 2))
+        Aproj[ii] = abs(OutFacets[2, ii] * cos(OutFacets[3, ii]))
+    end
+    Aproj = sum(Aproj)                 #sum of all intercepted triangular projected areas
+
+    OutLMNTs = OutGeometry(OutFacets[2, :], OutFacets[3, :], normal_v[:])
+    T = _eltype(OutLMNTs)
+
+    #pre-allocation of the vector to be populated by structs
+    InteractionGeometry_v = Vector{InteractionGeometry{T}}(undef, length(OutFacets[2, :]))
+
+    for ii ∈ 1:length(OutFacets[2, :])
+        InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii])
+    end
+
+
+    #int_geos = [InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]) for ii ∈ 1:length(OutFacets[2, :])]
+    #int_geos = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))
+
+    #print(OutLMNTs)
+    return Aproj, Aref, OutLMNTs, InteractionGeometry_v
+end
 
 export OutGeometry
 

@@ -34,16 +34,28 @@ end
     BackFaceIntersection
 end
 
-struct RayTriangleIntersection{M,T}
+struct RayTriangleIntersection{T}
+    mode::IntersectionMode
     t::T
     γ_dir::T
     area::T
+    face_index::Int64
 end
 
-mode(rti::RayTriangleIntersection{M}) where {M} = M
+function earlier_intersection(rti1::RayTriangleIntersection, rti2::RayTriangleIntersection)
+    if rti1.mode == NoIntersection
+        return rti2
+    elseif rti2.mode == NoIntersection
+        return rti1
+    else
+        return rti1.t < rti2.t ? rti1 : rti2
+    end
+end
 
-RayTriangleIntersection{M}(t::T, γ_dir::T, area::T) where {M,T} = RayTriangleIntersection{M,T}(t, γ_dir, area)
-no_intersection(::Type{T}) where {T} = RayTriangleIntersection{NoIntersection}(zero(T), zero(T), zero(T))
+mode(rti::RayTriangleIntersection) = rti.mode
+
+RayTriangleIntersection(mode::IntersectionMode, t::T, γ_dir::T, area::T, i::Integer) where {T} = RayTriangleIntersection{T}(mode, t, γ_dir, area, i)
+no_intersection(::Type{T}) where {T} = RayTriangleIntersection(NoIntersection, zero(T), zero(T), zero(T), 0)
 
 
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
@@ -63,8 +75,6 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
     tvec = ray.origin - V[1]
     u = invDet * dot(tvec, pvec)
     #calculation of triangle's area
-    crossProd = cross(edge1, edge2)
-    area = norm(crossProd) / 2        #area of the triangle
 
     (u < 0.0 || u > 1) && return no_intersection(T)
 
@@ -73,7 +83,7 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
 
     (v < 0.0 || u + v > 1.0) && return no_intersection(T)
     t = invDet * dot(edge2, qvec) # distance from the ray origin to P 
-    RayTriangleIntersection{which_face}(t, γ_dir, area)
+    RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0)
 end
 
 

@@ -23,6 +23,36 @@
 
 include("culling.jl")
 
+function normal_of_triangle_by_coords(triangle)
+    V1 = SV3(triangle[1], triangle[2], triangle[3])
+    V2 = SV3(triangle[4], triangle[5], triangle[6])
+    V3 = SV3(triangle[7], triangle[8], triangle[9])
+    TriangleFace(V1, V2, V3).normal
+end
+
+
+function ray_mesh_intersection(triangles, ray::Ray)
+    Ntri = size(triangles, 1)
+    f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
+    m = Map(ii -> begin   #iterate over all triangles
+
+        #definition of the triangle vertices
+        V1 = SV3(triangles[ii, 1], triangles[ii, 2], triangles[ii, 3])
+        V2 = SV3(triangles[ii, 4], triangles[ii, 5], triangles[ii, 6])
+        V3 = SV3(triangles[ii, 7], triangles[ii, 8], triangles[ii, 9])
+
+        #it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
+
+        # orig_new = reduce(vcat, orig)
+        face = TriangleFace(V1, V2, V3)
+
+        rti = MTalgorithm(face, ray)
+        @set rti.face_index = ii
+    end)
+    foldxt(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
+end
+
+
 """ 
     areasConcave(dir, rmax, distance, triangles, Ntri) 
 
@@ -37,7 +67,6 @@ A ray-tracing algorithm is used. The sampler for the generation of the rays can 
 #OUTPUT:
 - `OutTriangles::Matrix(6,_)` : it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
 """
-
 function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
 
     dir = -Vdir   #opposite direction to velocity vector
@@ -68,58 +97,16 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
     #---------------------------------------
 
     for jj ∈ 1:Norig       #iterate over the set of ray origins
-        global index
-        index = 0
-        for ii ∈ 1:Ntri    #iterate over all triangles
-
-            #definition of the triangle vertices
-            V1 = SV3(triangles[ii, 1], triangles[ii, 2], triangles[ii, 3])
-            V2 = SV3(triangles[ii, 4], triangles[ii, 5], triangles[ii, 6])
-            V3 = SV3(triangles[ii, 7], triangles[ii, 8], triangles[ii, 9])
-
-            #it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
-            orig = O[jj]
-            # orig_new = reduce(vcat, orig)
-            face = TriangleFace(V1, V2, V3)
-            ray = Ray(SV3(orig), dir)
-            RTI = MTalgorithm(face, ray)
-            modo = mode(RTI)
-
-            # print(RTI.t)
-            # print(RTI.γ_dir, //)
-            t = RTI.t
-            gamma = RTI.γ_dir
-            area = RTI.area
-            u_n = TriangleFace(V1, V2, V3).normal |> normalize
-            # print(u_n, //)
-
-
-            if modo == NoIntersection
-
-            elseif modo ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
-
-                # print(index)
-                global index
-
-                index += 1
-
-                intercept_dummy[index, :] = [ii, t, area, gamma, u_n[1], u_n[2], u_n[3]] #last 3 components are normal vector components of the facet
-
-                if index > 1 #if more than one triangle intercepted by the same ray
-                    if abs(intercept_dummy[index, 2]) < abs(intercept_dummy[index-1, 2])   #select the most forward triangle to be intercepted
-
-                        triIntercept[:, jj] = [intercept_dummy[index, 1] intercept_dummy[index, 3] intercept_dummy[index, 4] intercept_dummy[index, 5] intercept_dummy[index, 6] intercept_dummy[index, 7]]   #triangle index, area of the triangle, angle between velocity vector and triangle's normal
-
-                    end
-                else
-                    triIntercept[:, jj] = [intercept_dummy[index, 1] intercept_dummy[index, 3] intercept_dummy[index, 4] intercept_dummy[index, 5] intercept_dummy[index, 6] intercept_dummy[index, 7]]        #triangle index, area of the triangle, angle between velocity vector and triangle's normal
-                end
-            end
+        orig = O[jj]
+        ray = Ray(SV3(orig), dir)
+        rti = ray_mesh_intersection(triangles, ray)
+        if mode(rti) ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
+            ii = rti.face_index
+            u_n = normal_of_triangle_by_coords(@view triangles[ii, :])
+            triIntercept[:, jj] .= [
+                ii, rti.area, rti.γ_dir, u_n[1], u_n[2], u_n[3]
+            ]
         end
-
-
-        fill!(intercept_dummy, 0.0)
-
     end
 
 
