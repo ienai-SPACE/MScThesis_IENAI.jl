@@ -43,14 +43,14 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
     dir = -Vdir   #opposite direction to velocity vector
     Ntri_preculling = Ntri
 
-    print("Ntri_preculling=", Ntri_preculling)
-    print("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
+    println("Ntri_preculling=", Ntri_preculling)
+    println("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
     #back-face culling
     triangles = culling(MeshVertices, dir)
     #Number of triangles
     Ntri = size(triangles, 1)
-    print("culling ratio =", Ntri / Ntri_preculling)
-    print("max in MeshVertices=", maximum(MeshVertices[:, :]))
+    println("culling ratio =", Ntri / Ntri_preculling)
+    println("max in MeshVertices=", maximum(MeshVertices[:, :]))
 
 
     #select the sampling method and the density of the sampler [rays/m^2]
@@ -73,27 +73,30 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
         for ii ∈ 1:Ntri    #iterate over all triangles
 
             #definition of the triangle vertices
-            V1 = [triangles[ii, 1], triangles[ii, 2], triangles[ii, 3]]
-            V2 = [triangles[ii, 4], triangles[ii, 5], triangles[ii, 6]]
-            V3 = [triangles[ii, 7], triangles[ii, 8], triangles[ii, 9]]
+            V1 = SV3(triangles[ii, 1], triangles[ii, 2], triangles[ii, 3])
+            V2 = SV3(triangles[ii, 4], triangles[ii, 5], triangles[ii, 6])
+            V3 = SV3(triangles[ii, 7], triangles[ii, 8], triangles[ii, 9])
 
-
-            orig = O[jj, :]
-            orig_new = reduce(vcat, orig)
-            RTI, modo = MTalgorithm(TriangleFace(SV3(V1), SV3(V2), SV3(V3)), Ray(SV3(orig_new), dir))
+            #it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
+            orig = O[jj]
+            # orig_new = reduce(vcat, orig)
+            face = TriangleFace(V1, V2, V3)
+            ray = Ray(SV3(orig), dir)
+            RTI = MTalgorithm(face, ray)
+            modo = mode(RTI)
 
             # print(RTI.t)
             # print(RTI.γ_dir, //)
             t = RTI.t
             gamma = RTI.γ_dir
             area = RTI.area
-            u_n = TriangleFace(SV3(V1), SV3(V2), SV3(V3)).normal |> normalize
+            u_n = TriangleFace(V1, V2, V3).normal |> normalize
             # print(u_n, //)
 
 
             if modo == NoIntersection
 
-            elseif modo == BackFaceIntersection || modo == FrontFaceIntersection   #the triangle is intercepted by the ray
+            elseif modo ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
 
                 # print(index)
                 global index

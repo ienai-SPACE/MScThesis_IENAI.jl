@@ -82,7 +82,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "T_Sat_fineMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
+    mesh = load(pkg_path / "test" / "samples" / "T_SatMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
 
 
     MeshVerticesCoords = finputMesh(mesh)
