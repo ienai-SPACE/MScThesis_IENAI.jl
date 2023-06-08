@@ -157,15 +157,16 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
     rng = Xoshiro(1234) # create a new Xoshiro random number generator object
     R1 = rand(rng, Int(n))   # generate a random number using the rng object
     R2 = rand(rng, Int(n))
-    R3 = rand(rng, Int(n))
-    R4 = rand(rng, Int(n))
+    # R3 = rand(rng, Int(n))
+    # R4 = rand(rng, Int(n))
 
     Rc = rmax
 
     x_c = Rc * sqrt.(R1) .* cos.(2 * π * R2)
-    y_c = Rc * sqrt.(R3) .* cos.(2 * π * R4)
+    y_c = Rc * sqrt.(R1) .* sin.(2 * π * R2)
 
     points = filter(p -> norm(p) <= rmax, collect(zip(x_c, y_c)))
+
 
     center = dir * distance
     points_new = zeros(SVector{3,Float64}, length(points))
