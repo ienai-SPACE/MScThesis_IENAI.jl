@@ -26,6 +26,7 @@ include("Orbit&DateInputs.jl")
 
 include("areasSphericalInput.jl")
 include("sweep.jl")
+include("sweep_v2.jl")
 
 # include("VectorizeCoefficients.jl")
 

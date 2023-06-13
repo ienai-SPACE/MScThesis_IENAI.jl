@@ -74,8 +74,11 @@ Create a uniformly distributed source of rays
 """
 
 function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
+
+    dir = -dir #same sense as velocity vector
+
     step = 1 / sqrt(gf.ray_density)
-    x_grid = -rmax:step:rmax
+    x_grid = -rmax:step:rmax      #maybe rmax/2 is enough
     y_grid = -rmax:step:rmax
     ny = length(y_grid)
     nx = length(x_grid)
@@ -115,6 +118,8 @@ Source: http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-spher
 
 function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
 
+    dir = -dir #same sense as velocity vector
+
     goldenRatio = (1 + sqrt(5)) / 2
     n = ceil(gf.ray_density * (π * rmax^2)) #number of distributed points inside the disk of radius rmax
 
@@ -131,6 +136,7 @@ function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
     for ii ∈ 1:length(collect(x_coords))
         points_new[ii] = center + x_coords[ii] * v + y_coords[ii] * w #center to displace the plane in the opposite direction to the `dir`
     end
+
     points_new, Int(length(x_coords))
 end
 
@@ -153,17 +159,25 @@ Source: Xuhong Jina et al,"Monte Carlo simulation for aerodynamic coefficients o
 
 function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
 
+    dir = -dir #same sense as velocity vector
+
     n = ceil(gf.ray_density * (4 * rmax^2)) #number of randomly distributed points inside the disk of radius rmax
-    rng = Xoshiro(1234) # create a new Xoshiro random number generator object
+    # rng = Xoshiro(1234) # create a new Xoshiro random number generator object
+    # R1 = rand(rng, Int(n))   # generate a random number using the rng object
+    # R2 = rand(rng, Int(n))
+    # R3 = rand(rng, Int(n))
+    # R4 = rand(rng, Int(n))
+
+
+    rng = Xoshiro() # create a new Xoshiro random number generator object
     R1 = rand(rng, Int(n))   # generate a random number using the rng object
     R2 = rand(rng, Int(n))
-    R3 = rand(rng, Int(n))
-    R4 = rand(rng, Int(n))
 
     Rc = rmax
 
     x_c = Rc * sqrt.(R1) .* cos.(2 * π * R2)
-    y_c = Rc * sqrt.(R3) .* cos.(2 * π * R4)
+    y_c = Rc * sqrt.(R1) .* sin.(2 * π * R2)
+
 
     points = filter(p -> norm(p) <= rmax, collect(zip(x_c, y_c)))
 

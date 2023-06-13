@@ -29,25 +29,27 @@ MeshVerticesCoords, dir, rmax, distance = SatelliteGeometryCalculations.GeomInpu
 
 # α::Float64            : azimuth w.r.t. body frame. (α = 0 aligned with the x-axis)
 # ϕ::Float64            : elevation w.r.t. body frame. (ϕ = 0 on the xy-plane) 
-α = deg2rad(-50)
-ϕ = deg2rad(20)
+α = deg2rad(0)
+ϕ = deg2rad(0)
+
 
 Aproj, Atot, OutLMNTs, int_geos = SatelliteGeometryCalculations.areasSpherical(rmax, distance, α, ϕ, MeshVerticesCoords, convexFlag)
 
+println(Aproj)
+println(Atot)
 
 # step = deg2rad(15);
 # LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep(rmax, distance, MeshVerticesCoords, convexFlag, step)
 # writedlm("AprojLookUpTable.txt", AprojLookUpTable)
 
-SatelliteGeometryCalculations.tock()
+
 
 # interactions_geometries = InteractionGeometry(OutLMNTs.area[1], OutLMNTs.angle[1])
-
 
 # coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_v, OutLMNTs.normals)
 
 
-
+SatelliteGeometryCalculations.tock()
 
 
 

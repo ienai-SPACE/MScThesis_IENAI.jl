@@ -11,7 +11,7 @@ struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
     function Geometry{GT}(faces::Vector{F}) where {GT,F}
-        rmax = maximum([_max_coord(face) for face in faces])
+        rmax = 1.1maximum([_max_coord(face) for face in faces])
         new{GT,F}(faces, rmax)
     end
 end
@@ -21,7 +21,7 @@ struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     surface_props::SurfaceProps{T}
     rmax::Float64
     function HomogeneousGeometry{GT}(faces::Vector{F}, surface_props::SurfaceProps{T}) where {GT,F,T}
-        rmax = maximum([_max_coord(face) for face in faces])
+        rmax = 1.1maximum([_max_coord(face) for face in faces])
         new{GT,T,F}(faces, surface_props, rmax)
     end
 end
@@ -101,7 +101,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "T_SatMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
+    mesh = load(pkg_path / "test" / "samples" / "T_Sat_fineMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
 
 
     MeshVerticesCoords = finputMesh(mesh)
@@ -134,8 +134,11 @@ end
 
 function is_visible(face::TriangleFace, viewpoint::Viewpoint)
     normal = face.normal
-    dot(normal, viewpoint.direction) < 0
+    #viewpoint direction is the same sense as oncoming ray beam
+    dot(normal, viewpoint.direction) < -1e-4
 end
 
 shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
+face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
+face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal

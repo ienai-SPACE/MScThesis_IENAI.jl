@@ -1,5 +1,3 @@
-
-
 # using LinearAlgebra
 # using StaticArrays
 
@@ -49,7 +47,7 @@ function areas(rmax, distance, dir, triangles, convexFlag)
     end
 end
 
-function areas_convex(rmax, distance, Vdir, triangles)
+function areas_convex(rmax, distance, Vdir, triangles)  #this is actually dir
     #Number of triangles
     Ntri = size(triangles, 1)
 
@@ -107,11 +105,12 @@ function areas_convex(rmax, distance, Vdir, triangles)
     return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 
-function areas_nonconvex(rmax, distance, Vdir, triangles)
+function areas_nonconvex(rmax, distance, dir, triangles)
 
     #Number of triangles
     Ntri = size(triangles, 1)
-    OutFacets = areasConcave(Vdir, rmax, distance, triangles, Ntri)
+
+    OutFacets = areasConcave(dir, rmax, distance, triangles, Ntri)
 
 
     #store normal vector components into vector
@@ -155,34 +154,7 @@ end
 
 export OutGeometry
 
-#TESTING
-#---------------------------------------------------------------------------------------------------------------------------------
 
-#=
-convexFlag = 0
-rmax = 1                            #radius of the circular plane from where rays originate
-distance = 10                       #distance at which the circular plane
-
-#triangle vetices coordinates
-triangles = @SMatrix[4.394897596952136 -1.3063587207678875 4.012655067923802 3.3442061435039823 0.7676371202562053 4.251153740481179 5.445214679778381 1.8739750984535304 5.439657623886108
-    1.3410577524314113 0.6227469916184274 1.5604711027511295 1.4074299081230686 -0.5929514915580713 2.0821525791882842 2.850415168046063 0.5144988358467968 1.1637316942088742]
-#Vrel = defined as global variable in 'EnvironmentalInputs'
-#direction vector
-dir = [-0.6988494037821777, -0.137916655763437, -0.7018464981007773]
-
-triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-dir = @SVector [1, 1, 0]
-
-convexFlag = 1
-rmax = 1                            #radius of the circular plane from where rays originate
-distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
-
-
-
-
-
-Aproj, Aref, OutFacets = areas(rmax, distance, dir, triangles, convexFlag)
-=#
 
 function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
     if is_convex(geometry)
@@ -193,48 +165,99 @@ function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
 end
 
 function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
-    samplerG = GridFilter(50000)
-    samplerF = FibonacciSampler(50000)
-    samplerMC = MonteCarloSampler(50000)
+    #view.direction --> dir (particle beam direction)
+    samplerG = GridFilter(5e5)
+    samplerF = FibonacciSampler(1e5)
+    samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
-    rti_vec, w = raytrace(geometry, viewpoint, sampler)
-    valid_rti = rti_vec |> Filter(rti -> rti.mode != NoIntersection) |> tcollect
-    Aproj = w * length(valid_rti)
-    faces_hit_idx_nonunique = rti_vec .|> rti -> rti.face_index
+    # rti_vec, w, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, indices, filtered_geometry = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
+    rti_vec, w, filtered_geometry = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
+    valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
+    println("length(valid_rti)=", length(valid_rti))
+    Aproj = w * length(valid_rti) # / sampler.ray_density
+    faces_hit_idx_nonunique = valid_rti .|> rti -> rti.face_index
     faces_hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
-    Aref = sum(face_area(geometry, idx) for idx in faces_hit_idx)
-    Aproj, Aref
+    sorted_hit_idx = sort(faces_hit_idx)
+    # println("length(filter(!iszero, indices))=", length(filter(!iszero, indices)))
+    # indices = Int.(unique(filter(!iszero, indices)))
+
+
+    Aref = sum(face_area(filtered_geometry, idx) for idx in sorted_hit_idx)
+    face_areas = [face_area(filtered_geometry, idx) for idx in sorted_hit_idx]
+    _face_vertices = [face_vertices(filtered_geometry, idx) for idx in sorted_hit_idx]
+    _face_normals = [face_normal(filtered_geometry, idx) for idx in sorted_hit_idx]
+
+    # return Aproj, Aref, sorted_hit_idx, face_areas, _face_vertices, _face_normals, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, rti_vec, valid_rti, indices, geometry
+    return Aproj, Aref, sorted_hit_idx, face_areas, _face_vertices, _face_normals, rti_vec, valid_rti, geometry
 end
 
 
 function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     Ntri = n_faces(geometry)
     Ntri_preculling = Ntri
-    rmax = viewpoint.rmax
+
+    #Preculling: Meshed satellite
+    # _face_vertices_preCulling = [face_vertices(geometry, idx) for idx in 1:Ntri]
+    # _face_normals_preCulling = [face_normal(geometry, idx) for idx in 1:Ntri]
     println("Ntri_preculling=", Ntri_preculling)
     println("max in MeshVertices (preculling)=", viewpoint.rmax)
+    println("viewpoint.direction=", viewpoint.direction)
+
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
+    # println("length filtered geo", length(filtered_geometry.faces))
+
     #Number of triangles
     Ntri = n_faces(filtered_geometry)
+    # _face_vertices_preRT = [face_vertices(filtered_geometry, idx) for idx in 1:Ntri]
+    # _face_normals_preRT = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
+
     new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
     println("culling ratio =", Ntri / Ntri_preculling)
-    println("max in MeshVertices=", new_viewpoint.rmax)
-    return _raytrace(filtered_geometry, new_viewpoint, sampler)
+    # println("max in MeshVertices=", new_viewpoint.rmax)
+    # rt_vec, w, indices = _raytrace(filtered_geometry, new_viewpoint, sampler)
+    rt_vec, w = _raytrace(filtered_geometry, new_viewpoint, sampler)
+
+    # return rt_vec, w, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, indices, filtered_geometry
+    return rt_vec, w, filtered_geometry
 end
 
 function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     dir = viewpoint.direction
     rmax = viewpoint.rmax
     O, Norig = generate_ray_origins(sampler, dir, rmax, viewpoint.distance)        #coordinates of ray origins, number of origins
+
+    Ntri = n_faces(geometry)
+    println("Ntri in _raytrace=", Ntri)
+    # _face_vertices_preRT2 = [face_vertices(geometry, idx) for idx in 1:Ntri]
+    # _face_normals_preRT2 = [face_normal(geometry, idx) for idx in 1:Ntri]
+
     m = Map(jj -> begin
         orig = O[jj]
         ray = Ray(SV3(orig), dir)
         rti = ray_mesh_intersection(geometry, ray)
     end)
 
+
     rti_vec = 1:Norig |> m |> tcollect
-    return rti_vec, (π * rmax^2) / Norig
+
+    #------------------------------------------------
+    # indices = zeros(Norig * Ntri)
+    # counter = 0
+    # for jj ∈ 1:Norig       #iterate over the set of ray origins
+    #     orig = O[jj]
+    #     ray = Ray(SV3(orig), dir)
+    #     rti = ray_mesh_intersection(geometry, ray)
+    #     if mode(rti) ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
+    #         ii = rti.face_index
+    #         counter += 1
+    #         indices[counter] = ii
+    #     end
+    # end
+
+    # return rti_vec, (pi * rmax^2) / (Norig), indices
+
+    return rti_vec, (pi * rmax^2) / (Norig)
 end
 
 export analyze_areas

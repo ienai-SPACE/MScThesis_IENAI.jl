@@ -1,4 +1,4 @@
-function culling(MeshVertices, dir)
+function culling(MeshVertices, Vdir)
     #Number of triangles
     Ntri = size(MeshVertices, 1)
 
@@ -21,7 +21,7 @@ function culling(MeshVertices, dir)
 
         n = cross(edge1, edge2)
 
-        dotProd = dot(dir, n)
+        dotProd = dot(Vdir, n)
 
 
         if dotProd > 1e-5   #theoretically > 0, but 1e-5 to account for numerical errors

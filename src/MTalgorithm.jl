@@ -59,12 +59,18 @@ no_intersection(::Type{T}) where {T} = RayTriangleIntersection(NoIntersection, z
 
 
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
-    dot_prod = dot(triangle.normal, ray.direction)
-    γ_dir = acos(dot_prod / (norm(triangle.normal) * norm(ray.direction)))
+
+    Vdir = -ray.direction
+    # println("dir in MT", dir)
+
+    dot_prod = dot(triangle.normal, Vdir)
+
+    γ_dir = acos(dot_prod / (norm(triangle.normal) * norm(Vdir)))
+    # println(dot_prod, rad2deg(γ_dir))
     if abs(dot_prod) < ϵ
         return no_intersection(T)
     end
-    which_face = dot_prod > 1e-5 ? BackFaceIntersection : FrontFaceIntersection
+    which_face = dot_prod > 1e-5 ? FrontFaceIntersection : BackFaceIntersection
 
     V = triangle.vertices
     edge1 = V[2] - V[1]

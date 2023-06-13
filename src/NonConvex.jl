@@ -31,7 +31,7 @@ function normal_of_triangle_by_coords(triangle)
 end
 
 
-function ray_mesh_intersection(triangles::Matrix, ray::Ray)
+function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ray::Ray)
     Ntri = size(triangles, 1)
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
@@ -47,6 +47,7 @@ function ray_mesh_intersection(triangles::Matrix, ray::Ray)
         face = TriangleFace(V1, V2, V3)
 
         rti = MTalgorithm(face, ray)
+
         @set rti.face_index = ii
     end)
     foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
@@ -54,6 +55,9 @@ end
 
 function ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
     Ntri = n_faces(geo)
+
+    #TO DO: WRITE IN LOOP FORM TO ENSURE THE PROBLEM IS ON THIS IMPLEMENTATION: main problem is 'probably' related to incides
+
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
         face = geo.faces[ii]
@@ -78,15 +82,18 @@ A ray-tracing algorithm is used. The sampler for the generation of the rays can 
 #OUTPUT:
 - `OutTriangles::Matrix(6,_)` : it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
 """
-function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
+function areasConcave(dir, rmax, distance, MeshVertices, Ntri)
 
-    dir = -Vdir   #opposite direction to velocity vector
+    # dir --> opposite direction to velocity vector
+    Vdir = -dir
+
     Ntri_preculling = Ntri
+
 
     println("Ntri_preculling=", Ntri_preculling)
     println("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
     #back-face culling
-    triangles = culling(MeshVertices, dir)
+    triangles = culling(MeshVertices, Vdir)
     #Number of triangles
     Ntri = size(triangles, 1)
     println("culling ratio =", Ntri / Ntri_preculling)
@@ -95,8 +102,8 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
 
     #select the sampling method and the density of the sampler [rays/m^2]
     samplerG = GridFilter(50000)
-    samplerF = FibonacciSampler(50000)
-    samplerMC = MonteCarloSampler(50000)
+    samplerF = FibonacciSampler(1e6)
+    samplerMC = MonteCarloSampler(1e6)
 
     O, Norig = generate_ray_origins(samplerF, dir, rmax, distance)        #coordinates of ray origins, number of origins
 
@@ -119,11 +126,6 @@ function areasConcave(Vdir, rmax, distance, MeshVertices, Ntri)
             ]
         end
     end
-
-
-
-
-
 
     #------pre-allocation-------------------
     # OutTriangles = zeros(6, Norig)            #matrix storing the triangle index, area, and the angle between the normal and the velocity direction
