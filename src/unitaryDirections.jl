@@ -20,7 +20,7 @@ function unitaryDirections(velocity, normal)
     #Depending on the numbering direction of the triangle normals will go in one or another direction ------> TO BE CHECKED
     #------------------------------------------------------------
 
-    u_D = velocity |> normalize
+    u_D = -velocity |> normalize
 
     u_L_num = cross(cross(u_D, normal), u_D)
 

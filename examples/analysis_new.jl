@@ -12,20 +12,17 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_Sat_fineMesh.obj")
 geo = load_geometry(mesh_path, SurfaceProps(), false)
 
-
-α = deg2rad(0)
-ϕ = deg2rad(0)
+#---------- EVALUATION OF A SINGLE VIEWPOINT DIRECTION--------------------------------------
+α = deg2rad(90)
+ϕ = deg2rad(180)
 v = Viewpoint(geo, α, ϕ)
-# Aproj, Aref, hit_indices, hit_areas, hit_vertices, hit_normals, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, rti_vec, valid_rti, indices, geometry = analyze_areas(geo, v)
+
+##################################################################################################################
+#---- Non-convex----------------------
 Aproj, Aref, hit_indices, hit_areas, hit_vertices, hit_normals, rti_vec, valid_rti, geometry = analyze_areas(geo, v)
-
-SatelliteGeometryCalculations.tock()
-#Perform sweep
-step = deg2rad(15);
-LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, step)
-
-writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
-
+#---- Convex--------------------------
+# Aproj, Aref = analyze_areas(geo, v)
+##################################################################################################################
 
 # writedlm("hit_vertices.txt", hit_vertices)
 # writedlm("hit_normals.txt", hit_normals)
@@ -42,5 +39,18 @@ writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
 
 println("Aproj = ", Aproj)
 println("Aref = ", Aref)
+
+#-------------------------------------------------------------------------------------------
+
+#---------- SWEEP TO GENERATE LOOK-UP TABLE-------------------------------------------------
+
+#Perform sweep
+# step = deg2rad(15);
+# LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, step)
+
+# writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
+#-------------------------------------------------------------------------------------------
+
+
 
 SatelliteGeometryCalculations.tock()

@@ -21,7 +21,9 @@ struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     surface_props::SurfaceProps{T}
     rmax::Float64
     function HomogeneousGeometry{GT}(faces::Vector{F}, surface_props::SurfaceProps{T}) where {GT,F,T}
-        rmax = 1.1maximum([_max_coord(face) for face in faces])
+        # rmax = 1.1maximum([_max_coord(face) for face in faces])
+        rmax = maximum([_max_coord_euclidean(face) for face in faces])
+
         new{GT,T,F}(faces, surface_props, rmax)
     end
 end
@@ -31,6 +33,7 @@ is_convex(geo::AbstractGeometry{NonConvex}) = false
 
 _max_coord(face::Face) = _max_coord(face.geometry)
 _max_coord(face::TriangleFace) = maximum([maximum(v) for v ∈ face.vertices])
+_max_coord_euclidean(face::TriangleFace) = maximum([norm(v) for v ∈ face.vertices])
 
 get_point_data(point) = point.main.data
 get_point_data(point::Point) = point.data
@@ -134,8 +137,8 @@ end
 
 function is_visible(face::TriangleFace, viewpoint::Viewpoint)
     normal = face.normal
-    #viewpoint direction is the same sense as oncoming ray beam
-    dot(normal, viewpoint.direction) < -1e-4
+    #viewpoint direction is in the same sense as oncoming ray beam
+    dot(normal, viewpoint.direction) < -1e-3
 end
 
 shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)

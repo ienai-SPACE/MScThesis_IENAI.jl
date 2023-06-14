@@ -158,7 +158,7 @@ export OutGeometry
 
 function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
     if is_convex(geometry)
-        return nothing #areas_convex(viewpoint, geometry)
+        return areas_convex(geometry, viewpoint)
     else
         return areas_nonconvex(geometry, viewpoint)
     end
@@ -166,10 +166,10 @@ end
 
 function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #view.direction --> dir (particle beam direction)
-    samplerG = GridFilter(5e5)
+    samplerG = GridFilter(1e5)
     samplerF = FibonacciSampler(1e5)
     samplerMC = MonteCarloSampler(1e5)
-    sampler = samplerF
+    sampler = samplerMC
     # rti_vec, w, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, indices, filtered_geometry = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     rti_vec, w, filtered_geometry = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
@@ -189,6 +189,17 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     # return Aproj, Aref, sorted_hit_idx, face_areas, _face_vertices, _face_normals, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, rti_vec, valid_rti, indices, geometry
     return Aproj, Aref, sorted_hit_idx, face_areas, _face_vertices, _face_normals, rti_vec, valid_rti, geometry
+end
+
+function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+    #back-face culling
+    filtered_geometry = filter_backfaces(geometry, viewpoint)
+    #Number of triangles
+    Ntri = n_faces(filtered_geometry)
+    #Calculate areas
+    Aproj = sum(projection(filtered_geometry, viewpoint, Ntri))
+    Atot = sum([filtered_geometry.faces[idx].area for idx in 1:Ntri])
+    return Aproj, Atot
 end
 
 

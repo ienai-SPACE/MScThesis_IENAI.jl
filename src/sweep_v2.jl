@@ -64,6 +64,8 @@ function sweep_v2(geo, step)
         counter = 0
     end
 
+    println("iter num=", counter + counter2)
+
     return AlphaPhiStorage, AprojLookUp
 
 end
