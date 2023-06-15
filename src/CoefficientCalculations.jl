@@ -150,7 +150,7 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
 
     # print(normals, //)
 
-    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,C, C
+    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
 
     # print(coeffs_vec, //)
     # print(areas, //)
@@ -159,74 +159,43 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
     CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
     # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
-
-
 end
 
-export InteractionGeometry, compute_coefficients
 
-#EXAMPLES
-# julia> map(x->x^2, 1:6)
-# 6-element Vector{Int64}:
-#   1
-#   4
-#   9
-#  16
-#  25
-#  36
-
-# julia> squares = map(1:6) do x
-#            x^2
-#        end
-# 6-element Vector{Int64}:
-#   1
-#   4
-#   9
-#  16
-#  25
-#  36
-
-
-
+#----------------- NEW IMPLEMENTATATION: ----------------------------------------------
 #=
-function CoefficientCalculations(outSurfaceProps, outGasStreamProps, OutLMNTs, Vrel_norm)
+function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, in_info::sInterceptInfo, Vrel_v)
+    element_interaction = ElementInteractionProps(surfprops, in_info.angle)
+    Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, in_info.normal)
+    AerodynamicCoefficients(Cd, Cl, Cp, Ctau)
+end
 
-    #---Pre-allocation--------------------------
-    #m_srf = outSurfaceProps.m_srf
-    #C = outGasStreamProps.C
-    Afacet = OutLMNTs[2, :]
-    #δ = OutTriangles[3, :]
 
-    Cd_facet = @MMatrix zeros(length(Afacet), 1)                                  #drag coefficient at each facet
-    Cl_facet = @MMatrix zeros(length(Afacet), 1)                                  #lift coefficient at each facet
-    Cp_facet = @MMatrix zeros(length(Afacet), 1)                                  #pressure coefficient at each facet
-    Ctau_facet = @MMatrix zeros(length(Afacet), 1)                                #shear coefficient at each facet
-
-    ATMnDYN = stATMnDYN(outGasStreamProps.Ta, Vrel_norm, outGasStreamProps.PO, outGasStreamProps.C)
-    #--------------------------------------------
-
-    A = sum(Afacet)
-
-    for jj ∈ 1:Int(length(Afacet))
-
-        LMNT = ElementInteractionProps(OutLMNTs[3, jj], outSurfaceProps.m_srf, outSurfaceProps.Tw)
-
-        #Cd, Cl, Cp, Ctau = DRIA_GSI(δ[jj], C, m_srf)
-        Cd, Cl, Cp, Ctau = DRIA_GSI(LMNT, ATMnDYN)
-
-        Cd_facet[jj] = Cd * Afacet[jj] / A
-        Cl_facet[jj] = Cl * Afacet[jj] / A
-        Cp_facet[jj] = Cp * Afacet[jj] / A
-        Ctau_facet[jj] = Ctau * Afacet[jj] / A
-
+function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, in_info::SatelliteGeometryCalculations.sInterceptInfo, Vrel_v)
+    aero_coeffs = map(intgeo) do in_info
+        compute_coefficients(surfprops, gasprops, in_info, Vrel_v)
     end
+    areas = map(in_info) do x
+        x.area
+    end
+    angles = map(in_info) do x
+        x.angle
+    end
+    # num = sum(aero_coeffs .* areas)
+    num = aero_coeffs .* areas
 
-    CD = sum(Cd_facet)
-    CL = sum(Cl_facet)
-    CP = sum(Cp_facet)
-    CTAU = sum(Ctau_facet)
+    # print(normals, //)
 
-    return CD, CL, CP, CTAU
+    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
 
+    # print(coeffs_vec, //)
+    # print(areas, //)
+    # print(cos.(angles), //)
+    # print(rad2deg.(angles), //)
+    # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
+    CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
+    # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
 end
 =#
+
+export InteractionGeometry, compute_coefficients

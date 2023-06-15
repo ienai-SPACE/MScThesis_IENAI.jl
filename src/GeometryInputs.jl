@@ -11,7 +11,8 @@ struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
     function Geometry{GT}(faces::Vector{F}) where {GT,F}
-        rmax = 1.1maximum([_max_coord(face) for face in faces])
+        # rmax = 1.1maximum([_max_coord(face) for face in faces])
+        rmax = maximum([_max_coord_euclidean(face) for face in faces])
         new{GT,F}(faces, rmax)
     end
 end
@@ -57,6 +58,12 @@ function Viewpoint(geo::AbstractGeometry, azimuth, elevation)
     rmax = get_rmax(geo)
     distance = 100 * rmax
     Viewpoint(rmax, distance, azimuth, elevation)
+end
+
+function Viewpoint(geo::AbstractGeometry, Vdir)
+    rmax = get_rmax(geo)
+    distance = 100 * rmax
+    Viewpoint(rmax, distance, Vdir)
 end
 
 get_rmax(geo::AbstractGeometry) = geo.rmax
@@ -111,8 +118,11 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
     # MeshVerticesCoords = Float64.([1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1])
 
     if convexFlag == 0
-        rmax = maximum(MeshVerticesCoords[:, :])          #radius of the circular plane from where rays originate
-        distance = rmax * 100.0                                                    #distance at which the circular plane is located (it should be out from the satellite body)
+        maxDistance = euclidean_norm(MeshVerticesCoords)
+        # rmax = maximum(MeshVerticesCoords[:, :])          #radius of the circular plane from where rays originate
+        rmax = maxDistance
+        println("rmax = ", rmax)
+        distance = rmax * 100.0                           #distance at which the circular plane is located (it should be out from the satellite body)
     else
         rmax = 0.0
         distance = 0.0
@@ -128,6 +138,25 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     return MeshVerticesCoords, dir, rmax, distance
 
+end
+
+function euclidean_norm(MeshVerticesCoords::Matrix{Float64})
+    Ntri = lastindex(MeshVerticesCoords[:, 1])
+    maxVertex = [0.0, 0.0, 0.0]
+    _maxVertex = Vector{Float64}(undef, Ntri)
+    for jj ∈ 1:Ntri
+        for ii ∈ 0:2
+            maxVertex[ii+1] = sqrt(MeshVerticesCoords[jj, 1+3*ii]^2 + MeshVerticesCoords[jj, 2+3*ii]^2 + MeshVerticesCoords[jj, 3+3*ii]^2)
+        end
+        _maxVertex[jj] = maximum(maxVertex)
+    end
+    maximum(_maxVertex)
+end
+
+function angle_V_n(dir, normal)
+    Vdir = -dir
+    dp_v = [dot(Vdir, normal[ii]) / (norm(normal[ii]) * norm(Vdir)) for ii in 1:Int(length(normal))]
+    acos.(dp_v)
 end
 
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}

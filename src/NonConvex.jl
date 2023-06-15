@@ -41,8 +41,6 @@ function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ra
         V2 = SV3(triangles[ii, 4], triangles[ii, 5], triangles[ii, 6])
         V3 = SV3(triangles[ii, 7], triangles[ii, 8], triangles[ii, 9])
 
-        #it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
-
         # orig_new = reduce(vcat, orig)
         face = TriangleFace(V1, V2, V3)
 
@@ -55,8 +53,6 @@ end
 
 function ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
     Ntri = n_faces(geo)
-
-    #TO DO: WRITE IN LOOP FORM TO ENSURE THE PROBLEM IS ON THIS IMPLEMENTATION: main problem is 'probably' related to incides
 
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
