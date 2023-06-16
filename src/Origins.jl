@@ -96,7 +96,9 @@ function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
     for (i, p) ∈ enumerate(points)
         points_new[i] = center + p[1] * v + p[2] * w #`center` to displace the plane in the opposite direction to the satellite
     end
-    points_new, Int(length(points))
+    Aray = π * rmax^2 / length(points)
+
+    return points_new, Int(length(points)), Aray
 end
 
 
@@ -136,8 +138,9 @@ function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
     for ii ∈ 1:length(collect(x_coords))
         points_new[ii] = center + x_coords[ii] * v + y_coords[ii] * w #center to displace the plane in the opposite direction to the `dir`
     end
+    Aray = π * rmax^2 / n
 
-    points_new, Int(length(x_coords))
+    return points_new, Int(length(x_coords)), Aray
 end
 
 
@@ -162,12 +165,6 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
     dir = -dir #same sense as velocity vector
 
     n = ceil(gf.ray_density * (4 * rmax^2)) #number of randomly distributed points inside the disk of radius rmax
-    # rng = Xoshiro(1234) # create a new Xoshiro random number generator object
-    # R1 = rand(rng, Int(n))   # generate a random number using the rng object
-    # R2 = rand(rng, Int(n))
-    # R3 = rand(rng, Int(n))
-    # R4 = rand(rng, Int(n))
-
 
     rng = Xoshiro() # create a new Xoshiro random number generator object
     R1 = rand(rng, Int(n))   # generate a random number using the rng object
@@ -188,7 +185,9 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
         points_new[i] = center + p[1] * v + p[2] * w #center to displace the plane in the opposite direction to the `dir`
 
     end
-    points_new, Int(length(points))
+    Aray = π * rmax^2 / n
+
+    points_new, Int(length(points)), Aray
 end
 
 

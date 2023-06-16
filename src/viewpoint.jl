@@ -14,7 +14,8 @@ function Viewpoint(rmax::T, distance::T, azimuth::T, elevation::T) where {T}
     Viewpoint{T}(rmax, distance, dir)
 end
 
-function Viewpoint(rmax::T, distance::T, Vdir::Vector{T}) where {T}
+function Viewpoint(rmax::T, distance::T, Vrel::Vector{T}) where {T}
+    Vdir = normalize(Vrel)
     dir = SV3(-Vdir)
     Viewpoint{T}(rmax, distance, dir)
 end

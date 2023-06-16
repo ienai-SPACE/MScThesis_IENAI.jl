@@ -38,6 +38,7 @@ struct InteractionGeometry{T}
     angle::T
 end
 
+
 """
     AerodynamicCoefficients{T}
 
@@ -160,42 +161,5 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
     # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
 end
-
-
-#----------------- NEW IMPLEMENTATATION: ----------------------------------------------
-#=
-function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, in_info::sInterceptInfo, Vrel_v)
-    element_interaction = ElementInteractionProps(surfprops, in_info.angle)
-    Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, in_info.normal)
-    AerodynamicCoefficients(Cd, Cl, Cp, Ctau)
-end
-
-
-function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, in_info::SatelliteGeometryCalculations.sInterceptInfo, Vrel_v)
-    aero_coeffs = map(intgeo) do in_info
-        compute_coefficients(surfprops, gasprops, in_info, Vrel_v)
-    end
-    areas = map(in_info) do x
-        x.area
-    end
-    angles = map(in_info) do x
-        x.angle
-    end
-    # num = sum(aero_coeffs .* areas)
-    num = aero_coeffs .* areas
-
-    # print(normals, //)
-
-    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
-
-    # print(coeffs_vec, //)
-    # print(areas, //)
-    # print(cos.(angles), //)
-    # print(rad2deg.(angles), //)
-    # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
-    CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
-    # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
-end
-=#
 
 export InteractionGeometry, compute_coefficients

@@ -22,12 +22,12 @@ end
 
 _eltype(::OutGeometry{T}) where {T} = T
 
-struct sInterceptInfo{T}
-    area::T
-    angle::T
-    normal::SVector{3,T}
-    Nrays::T
-end
+# struct sInterceptInfo{T}
+#     area::T
+#     angle::T
+#     normal::SVector{3,T}
+#     Nrays::T
+# end
 """ 
     areas(rmax, distance, dir, triangles, convexFlag)
 
@@ -219,25 +219,28 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
-    rti_vec, w, filtered_geometry = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
+    rti_vec, w, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
     Aproj = w * length(valid_rti)
 
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
-    Aref = sum(face_area(filtered_geometry, idx) for idx in hit_idx)
+    # Aref = sum(face_area(filtered_geometry, idx) for idx in hit_idx)
 
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
     face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
-    _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
+    # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
+    _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
+    Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
+
+    # intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:lastindex(hit_idx))
+    # intercept_info = map(ii -> sInterceptInfo(_face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:lastindex(hit_idx))
+    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
 
-    intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:lastindex(hit_idx))
-
-
-    return Aproj, Aref, intercept_info
+    return Aproj, Aref, intercept_info, _face_normals
 end
 
 function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
@@ -253,8 +256,10 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_normals = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
     ray_per_index = zeros(Ntri)
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
-    intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:Ntri)
-    return Aproj, Atot, intercept_info
+    # intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:Ntri)
+    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
+
+    return Aproj, Atot, intercept_info, face_normals
 end
 
 
@@ -282,17 +287,17 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     println("culling ratio =", Ntri / Ntri_preculling)
     # println("max in MeshVertices=", new_viewpoint.rmax)
     # rt_vec, w, indices = _raytrace(filtered_geometry, new_viewpoint, sampler)
-    rt_vec, w = _raytrace(filtered_geometry, new_viewpoint, sampler)
+    rt_vec, w, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
     # return rt_vec, w, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, indices, filtered_geometry
 
-    return rt_vec, w, filtered_geometry
+    return rt_vec, w, filtered_geometry, Aray
 end
 
 function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     dir = viewpoint.direction
     rmax = viewpoint.rmax
-    O, Norig = generate_ray_origins(sampler, dir, rmax, viewpoint.distance)        #coordinates of ray origins, number of origins
+    O, Norig, Aray = generate_ray_origins(sampler, dir, rmax, viewpoint.distance)        #coordinates of ray origins, number of origins
 
     Ntri = n_faces(geometry)
     println("Ntri in _raytrace=", Ntri)
@@ -324,7 +329,7 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     # return rti_vec, (pi * rmax^2) / (Norig), indices
 
-    return rti_vec, (pi * rmax^2) / (Norig)
+    return rti_vec, (pi * rmax^2) / (Norig), Aray
 end
 
 export analyze_areas

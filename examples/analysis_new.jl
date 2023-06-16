@@ -19,13 +19,13 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-# α = deg2rad(0)
+# α = deg2rad(90)
 # ϕ = deg2rad(0)
 # v = Viewpoint(geo, α, ϕ)
 v = Viewpoint(geo, Vrel_v)
 ##################################################################################################################
 #---- Non-convex----------------------
-Aproj, Aref, intercept_info = analyze_areas(geo, v)
+Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 #---- Convex--------------------------
 # Aproj, Aref = analyze_areas(geo, v)
 ##################################################################################################################
@@ -43,12 +43,12 @@ Aproj, Aref, intercept_info = analyze_areas(geo, v)
 # writedlm("rti_vec_t.txt", rti_vec.t)
 
 
-# println("Aproj = ", Aproj)
-# println("Aref = ", Aref)
+println("Aproj = ", Aproj)
+println("Aref = ", Aref)
 
 # AERODYNAMIC COEFFICIENTS
 
-# coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v)
+coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
 #-------------------------------------------------------------------------------------------
 
 #---------- SWEEP TO GENERATE LOOK-UP TABLE-------------------------------------------------
