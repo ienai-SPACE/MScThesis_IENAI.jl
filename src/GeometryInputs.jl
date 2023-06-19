@@ -174,3 +174,14 @@ shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal
+
+struct Grid{T}
+    alpha::Vector{T}
+    phi::Vector{T}
+
+    function Grid(step::T) where {T<:Real}
+        α = collect(-π:step:π)
+        ϕ = collect(-π/2:step:π/2)
+        return new{T}(α, ϕ)
+    end
+end

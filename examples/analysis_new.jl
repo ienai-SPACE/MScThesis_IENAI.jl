@@ -1,4 +1,4 @@
-using SatelliteGeometryCalculations, DelimitedFiles
+using SatelliteGeometryCalculations, DelimitedFiles, BasicInterpolators
 
 SatelliteGeometryCalculations.tick()
 
@@ -22,10 +22,10 @@ outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 # α = deg2rad(90)
 # ϕ = deg2rad(0)
 # v = Viewpoint(geo, α, ϕ)
-v = Viewpoint(geo, Vrel_v)
+# v = Viewpoint(geo, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+# Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
 
 
@@ -42,25 +42,28 @@ Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 # writedlm("rti_vec_t.txt", rti_vec.t)
 
 
-println("Aproj = ", Aproj)
-println("Aref = ", Aref)
+# println("Aproj = ", Aproj)
+# println("Aref = ", Aref)
 
 #---- Aerodynamic coefficients ---------------------------------------------------------------
 
-coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
+# coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
 #---------------------------------------------------------------------------------------------
 
 #---------- # SWEEP TO GENERATE LOOK-UP TABLE # ----------------------------------------------
 
-# step = deg2rad(15);
-# LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, step)
+step = deg2rad(45);
+grid = SatelliteGeometryCalculations.Grid(step)
+LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, grid)
 
-# writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
-#-------------------------------------------------------------------------------------------
+writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
+
+_look_up_table = readdlm("AprojLookUpTable_v2.txt")
 
 
-
+##---------- Interpolation --------------------------------------------------------------------
+P = BicubicInterpolator(rad2deg.(grid.phi), rad2deg.(grid.alpha), _look_up_table, StrictBoundaries())
+interpolated_Aproj = P(20, 10)  #[deg] P(phi, alpha)
 
 SatelliteGeometryCalculations.tock()
-
 

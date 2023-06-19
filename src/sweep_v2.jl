@@ -36,11 +36,11 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 """
 
 
-function sweep_v2(geo, step)
+function sweep_v2(geo, grid)
 
 
-    α = -π:step:π
-    ϕ = -π/2:step:π/2
+    α = grid.alpha
+    ϕ = grid.phi
 
     #pre-allocation of the vector to be populated by structs
     #T = _eltype(SweepStorage{T})
@@ -49,6 +49,7 @@ function sweep_v2(geo, step)
 
     counter = 0
     counter2 = 0
+    counter3 = 0
 
     for aa ∈ α
         counter2 += 1
@@ -60,11 +61,12 @@ function sweep_v2(geo, step)
             AlphaPhiStorage[counter, counter2] = storageValues
             AprojLookUp[counter, counter2] = Aproj
 
+            counter3 += 1
+            println("iter num=", counter3)
         end
         counter = 0
     end
 
-    println("iter num=", counter + counter2)
 
     return AlphaPhiStorage, AprojLookUp
 
