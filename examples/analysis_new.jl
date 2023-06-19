@@ -9,13 +9,13 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 # mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "sphereMesh4.obj")
 # load_geometry(mesh_path, SurfaceProps(), true)
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_Sat_fineMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
 geo = load_geometry(mesh_path, SurfaceProps(), false)
 
-#---------- EVALUATION OF A SINGLE VIEWPOINT DIRECTION--------------------------------------
+#---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
-#----Orbit and date inputs-------------------------------------------------------------------------------------------------
+#----Orbit and date inputs------------------------------------------------------------------
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
@@ -23,12 +23,11 @@ outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 # ϕ = deg2rad(0)
 # v = Viewpoint(geo, α, ϕ)
 v = Viewpoint(geo, Vrel_v)
-##################################################################################################################
-#---- Non-convex----------------------
+
+#---- Area calculations --------------------------------------------------------------------
 Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
-#---- Convex--------------------------
-# Aproj, Aref = analyze_areas(geo, v)
-##################################################################################################################
+
+
 
 # writedlm("hit_vertices.txt", hit_vertices)
 # writedlm("hit_normals.txt", hit_normals)
@@ -46,12 +45,12 @@ Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 println("Aproj = ", Aproj)
 println("Aref = ", Aref)
 
-# AERODYNAMIC COEFFICIENTS
+#---- Aerodynamic coefficients ---------------------------------------------------------------
 
 coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
-#-------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
 
-#---------- SWEEP TO GENERATE LOOK-UP TABLE-------------------------------------------------
+#---------- # SWEEP TO GENERATE LOOK-UP TABLE # ----------------------------------------------
 
 # step = deg2rad(15);
 # LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, step)

@@ -225,7 +225,6 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
-    # Aref = sum(face_area(filtered_geometry, idx) for idx in hit_idx)
 
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
     face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
@@ -235,8 +234,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
 
-    # intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:lastindex(hit_idx))
-    # intercept_info = map(ii -> sInterceptInfo(_face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:lastindex(hit_idx))
+
     intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
 
@@ -252,16 +250,30 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     Aproj = sum(projection(filtered_geometry, viewpoint, Ntri))
     Atot = sum([filtered_geometry.faces[idx].area for idx in 1:Ntri])
 
-    face_areas = [face_area(filtered_geometry, idx) for idx in 1:Ntri]
+    _face_areas = [face_area(filtered_geometry, idx) for idx in 1:Ntri]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
-    ray_per_index = zeros(Ntri)
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
-    # intercept_info = map(ii -> sInterceptInfo(face_areas[ii], _face_angles[ii], _face_normals[ii], Float64(ray_per_index[ii])), 1:Ntri)
-    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
-    return Aproj, Atot, intercept_info, face_normals
+    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:Ntri)
+
+    return Aproj, Atot, intercept_info, _face_normals
 end
 
+"""
+    raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
+
+Perform back-face culling and ray-tracing
+
+#INPUTS
+- `geometry::AbstractGeometry`      : storage of information about the 3D CAD model
+- `viewpoint::Viewpoint`
+- `sampler`                         : identification of Fibonacci, Monte Carlo or Grid Filter sampling methods
+#OUTPUTS
+- `rt_vec`                          : distance from origin of local ref.frame to the perpendicular source plane
+- `w`                               : weight = (pi * rmax^2) / (number of rays)
+- `filtered_geometry`               : only faces that have been intercepted by the rays
+- `Aray`                            : area of each ray [m^2]
+"""
 
 function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     Ntri = n_faces(geometry)
@@ -276,7 +288,6 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
-    # println("length filtered geo", length(filtered_geometry.faces))
 
     #Number of triangles
     Ntri = n_faces(filtered_geometry)
@@ -285,11 +296,8 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
     println("culling ratio =", Ntri / Ntri_preculling)
-    # println("max in MeshVertices=", new_viewpoint.rmax)
-    # rt_vec, w, indices = _raytrace(filtered_geometry, new_viewpoint, sampler)
-    rt_vec, w, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
-    # return rt_vec, w, _face_vertices_preRT, _face_normals_preRT, _face_vertices_preCulling, _face_normals_preCulling, indices, filtered_geometry
+    rt_vec, w, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
     return rt_vec, w, filtered_geometry, Aray
 end
@@ -310,24 +318,7 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
         rti = ray_mesh_intersection(geometry, ray)
     end)
 
-
     rti_vec = 1:Norig |> m |> tcollect
-
-    #------------------------------------------------
-    # indices = zeros(Norig * Ntri)
-    # counter = 0
-    # for jj ∈ 1:Norig       #iterate over the set of ray origins
-    #     orig = O[jj]
-    #     ray = Ray(SV3(orig), dir)
-    #     rti = ray_mesh_intersection(geometry, ray)
-    #     if mode(rti) ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
-    #         ii = rti.face_index
-    #         counter += 1
-    #         indices[counter] = ii
-    #     end
-    # end
-
-    # return rti_vec, (pi * rmax^2) / (Norig), indices
 
     return rti_vec, (pi * rmax^2) / (Norig), Aray
 end
