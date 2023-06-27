@@ -1,6 +1,6 @@
 module SatelliteGeometryCalculations
 
-using LinearAlgebra, StaticArrays, SatelliteToolbox, TickTock, Accessors, Transducers
+using LinearAlgebra, StaticArrays, SatelliteToolbox, TickTock, Accessors, Transducers, BasicInterpolators
 using GeometryBasics: Point
 
 SV3{T} = SVector{3,T}

@@ -41,8 +41,12 @@ get_point_data(point::Point) = point.data
 
 n_faces(geo::AbstractGeometry) = length(geo.faces)
 
+unit_dict = Dict("m" => 1, "mm" => 1e-3)
 
-function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, scale_factor=1e-3)
+function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units::String)
+
+    scale_factor = unit_dict[units]
+
     mesh = load(path)
     faces = TriangleFace{Float64}[]
     for triangle in mesh
@@ -184,4 +188,11 @@ struct Grid{T}
         ϕ = collect(-π/2:step:π/2)
         return new{T}(α, ϕ)
     end
+end
+
+function interpolator(_look_up_table::Matrix, aa_in, pp_in)
+    _phi = _look_up_table[:, 1] |> length |> ss -> (180 / (ss - 1)) |> (step -> collect(-90:step:90))
+    _alpha = _look_up_table[1, :] |> length |> ss -> (360 / (ss - 1)) |> (step -> collect(-180:step:180))
+    P = BicubicInterpolator(_phi, _alpha, _look_up_table, StrictBoundaries())
+    return P(pp_in, aa_in)  #[deg] P(phi, alpha)
 end

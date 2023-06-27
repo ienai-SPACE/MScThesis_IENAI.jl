@@ -36,16 +36,17 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 """
 
 
-function sweep_v2(geo, grid)
-
-
+function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
     α = grid.alpha
     ϕ = grid.phi
 
     #pre-allocation of the vector to be populated by structs
-    #T = _eltype(SweepStorage{T})
     AlphaPhiStorage = Matrix(undef, length(ϕ), length(α))
     AprojLookUp = Matrix(undef, length(ϕ), length(α))
+    CdLookUp = Matrix(undef, length(ϕ), length(α))
+    ClLookUp = Matrix(undef, length(ϕ), length(α))
+    CpLookUp = Matrix(undef, length(ϕ), length(α))
+    CtauLookUp = Matrix(undef, length(ϕ), length(α))
 
     counter = 0
     counter2 = 0
@@ -55,11 +56,16 @@ function sweep_v2(geo, grid)
         counter2 += 1
         for pp ∈ ϕ
             v = Viewpoint(geo, aa, pp)
-            Aproj, Aref = analyze_areas(geo, v)
+            Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+            coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
             counter += 1
             storageValues = SweepStorage_v2(rad2deg(aa), rad2deg(pp), Aproj, Aref)
             AlphaPhiStorage[counter, counter2] = storageValues
             AprojLookUp[counter, counter2] = Aproj
+            CdLookUp[counter, counter2] = coeffs[1]
+            ClLookUp[counter, counter2] = coeffs[3]
+            CpLookUp[counter, counter2] = coeffs[5]
+            CtauLookUp[counter, counter2] = coeffs[7]
 
             counter3 += 1
             println("iter num=", counter3)
@@ -68,7 +74,8 @@ function sweep_v2(geo, grid)
     end
 
 
-    return AlphaPhiStorage, AprojLookUp
+    # return AlphaPhiStorage, AprojLookUp
+    return AlphaPhiStorage, AprojLookUp, CdLookUp, ClLookUp, CpLookUp, CtauLookUp
 
 end
 

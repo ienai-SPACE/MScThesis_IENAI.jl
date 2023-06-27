@@ -8,4 +8,4 @@ using FilePathsBase: /
 # load_geometry(mesh_path, SurfaceProps(), true)
 
 mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
-load_geometry(mesh_path, SurfaceProps(), false)
+load_geometry(mesh_path, SurfaceProps(), false, "mm")

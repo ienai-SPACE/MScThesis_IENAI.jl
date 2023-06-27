@@ -1,4 +1,4 @@
-using SatelliteGeometryCalculations, DelimitedFiles, BasicInterpolators
+using SatelliteGeometryCalculations, DelimitedFiles
 
 SatelliteGeometryCalculations.tick()
 
@@ -9,9 +9,11 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 # mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "sphereMesh4.obj")
 # load_geometry(mesh_path, SurfaceProps(), true)
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
-geo = load_geometry(mesh_path, SurfaceProps(), false)
+mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_Sat_fineMesh.obj")
+geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
+VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
+writedlm("GRACE_VERTICES.txt", VERTICES)
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
@@ -19,13 +21,13 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-# α = deg2rad(90)
-# ϕ = deg2rad(0)
-# v = Viewpoint(geo, α, ϕ)
+α = deg2rad(-110)
+ϕ = deg2rad(-50)
+v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-# Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
 
 
@@ -42,28 +44,13 @@ outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 # writedlm("rti_vec_t.txt", rti_vec.t)
 
 
-# println("Aproj = ", Aproj)
-# println("Aref = ", Aref)
+println("Aproj = ", Aproj)
+println("Aref = ", Aref)
 
 #---- Aerodynamic coefficients ---------------------------------------------------------------
 
-# coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
+coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
 #---------------------------------------------------------------------------------------------
-
-#---------- # SWEEP TO GENERATE LOOK-UP TABLE # ----------------------------------------------
-
-step = deg2rad(45);
-grid = SatelliteGeometryCalculations.Grid(step)
-LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, grid)
-
-writedlm("AprojLookUpTable_v2.txt", AprojLookUpTable)
-
-_look_up_table = readdlm("AprojLookUpTable_v2.txt")
-
-
-##---------- Interpolation --------------------------------------------------------------------
-P = BicubicInterpolator(rad2deg.(grid.phi), rad2deg.(grid.alpha), _look_up_table, StrictBoundaries())
-interpolated_Aproj = P(20, 10)  #[deg] P(phi, alpha)
 
 SatelliteGeometryCalculations.tock()
 
