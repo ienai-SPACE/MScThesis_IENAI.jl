@@ -1,3 +1,15 @@
+"""
+    culling(MeshVertices, Vdir)
+
+Filter out all non-forward facing faces_hit_idx_nonunique
+
+#INPUT
+- `MeshVertices::Matrix`   : coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3;...]
+- `Vdir::Vector`           : vector with the direction to be analyzed
+#OUTPUT
+- `triangles::Transpose{Float64,Matrix{Float64}}`       :triangles that pass the culling filter
+"""
+
 function culling(MeshVertices, Vdir)
     #Number of triangles
     Ntri = size(MeshVertices, 1)
@@ -34,7 +46,7 @@ function culling(MeshVertices, Vdir)
             end
         end
     end
-
+    println(typeof(transpose(triangles)))
 
     return transpose(triangles)
 

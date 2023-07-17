@@ -16,15 +16,7 @@ struct ElementInteractionProps{T}
     Tw::T
 end
 
-#check potential mistake here: ElementInteractionProps(angle, surfprops::SurfaceProps) 
 ElementInteractionProps(surfprops::SurfaceProps, angle) = ElementInteractionProps(angle, surfprops.m_srf, surfprops.Tw)
-
-# mutable struct stATMnDYN{T}
-#     Ta::T
-#     Vrel::T
-#     PO::T
-#     C::SVector{6,T}
-# end
 
 """
     InteractionGeometry{T}
@@ -53,6 +45,20 @@ struct AerodynamicCoefficients{T}
     Cp::T
     Ctau::T
 end
+
+"""
+    CoefficientsVectorized{T}
+
+- `CD_norm::T`
+- `CD_dir::Vector{T}`
+- `CL_norm::T`
+- `CL_dir::Vector{T}`
+- `CP_norm::T`
+- `CP_dir::Vector{T}`
+- `CTau_norm::T`
+- `CTau_dir::Vector{T}`
+
+"""
 
 struct CoefficientsVectorized{T}
     CD_norm::T

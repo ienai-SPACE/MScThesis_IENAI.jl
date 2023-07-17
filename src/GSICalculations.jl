@@ -3,7 +3,7 @@ using StaticArrays
 """
     DRIA_GSI(element_interaction, gasprops, Vrel)
 
-Reference: [DOORNBOS 2012, Thermospheric Density and Wind Determination from Satellite Dynamics] + modification based on atomic oxygen abosption=#
+Reference: [DOORNBOS 2012, Thermospheric Density and Wind Determination from Satellite Dynamics] + modification based on atomic oxygen aborption
 
 #INPUTS:
 - `element_interaction::ElementInteractionProps{T}`       : struct with `δ`, `SRF`, and `Tw` as fields
@@ -96,4 +96,72 @@ function DRIA_GSI(element_interaction, gasprops, Vrel, normals)
 
     return Cd_facet, Cl_facet, Cp_facet, Ctau_facet
 
+end
+
+"""
+    DRIA_sphere(element_interaction, gasprops, Vrel)
+
+Reference: P. M. Mehta, A. Walker, C. Mclaughlin, and J. Koller, “Comparing physical drag coefficients computed using different gas surface interaction models,” Journal of spacecraft and rockets, vol. 51, no. 3, 2014.
+
+#INPUTS:
+- `element_interaction::ElementInteractionProps{T}`       : struct with `δ`, `SRF`, and `Tw` as fields
+- `gasprops::GasStreamProperties`                         : mass of the atoms of the surface particles
+- `Vrel:Vector`    
+
+#OUTPUTS:
+-`CD_sph`           : sphere drag coefficient
+- `cd_j::MMatrix`   : drag coefficient contribution for every gas species and both clean and contaminated surface (without mass or oxygen partial pressure scaling)
+- `sumM`            : sum of gas species molecular weights
+"""
+
+function DRIA_sphere(SurfaceProps, gasprops, Vrel)
+
+    C = gasprops.C
+    m_srf = SurfaceProps.m_srf
+    P0 = gasprops.PO
+    Tw = SurfaceProps.Tw
+    Ta = gasprops.Ta
+    Vrel_norm = norm(Vrel)
+
+    K = 1.44e6                                  #Best-fit Langmuir adsorbate constant for DRIA GSI model
+    θ = K * P0 / (1 + K * P0)                   #Fraction of the surface contaminated by atomic oxygen
+    println("theta = ", θ)
+
+    #-------Pre-allocation---------------------------------------------
+    mgas = @SVector [O.m, H.m, N.m, O2.m, N2.m, He.m]                    #[g/mol] atomic mass of gas constituents
+    cd_j = @MMatrix zeros(length(mgas), 2)                               #drag coefficient at each facet
+    s = @MMatrix zeros(length(mgas), 2)                                  #thermal speed: two values per species, i.e. contaminated and clean surface
+    #------------------------------------------------------------------
+
+    for ii ∈ 1:2
+        for jj ∈ 1:6
+
+            μ_srf = mgas[jj] / m_srf                #ratio between the mass of the atoms of the incoming gas with the mass of the surface particles
+            Ks = 3.6                                #substrate coefficient (6 < s < 11 the use of Ks = 3.6 is appropriate)
+            α_c = Ks * μ_srf / (1 + μ_srf)^2        #accomodation coefficient for clean surface
+
+            α_vec = [α_c, 1]
+
+            α = α_vec[ii]
+
+            println("alpha = ", α)
+
+            s[jj, ii] = Vrel_norm / sqrt(2 * (kb / (mgas[jj] / NA / 1000) * Ta))    #thermal speed
+
+            AA = (4 * s[jj, ii]^4 + 4 * s[jj, ii]^2 - 1) * erf.(s[jj, ii]) / (2 * s[jj, ii]^4)
+            BB = (2 * s[jj, ii]^2 + 1) * exp(-s[jj, ii]^2) / (sqrt(π) * s[jj, ii]^3)
+            Tki = (mgas[jj] / NA / 1000) * Vrel_norm^2 / (3 * kb) # = (2 / 3) * s[jj, ii]^2 * Ta
+            Tkr = Tki * (1 - α) + α * Tw
+            CC = sqrt(Tkr / Ta) * (2 * sqrt(π)) / (3 * s[jj, ii])
+            cd_j[jj, ii] = (AA + BB + CC) .* C[jj] * mgas[jj]
+
+        end
+    end
+
+
+    Cd_weighted = sum(cd_j, dims=1) / sum(C .* mgas)         # mass weighted
+    Cd_weighted_clean = Cd_weighted[1, 1]                    # clean (α ~= 1)
+    Cd_weighted_cont = Cd_weighted[1, 2]                     # contaminated (α = 1)
+
+    return (Cd_weighted_clean * (1 - θ) + Cd_weighted_cont * θ), cd_j, sum(C .* mgas)
 end

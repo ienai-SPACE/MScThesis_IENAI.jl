@@ -9,11 +9,11 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 # mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "sphereMesh4.obj")
 # load_geometry(mesh_path, SurfaceProps(), true)
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_Sat_fineMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
 geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
-VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
-writedlm("GRACE_VERTICES.txt", VERTICES)
+# VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
+# writedlm("GRACE_VERTICES.txt", VERTICES)
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
@@ -21,10 +21,13 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-α = deg2rad(-110)
-ϕ = deg2rad(-50)
-v = Viewpoint(geo, α, ϕ)
-# v = Viewpoint(geo, Vrel_v)
+# α = deg2rad(-110)
+# ϕ = deg2rad(-50)
+# v = Viewpoint(geo, α, ϕ)
+v = Viewpoint(geo, Vrel_v)
+
+#DRIA - Sphere
+# CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
 Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
@@ -51,6 +54,11 @@ println("Aref = ", Aref)
 
 coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
 #---------------------------------------------------------------------------------------------
+println(coeffs)
 
 SatelliteGeometryCalculations.tock()
+
+
+# println("CD_inhouse = ", coeffs[1])
+# println("CD_DRIA = ", CD_sph)
 

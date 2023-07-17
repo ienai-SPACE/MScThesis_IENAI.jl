@@ -18,7 +18,7 @@ function OrbitandDate()
     #r_a = a * (1 + e);        #[km]
     h = a - R_E          #[km]   mean altitude of the orbit
 
-    Vatm = 0.1        #[km/s] (h = 200-300 km) velocity of rotation of the atmosphere
+    Vatm = 0.1        #[km/s] (h = 200-300 km) velocity of rotation of the atmosphere --> WEST to EAST
     Vsc = sqrt(2 * mu / (h + R_E) - mu / (a))          #[km/s] velocity of the spacecraft
     Vrel = (Vsc - Vatm) * 1000  #[m/s] relative velocity between spacecraft and atmosphere
 

@@ -7,6 +7,13 @@ using FilePathsBase: /
 
 abstract type AbstractGeometry{GT} end
 
+"""
+    Geometry{GT,F<:Face} <: AbstractGeometry{GT}
+
+- `faces::Vector{F}`
+- `rmax::Float64` 
+"""
+
 struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
@@ -16,6 +23,14 @@ struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
         new{GT,F}(faces, rmax)
     end
 end
+
+"""
+    HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
+
+- `faces::Vector{F}`
+- `surface_props::SurfaceProps{T}`
+- `rmax::Float64`
+"""
 
 struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     faces::Vector{F}
@@ -43,6 +58,18 @@ n_faces(geo::AbstractGeometry) = length(geo.faces)
 
 unit_dict = Dict("m" => 1, "mm" => 1e-3)
 
+"""
+    load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units::String)
+
+#INPUTS
+- `path
+- `surface_props::SurfaceProps`
+- `is_convex::Bool`
+- `units::String`
+#OUTPUTS
+- `HomogeneousGeometry{gtype}(faces, surface_props)`
+"""
+
 function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units::String)
 
     scale_factor = unit_dict[units]
@@ -58,12 +85,32 @@ function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units
     HomogeneousGeometry{gtype}(faces, surface_props)
 end
 
+"""
+    Viewpoint(geo::AbstractGeometry, azimuth, elevation)
+
+#INPUTS
+- `geo::AbstractGeometry`
+- `azimuth`
+- `elevation`
+#OUTPUTS
+- `Viewpoint(rmax, distance, azimuth, elevation)`
+"""
+
 function Viewpoint(geo::AbstractGeometry, azimuth, elevation)
     rmax = get_rmax(geo)
     distance = 100 * rmax
     Viewpoint(rmax, distance, azimuth, elevation)
 end
 
+"""
+    Viewpoint(geo::AbstractGeometry, , Vdir)
+
+#INPUTS
+- `geo::AbstractGeometry`
+- `Vdir:: Vector`
+#OUTPUTS
+- `Viewpoint(rmax, distance, azimuth, elevation)`
+"""
 function Viewpoint(geo::AbstractGeometry, Vdir)
     rmax = get_rmax(geo)
     distance = 100 * rmax
@@ -144,6 +191,17 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
 end
 
+"""
+    euclidean_norm(MeshVerticesCoords::Matrix{Float64})
+
+Calculate the euclidean norm from the datum of the body reference frame to the furthest point in the object
+
+#INPUT
+- `MeshVerticesCoords::Matrix{Float64}`
+#OUTPUT
+- 'rmax = maximum(_maxVertex)'
+"""
+
 function euclidean_norm(MeshVerticesCoords::Matrix{Float64})
     Ntri = lastindex(MeshVerticesCoords[:, 1])
     maxVertex = [0.0, 0.0, 0.0]
@@ -157,17 +215,50 @@ function euclidean_norm(MeshVerticesCoords::Matrix{Float64})
     maximum(_maxVertex)
 end
 
+"""
+    angle_V_n(dir, normal)
+
+Calculate the angle between two vectors (the velocity direction vector and the normal vector of the surface)
+
+#INPUT
+- `dir`
+- `normal`
+#OUTPUT
+- `gamma = acos.(dp_v) `
+"""
 function angle_V_n(dir, normal)
     Vdir = -dir
     dp_v = [dot(Vdir, normal[ii]) / (norm(normal[ii]) * norm(Vdir)) for ii in 1:Int(length(normal))]
     acos.(dp_v)
 end
 
+"""
+    filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
+
+Filter out all the non-forward facing face_vertices
+
+#INPUT
+- `geometry::HomogeneousGeometry{GT}`
+- `viewpoint::Viewpoint`
+#OUTPUTS
+- `HomogeneousGeometry{GT}(new_faces, geometry.surface_props)`
+"""
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
     HomogeneousGeometry{GT}(new_faces, geometry.surface_props)
 end
 
+"""
+    is_visible(face::TriangleFace, viewpoint::Viewpoint)
+
+Forward-facing check
+
+#INPUT
+- `face::TriangleFace`
+- `viewpoint::Viewpoint`
+#OUTPUT
+- ::Bool
+"""
 function is_visible(face::TriangleFace, viewpoint::Viewpoint)
     normal = face.normal
     #viewpoint direction is in the same sense as oncoming ray beam
@@ -179,17 +270,35 @@ face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal
 
+"""
+    Grid{T}
+    
+- `alpha::Vector{T}`
+- `phi::Vector{T}`
+"""
 struct Grid{T}
     alpha::Vector{T}
     phi::Vector{T}
 
     function Grid(step::T) where {T<:Real}
         α = collect(-π:step:π)
-        ϕ = collect(-π/2:step:π/2)
+        ϕ = collect(-π/2:step:π/2)  #APPLY SYMMETRY IF POSSIBLE
         return new{T}(α, ϕ)
     end
 end
 
+"""
+    interpolator(_look_up_table::Matrix, aa_in, pp_in)
+
+Interpolator to access the look-up table
+
+#INPUT
+- `_look_up_table::Matrix`
+- `aa_in`               : alpha [deg] value to be accessed in the look-up table
+- `pp_in`               : phi [deg] value to be accessed in the look-up table
+#OUTPUT
+- `P(pp_in, aa_in)`     : Interpolated value of the look-up table
+"""
 function interpolator(_look_up_table::Matrix, aa_in, pp_in)
     _phi = _look_up_table[:, 1] |> length |> ss -> (180 / (ss - 1)) |> (step -> collect(-90:step:90))
     _alpha = _look_up_table[1, :] |> length |> ss -> (360 / (ss - 1)) |> (step -> collect(-180:step:180))

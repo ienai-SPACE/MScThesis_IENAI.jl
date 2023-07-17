@@ -47,6 +47,7 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
     ClLookUp = Matrix(undef, length(ϕ), length(α))
     CpLookUp = Matrix(undef, length(ϕ), length(α))
     CtauLookUp = Matrix(undef, length(ϕ), length(α))
+    culling = Matrix(undef, length(ϕ), length(α))
 
     counter = 0
     counter2 = 0
@@ -56,7 +57,7 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
         counter2 += 1
         for pp ∈ ϕ
             v = Viewpoint(geo, aa, pp)
-            Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+            Aproj, Aref, intercept_info, normals, culling_ratio = analyze_areas(geo, v)
             coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
             counter += 1
             storageValues = SweepStorage_v2(rad2deg(aa), rad2deg(pp), Aproj, Aref)
@@ -66,6 +67,7 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
             ClLookUp[counter, counter2] = coeffs[3]
             CpLookUp[counter, counter2] = coeffs[5]
             CtauLookUp[counter, counter2] = coeffs[7]
+            culling[counter, counter2] = culling_ratio
 
             counter3 += 1
             println("iter num=", counter3)
@@ -75,7 +77,7 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
 
     # return AlphaPhiStorage, AprojLookUp
-    return AlphaPhiStorage, AprojLookUp, CdLookUp, ClLookUp, CpLookUp, CtauLookUp
+    return AlphaPhiStorage, AprojLookUp, CdLookUp, ClLookUp, CpLookUp, CtauLookUp, culling
 
 end
 

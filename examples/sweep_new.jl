@@ -24,13 +24,16 @@ if sweepFlag == 1
     step = deg2rad(15)
     grid = SatelliteGeometryCalculations.Grid(step)
     # LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, grid)
-    LookUpTable, AprojLookUpTable, CdLookUp, ClLookUp, CpLookUp, CtauLookUp = SatelliteGeometryCalculations.sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
+    LookUpTable, AprojLookUpTable, CdLookUp, ClLookUp, CpLookUp, CtauLookUp, culling = SatelliteGeometryCalculations.sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
     writedlm("GRACE_AprojLookUpTable.txt", AprojLookUpTable)
     writedlm("GRACE_CDlookup.txt", CdLookUp)
     writedlm("GRACE_CLlookup.txt", ClLookUp)
     writedlm("GRACE_CPlookup.txt", CpLookUp)
     writedlm("GRACE_CTAUlookup.txt", CtauLookUp)
+    writedlm("GRACE_cullingRatio", culling)
+    # writedlm("TSAT_AprojLookUpTable.txt", AprojLookUpTable)
+
 end
 
 ##---------- Interpolation --------------------------------------------------------------------

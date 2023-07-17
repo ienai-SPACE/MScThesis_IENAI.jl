@@ -1,26 +1,3 @@
-
-# using StaticArrays, LinearAlgebra, GeometryBasics
-
-# SV3{T} = SVector{3,T}
-# include("Origins.jl")
-# include("MTalgorithm.jl")
-
-# include("GeometryInputs.jl")
-
-# # triangles = @SMatrix [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-# dir = @SVector [1.0, 1.0, 0.0]
-# Vrel_v = [5395.145235865259 5395.145235865259 0.0];
-
-# triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
-
-# rmax = 3                            #radius of the circular plane from where rays originate
-# distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
-# Ntri = size(triangles, 1)
-
-# # OutTriangles = areasConcave(dir, rmax, distance, MeshVerticesCoords, Ntri)
-
-#--------------------------------------------
-
 include("culling.jl")
 
 function normal_of_triangle_by_coords(triangle)
@@ -71,7 +48,7 @@ Obtain the areas of triangular elements that are impinged by the oncoming partic
 A ray-tracing algorithm is used. The sampler for the generation of the rays can be selected.
 
 #INPUT:
-- `triangles::Matrix`   : coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3;...]
+- `MeshVertices::Matrix`   : coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3;...]
 - `dir`                 : vector with the direction to be analyzed
 - `rmax`                : radius of the circular plane from where the rays are originated  
 - `distance`            : distance of the perpendicular plane from where the rays are originated
@@ -152,80 +129,8 @@ function areasConcave(dir, rmax, distance, MeshVertices, Ntri)
         end
     end
 
-    # print(typeof(OutFacets), //)
-    # print(size(OutFacets))
-
-
-    #eliminate non-intercepted triangle entries and size down the output matrix
-    # OutTriangles = filter(!iszero, OutTriangles)
-
-    # print(OutTriangles, //)
-    # print(lastindex(OutTriangles), //)
-
-    # OutTriangles = reshape(OutTriangles, (6, Int(lastindex(OutTriangles) / 6)))
-
-    # lastindex(OutTriangles), length(OutTriangles), Int(length(OutTriangles) / 3)
-
     return OutFacets
 
 end
 
 export areasConcave
-
-#TEST
-#---------------------------------
-
-# triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-# dir = @SVector [1.0, 1.0, 0.0]
-# Vrel_v = [5395.145235865259 5395.145235865259 0.0];
-
-# # # triangles, dir, rmax, distance = GeomInputs(Vrel_v, 0, 0)
-
-# rmax = 3                            #radius of the circular plane from where rays originate
-# distance = 10                       #distance at which the circular plane is located (it should be out from the satellite body)
-# Ntri = size(triangles, 1)
-
-# OutTriangles = areasConcave(dir, rmax, distance, triangles, Ntri)
-
-
-# function raytrace(sampler, Vdir, rmax, distance, MeshVertices, Ntri)
-
-#     dir = -Vdir   #opposite direction to velocity vector
-#     Ntri_preculling = Ntri
-
-#     println("Ntri_preculling=", Ntri_preculling)
-#     println("max in MeshVertices (preculling)=", maximum(MeshVertices[:, :]))
-#     #back-face culling
-#     triangles = culling(MeshVertices, dir)
-#     #Number of triangles
-#     Ntri = size(triangles, 1)
-#     println("culling ratio =", Ntri / Ntri_preculling)
-#     println("max in MeshVertices=", maximum(MeshVertices[:, :]))
-
-
-#     #select the sampling method and the density of the sampler [rays/m^2]
-#     samplerG = GridFilter(50000)
-#     samplerF = FibonacciSampler(50000)
-#     samplerMC = MonteCarloSampler(50000)
-
-#     O, Norig = generate_ray_origins(samplerF, dir, rmax, distance)        #coordinates of ray origins, number of origins
-
-
-#     #------pre-allocation-------------------
-#     # index = 0                                          #counter indicating the number of triangles intercepted by the same ray
-#     intercept_dummy = zeros(Ntri, 7)                   #triangle index, distance from origin to intercept, area of the triangle, angle between velocity vector and triangle's normal
-#     triIntercept = zeros(6, Norig)                     #triangle index, area of the triangle, angle between velocity vector and triangle's normal
-#     #---------------------------------------
-
-#     for jj ∈ 1:Norig       #iterate over the set of ray origins
-#         orig = O[jj]
-#         ray = Ray(SV3(orig), dir)
-#         rti = ray_mesh_intersection(triangles, ray)
-#         if mode(rti) ∈ (BackFaceIntersection, FrontFaceIntersection)   #the triangle is intercepted by the ray
-#             ii = rti.face_index
-#             u_n = normal_of_triangle_by_coords(@view triangles[ii, :])
-#             triIntercept[:, jj] .= [
-#                 ii, rti.area, rti.γ_dir, u_n[1], u_n[2], u_n[3]
-#             ]
-#         end
-#     end

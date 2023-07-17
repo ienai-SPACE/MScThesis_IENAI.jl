@@ -100,27 +100,8 @@ function areasConvex(vertices, Vdir)
         u_n = n |> normalize
     end
 
-    # print(rad2deg(γ_dir), /, area, /, u_n, //)
 
     return [area, γ_dir, u_n[1], u_n[2], u_n[3]]
 end
 
 export areasConvex
-
-#TESTING
-#------------------------------------------------------
-#
-# vertices = [0 0 0 0 1 1 0 -1 1] #x1y1z1x2y2z2x3y3z3
-# dir = [1 0 0]
-#results: [1.0, 0.7853981633974484 = pi/4]
-
-#vertices = [0 0 0 0 1 0 0 1 1 0 0 1] 
-#dir = [1 1 0]
-#results: [1.0, 0.7853981633974484 = pi/4]
-
-
-# vertices = [-0.5 -0.5 0 -0.5 0.5 0 -0.5 0.5 0.5]
-# dir = [1 0 0]
-
-# area, delta = areasConvex(vertices, dir)
-# #

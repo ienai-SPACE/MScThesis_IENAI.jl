@@ -1,6 +1,3 @@
-# using LinearAlgebra
-# using StaticArrays
-
 include("MTalgorithm.jl")
 include("Origins.jl")
 include("Convex.jl")
@@ -118,11 +115,6 @@ function areas_convex(Vdir, triangles)
         InteractionGeometry_v[ii] = InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii])
     end
 
-
-    #int_geos = [InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]) for ii ∈ 1:length(OutFacets[2, :])]
-    #int_geos = map(ii -> InteractionGeometry(OutFacets[2, ii], OutFacets[3, ii]), 1:length(OutFacets[2, :]))
-
-    #print(OutLMNTs)
     return Aproj, Aref, OutLMNTs, InteractionGeometry_v
 end
 
@@ -212,6 +204,20 @@ function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
     end
 end
 
+"""
+    areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+
+#INPUTS
+-`geometry::AbstractGeometry`
+-`viewpoint::Viewpoint`
+#OUTPUTS
+- `Aproj`
+- `Aref`
+- `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and incidence angles of intercepted triangles, ordered in increasing index
+- `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
+- `culling_ratio`
+"""
+
 function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #view.direction --> dir (particle beam direction)
     samplerG = GridFilter(1e5)
@@ -237,10 +243,24 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
+    culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
 end
 
+
+"""
+    areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+
+#INPUTS
+-`geometry::AbstractGeometry`
+-`viewpoint::Viewpoint`
+#OUTPUTS
+- `Aproj`
+- `Aref`
+- `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and angles of intercepted triangles, ordered in increasing index
+- `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
+"""
 function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)

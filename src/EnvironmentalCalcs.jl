@@ -55,19 +55,3 @@ function GasStreamProperties(nrlmsise00_output::SatelliteToolbox.NRLMSISE00_Outp
 end
 
 export GasStreamProperties
-
-
-#TEST
-#---------------------------------
-#=
-JD = date_to_jd(2018, 6, 19, 18, 35, 0)          #Julian Day [UTC].
-alt = 300e3                                       #Altitude [m].
-g_lat = deg2rad(-22)      #Geodetic latitude [rad].
-g_long = deg2rad(-45)     #Geodetic longitude [rad].
-f107A = 73.5       #81 day average of F10.7 flux (centered on day of year doy).
-f107 = 79      #Daily F10.7 flux for previous day.
-ap = 5.13        #Magnetic index.
-
-GSP = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
-
-=#
