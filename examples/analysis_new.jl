@@ -21,10 +21,10 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-# α = deg2rad(-110)
-# ϕ = deg2rad(-50)
-# v = Viewpoint(geo, α, ϕ)
-v = Viewpoint(geo, Vrel_v)
+α = deg2rad(0)
+ϕ = deg2rad(0)
+v = Viewpoint(geo, α, ϕ)
+# v = Viewpoint(geo, Vrel_v)
 
 #DRIA - Sphere
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)

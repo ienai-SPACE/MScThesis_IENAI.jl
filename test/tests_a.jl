@@ -36,25 +36,25 @@ end
     @test areasConvex(vertices4, dir) == [1.0, 0.7853981633974484, 1.0, 0.0, 0.0]
 end
 
-@testset "area function with convex shape" begin
-    triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
-    dir = [-1, -1, 0]
-    convexFlag = 1
-    rmax = 2
-    distance = 10
+# @testset "area function with convex shape" begin
+#     triangles = [1 1 0 0 1 1 1 0 1; 1 1 0 1 0 -1 0 1 -1; 0.5 0.5 0 1 1 1 0 0 1]
+#     dir = [-1, -1, 0]
+#     convexFlag = 1
+#     rmax = 2
+#     distance = 10
 
-    Aproj, Atot, OutLMNTs, InteractionGeometry_v = SatelliteGeometryCalculations.areas(rmax, distance, dir, triangles, convexFlag)
+#     Aproj, Atot, OutLMNTs, InteractionGeometry_v = SatelliteGeometryCalculations.areas(rmax, distance, dir, triangles, convexFlag)
 
-    @test Aproj ≈ 1.4142135623730947
-    @test Atot ≈ 1.7320508075688772
-    # @test OutFacets ≈ [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703871 0.6154797086703871]
-    @test OutLMNTs.area ≈ [0.8660254037844386; 0.8660254037844386]
-    @test OutLMNTs.angle ≈ [0.6154797086703871; 0.6154797086703871]
-    @test InteractionGeometry_v[1].area ≈ 0.8660254037844386
-    @test InteractionGeometry_v[2].area ≈ 0.8660254037844386
-    @test InteractionGeometry_v[1].angle ≈ 0.6154797086703875
-    @test InteractionGeometry_v[2].angle ≈ 0.6154797086703875
-end
+#     @test Aproj ≈ 1.4142135623730947
+#     @test Atot ≈ 1.7320508075688772
+#     # @test OutFacets ≈ [1.0 2.0; 0.8660254037844386 0.8660254037844386; 0.6154797086703871 0.6154797086703871]
+#     @test OutLMNTs.area ≈ [0.8660254037844386; 0.8660254037844386]
+#     @test OutLMNTs.angle ≈ [0.6154797086703871; 0.6154797086703871]
+#     @test InteractionGeometry_v[1].area ≈ 0.8660254037844386
+#     @test InteractionGeometry_v[2].area ≈ 0.8660254037844386
+#     @test InteractionGeometry_v[1].angle ≈ 0.6154797086703875
+#     @test InteractionGeometry_v[2].angle ≈ 0.6154797086703875
+#  end
 
 
 @testset "Coefficients" begin
@@ -169,13 +169,3 @@ end
     coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, int_geos, Vrel_v, OutLMNTs.normals)
 
 end
-
-# using LinearAlgebra
-# v1 = [1, 1, 0]
-# v2 = [0, 1, -1]
-# v3 = [1, 0, -1]
-# # v2 = [1, 1, 0, 1, 0, -1, 0, 1, -1]
-# # v3 = [0.5, 0.5, 0, 1, 1, 1, 0, 0, 1]
-# edge1 = v2 - v1
-# edge2 = v3 - v2
-# crossProd = cross(edge1, edge2) |> LinearAlgebra.normalize

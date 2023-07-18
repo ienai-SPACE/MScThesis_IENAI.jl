@@ -1,0 +1,154 @@
+using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations
+using FilePathsBase
+using FilePathsBase: /
+
+@testset "analyzeAreas and compute_coefficients" begin
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
+    geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
+    outSurfaceProps = SurfaceProps(0.0, 300.0, 0.0, 0.0, 26.9815)                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
+
+    #----Orbit and date inputs------------------------------------------------------------------
+    JD = date_to_jd(2018, 6, 19, 18, 35, 0)     #Julian Day [UTC].
+    h = 300
+    alt = h * 1000                                #Altitude [m].
+    g_lat = deg2rad(-22)                        #Geodetic latitude [rad].
+    g_long = deg2rad(-45)                       #Geodetic longitude [rad].
+    f107A = 73.5                                #81 day average of F10.7 flux (centered on day of year doy).
+    f107 = 79                                   #Daily F10.7 flux for previous day.
+    ap = 5.13                                   #Magnetic index.
+    Vrel = 7629.8875635332
+    Vrel_v = [1.0, 0.0, 0.0] * Vrel
+    # JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
+
+    α = deg2rad(0)
+    ϕ = deg2rad(0)
+    v = Viewpoint(geo, α, ϕ)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+
+    @test Aproj ≈ 0.20992818441580555
+    @test Aref ≈ 0.2099296371694464
+    @test length(intercept_info) == 80
+    @test length(normals) == 80
+
+    coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
+    @test coeffs[1] ≈ 2.287456085225732
+    @test coeffs[3] ≈ 1.024395736336198e-6
+    @test coeffs[5] ≈ 2.287456083828845
+    @test coeffs[7] ≈ 7.129319419221911e-6
+    @test coeffs[2] ≈ [-1.0, 0.0, 0.0]
+    @test coeffs[4] ≈ [0.0, 0.9940389486206442, 0.10902554115969573]
+    @test coeffs[6] ≈ [-0.9999999999940649, 3.436514327611419e-6, 2.461974684398811e-7]
+    @test coeffs[8] ≈ [-0.00019754849590484602, -0.9940389292201997, -0.10902553906929591]
+end
+
+@testset "DRIA_GSI" begin
+
+
+    JD = date_to_jd(2018, 6, 19, 18, 35, 0)     #Julian Day [UTC].
+    h = 300
+    alt = h * 1000                                #Altitude [m].
+    g_lat = deg2rad(-22)                        #Geodetic latitude [rad].
+    g_long = deg2rad(-45)                       #Geodetic longitude [rad].
+    f107A = 73.5                                #81 day average of F10.7 flux (centered on day of year doy).
+    f107 = 79                                   #Daily F10.7 flux for previous day.
+    ap = 5.13                                   #Magnetic index.
+    Vrel = 7629.8875635332
+    Vrel_v = [1.0, 0.0, 0.0] * Vrel
+    # JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
+
+
+
+
+    δ = deg2rad(20)
+    C = outGasStreamProps.C
+    m_srf = 26.9815
+    P0 = outGasStreamProps.PO
+    Tw = 300.0
+    Ta = outGasStreamProps.Ta
+    Vrel_norm = 7629.8875635332
+
+
+
+    K = 1.44e6                                  #Best-fit Langmuir adsorbate constants for DRIA GSI model
+    θ = K * P0 / (1 + K * P0)                   #Fraction of the surface contaminated by atomic oxygen
+
+
+    γ = cos(δ)
+    ell = sin(δ)
+
+
+
+    # #-------Pre-allocation---------------------------------------------
+    mgas = @SVector [O.m, H.m, N.m, O2.m, N2.m, He.m]                   #[g/mol] atomic mass of gas constituents
+    #mgas = @SVector [m[1].m, m[2].m, m[3].m, m[4].m, m[5].m, m[6].m] #[g/mol] atomic mass of gas constituents
+    cd_j = @MMatrix zeros(length(mgas), 2)                               #drag coefficient at each facet
+    cl_j = @MMatrix zeros(length(mgas), 2)                               #lift coefficient at each facet
+    #s = @MArray [zeros(length(mgas), 2)] 
+    s = @MMatrix zeros(length(mgas), 2)                                  #thermal speed: two values per species, i.e. contaminated and clean surface
+    # #------------------------------------------------------------------
+
+
+    for jj ∈ 1:2     #clean and contaminated surface
+        for j ∈ 1:6  #species specific mass concentration
+
+            μ_srf = mgas[j] / m_srf                 #ratio between the mass of the atoms of the incoming gas with the mass of the surface particles
+            Ks = 3.6                                #substrate coefficient (6 < s < 11 the use of Ks = 3.6 is appropriate)
+            α_c = Ks * μ_srf / (1 + μ_srf)^2        #accomodation coefficient for clean surface
+
+            α_vec = [α_c, 1]
+
+            α = α_vec[jj]
+
+
+
+            s[j, jj] = Vrel_norm / sqrt(2 * (kb / (mgas[j] / NA / 1000) * Ta))    #thermal speed
+            P = exp.(-γ .^ 2 .* s[j, jj] .^ 2) ./ s[j, jj]
+            G = 1 / (2 * s[j, jj] .^ 2)
+            Q = 1 + G
+            Z = 1 + erf.(γ .* s[j, jj])
+            RR = R / mgas[j] * 1000
+            Vratio = sqrt((1 / 2) * (1 + α * ((4 * RR * Tw) / Vrel_norm^2 - 1)))  #[Doornbos 2012]
+            cd_j[j, jj] = (P ./ sqrt(π) .+ γ .* Q .* Z .+ (0.5 * γ) .* Vratio .* (γ .* sqrt(pi) .* Z .+ P)) .* C[j] * mgas[j]
+            cl_j[j, jj] = (ell * G .* Z .+ (0.5 .* ell) * Vratio .* (γ .* sqrt(pi) .* Z .+ P)) .* C[j] * mgas[j]
+        end
+    end
+
+
+
+    Cd_weighted = sum(cd_j, dims=1) / sum(C .* mgas)         # mass weighted
+    Cl_weighted = sum(cl_j, dims=1) / sum(C .* mgas)         # mass weighted
+
+    Cd_weighted_clean = Cd_weighted[1, 1]                    # clean (α ~= 1)
+    Cl_weighted_clean = Cl_weighted[1, 1]                    # clean (α ~= 1)
+    Cd_weighted_cont = Cd_weighted[1, 2]                     # contaminated (α = 1)
+    Cl_weighted_cont = Cl_weighted[1, 2]                     # contaminated (α = 1)
+
+
+    Cd_facet = (Cd_weighted_clean * (1 - θ) + Cd_weighted_cont * θ)
+    Cl_facet = (Cl_weighted_clean * (1 - θ) + Cl_weighted_cont * θ)
+
+    Cp_facet = Cd_facet * cos(δ) + Cl_facet * sin(δ)
+    Ctau_facet = Cd_facet * sin(δ) - Cl_facet * cos(δ)
+
+    @test Cd_facet ≈ 2.1366229680840956
+    @test Cl_facet ≈ 0.09358046743714629
+    @test Cp_facet ≈ 2.0397752413956463
+    @test Ctau_facet ≈ 0.6428312190766557
+end
+
+@testset "Euclidean norm" begin
+
+    MeshVerticesCoords = [0 0 0 1 1 1 5 5 5; 0 0 0 0.1 0.1 0.1 0.5 0.5 0.5]
+    max = SatelliteGeometryCalculations.euclidean_norm(MeshVerticesCoords::Matrix{Float64})
+
+    @test max ≈ 8.660254037844387
+
+end

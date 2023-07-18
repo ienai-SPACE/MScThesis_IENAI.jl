@@ -46,7 +46,6 @@ function culling(MeshVertices, Vdir)
             end
         end
     end
-    println(typeof(transpose(triangles)))
 
     return transpose(triangles)
 
