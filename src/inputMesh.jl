@@ -35,13 +35,6 @@ function finputMesh(mesh; scale=1e-3) # assumes mm input by default
     Float64.(inputMesh .* scale)                 #pass from [mm] --> [m] & convert from Float32 to Float64
 end
 
-#TEST
-#-----------------------------------------
-
-
-# mesh = load("C:\\Users\\danie\\Documents\\UC3M\\IENAI internship\\CAD\\sphereMesh.obj")
-
-# MeshVerticesCoords = finputMesh(mesh)
 
 
 

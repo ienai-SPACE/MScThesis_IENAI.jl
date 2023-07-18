@@ -6,18 +6,18 @@ using LinearAlgebra
 Obtain the directions of the drag, lift, shear and pressure coefficients on a plate
 
 #INPUTS
--`velocity`
--`normal`
+-`velocity::Vector`
+-`normal::Vector`
 #OUTPUTS
--`u_D`
--`u_L`
--`u_tau`
--`u_P`
+-`u_D::Vector`
+-`u_L::Vector`
+-`u_tau::Vector`
+-`u_P::Vector`
 """
 
 function unitaryDirections(velocity, normal)
 
-    #Depending on the numbering direction of the triangle normals will go in one or another direction ------> TO BE CHECKED
+    #Depending on the numbering direction of the triangle, normals will go in one or another direction
     #------------------------------------------------------------
 
     u_D = -velocity |> normalize
@@ -40,17 +40,3 @@ function unitaryDirections(velocity, normal)
 
     return u_D, u_L, u_P, u_tau
 end
-
-#TEST----------------------------------------------
-
-
-# velocity = [1, 1, 0]
-# normal = [1, -1, 0]
-
-# u_D, u_L, u_tau, u_P = unitaryDirections(velocity, normal)
-
-# normal = [1, -1, 0]
-# u_d = [0.7071067811865475, 0.7071067811865475, 0]
-# u_l_dum = cross(u_d, normal)
-# u_l_num = cross(u_l_dum, u_d)
-# u_L = -u_l_num / norm(u_l_num)

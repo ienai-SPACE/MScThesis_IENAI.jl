@@ -1,11 +1,11 @@
 
 """
-    SweepStorage{Float64}
+    SweepStorage_v2{Float64}
 
 -`azimuth::Float64`
 -`altitude::Float64`
 -`Aproj::Float64`
--`Aref::Float64`
+-`Atot::Float64`
 """
 
 struct SweepStorage_v2{Float64}
@@ -17,22 +17,26 @@ end
 #_eltype(::SweepStorage{T}) where {T} = T
 
 
-
 """
-    sweep(rmax, distance, MeshVerticesCoords, convexFlag, step)
+    sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
-Create a 2D matrix as function of azimuth and elevation storing the projected `Aproj` and total area `Aref`, and the specific data of each impinged element `OutLMNTs`
+Create a 2D matrix as function of azimuth and elevation storing the projected `Aproj` and total area `Aref`, and the aerodynamic coefficients
 
 #INPUTS:
-- `rmax`            : radius of the circular plane from where rays originate
-- `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
-- `convexFlag`      :1 for convex, 0 for non-convex
-- `MeshVerticesCoords::Matrix`  : coordinates of the vertices of all area elements
-- `step::Float64`               : step used in the definition of `α::StepRangeLen{Float64}` `ϕ::StepRangeLen{Float64}`
+- `geo::AbstractGeometry`
+- `grid::Grid{T}`       : with fields `alpha::Vector` and `phi::Vector`
+- `outSurfaceProps::SurfaceProps{T}`
+- `outGasStreamProps::GasStreamProperties{T}`
+- `Vrel_v::Vector`
 
 #OUTPUTS:
 - `AlphaPhiStorage:: Matrix(undef, lastindex(ϕ), lastindex(α))`     : it contains `SweepStorage{Float64}` with fields `azimuth`, `altitude`, `Aproj`, `Aref`, `OutLMNTs`
 - `AprojLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`          : matrix storing the projected areas for each α, ϕ pair 
+- `CdLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`
+- `ClLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`
+- `CpLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`
+- `CtauLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`
+- `culling::Matrix(undef, lastindex(ϕ), lastindex(α))`
 """
 
 

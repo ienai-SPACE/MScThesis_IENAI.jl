@@ -1,5 +1,16 @@
 include("culling.jl")
 
+"""
+    normal_of_triangle_by_coords(triangle)
+
+Return the normal of a triangle
+
+#INPUT
+- `triangle::Vector`
+#OUTPUT
+- `normal::SVector{3, T}`
+"""
+
 function normal_of_triangle_by_coords(triangle)
     V1 = SV3(triangle[1], triangle[2], triangle[3])
     V2 = SV3(triangle[4], triangle[5], triangle[6])
@@ -7,6 +18,17 @@ function normal_of_triangle_by_coords(triangle)
     TriangleFace(V1, V2, V3).normal
 end
 
+"""
+    ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ray::Ray)
+
+Identify intercepted triangles by the MT algorithm and filter out back-face intersections. Add index to each intercepted triangle.
+
+#INPUTS
+- `triangles::Transpose{Float64,Matrix{Float64}}`
+- `ray::Ray`
+#OUTPUTS
+- `rti :: MTalgorithm(face, ray)`
+"""
 
 function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ray::Ray)
     Ntri = size(triangles, 1)
@@ -27,6 +49,18 @@ function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ra
     end)
     foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
 end
+
+"""
+    ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
+
+Identify intercepted triangles by the MT algorithm and filter out back-face intersections. Add index to each intercepted triangle.
+
+#INPUTS
+- `geo::HomogeneousGeometry`
+- `ray::Ray`
+#OUTPUTS
+- `rti :: MTalgorithm(face, ray)`
+"""
 
 function ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
     Ntri = n_faces(geo)

@@ -1,11 +1,13 @@
 
-#[A. Walker, P. M. Mehta, and J. Koller, “Drag coefficient model using the cercignani-lampis-lord gas- surface interaction model,” Journal of Spacecraft and Rockets, 2014]
-
-
 """
     oxygen_partial_pressure(nrlmsise00_output::SatelliteToolbox.NRLMSISE00Output)
 
-Calculate the partial pressure of oxygen in the atmosphere.
+Calculate the partial pressure of oxygen in the atmosphere. Source: A. Walker, P. M. Mehta, and J. Koller, “Drag coefficient model using the cercignani-lampis-lord gas- surface interaction model,” Journal of Spacecraft and Rockets, 2014
+
+#INPUT
+-`nrlmsise00_output::SatelliteToolbox.NRLMSISE00Output`     : atmospheric model
+#OUTPUT
+- `P0`                                                      : oxygen partial pressure
 """
 function oxygen_partial_pressure(nrlmsise00_output)
 
@@ -30,22 +32,5 @@ function oxygen_partial_pressure(nrlmsise00_output)
     return P0
 
 end
-
-#TEST
-#--------------------------------------------------------------------
-
-#=
-JD = date_to_jd(2018, 6, 19, 18, 35, 0);          #Julian Day [UTC].
-alt = 300e3                                       #Altitude [m].
-g_lat = deg2rad(-22)      #Geodetic latitude [rad].
-g_long = deg2rad(-45)     #Geodetic longitude [rad].
-f107A = 73.5       #81 day average of F10.7 flux (centered on day of year doy).
-f107 = 79      #Daily F10.7 flux for previous day.
-ap = 5.13        #Magnetic index.
-
-
-nrlmsise00_output = nrlmsise00(JD, alt, g_lat, g_long, f107A, f107, ap, output_si=true, dversion=true)
-oxygen_partial_pressure(nrlmsise00_output)
-=#
 
 export oxygen_partial_pressure

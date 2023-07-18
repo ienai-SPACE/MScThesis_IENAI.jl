@@ -22,7 +22,7 @@ Storage of: viewpoint information (azimuth and elevation wrt to local reference 
 - `azimuth::T`
 - `elevation::T`
 #OUTPUTS
-- `Viewpoint{T}`
+- `Viewpoint{T}`  : fields are `rmax`, `distance`, `dir`
 """
 
 function Viewpoint(rmax::T, distance::T, azimuth::T, elevation::T) where {T}
@@ -45,7 +45,7 @@ Storage of: viewpoint information (azimuth and elevation wrt to local reference 
 - `distance::T`
 - `Vrel::Vector{T}`
 #OUTPUTS
-- `Viewpoint{T}`
+- `Viewpoint{T}`        : fields are `rmax`, `distance`, `dir`
 """
 
 function Viewpoint(rmax::T, distance::T, Vrel::Vector{T}) where {T}

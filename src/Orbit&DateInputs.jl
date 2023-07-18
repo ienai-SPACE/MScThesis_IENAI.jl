@@ -1,10 +1,17 @@
 """
-function : OrbitandDate()
+    OrbitandDate()
 
-    GOAL:
-        - Define orbital elements and date to obtain relative velocity of the satellite and atmospheric SurfaceProps
-    OUTPUT:
-        - Julian date, [m] altitude, [rad] g_lat, [rad] g_long, f107A, f107, ap, [m/s] relative velocity vector
+Define orbital elements and date to obtain relative velocity of the satellite and atmospheric SurfaceProps
+    
+#OUTPUT:
+- `JD`          : Julian date
+- `alt`         : altitude [m]
+- `g_lat`       : [rad]
+- `g_long`      : [rad]
+- `f107A`
+- `f107`
+- `ap`
+- `Vrel_v`      : relative velocity vector [m/s]
 """
 
 

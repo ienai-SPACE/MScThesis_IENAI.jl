@@ -1,27 +1,4 @@
 """
-   other constants:
-   ------------------------------------
-   eta  : generator efficiency 
-   Tw   : wall temperature
-   s_cr : specular reflectivity component
-   s_cr : diffuse reflectivity component
-"""
-
-#=
-const η = 0;   #generator efficiency 
-
-const Tw = 300; #[K] temperature at the wall        
-
-#= Solar radiation pressure coefficients (for calculation of force of the satellite due to
-solar radiation according to [Luthcke et al., 1997]) =#
-
-const s_cr = 0.15; #specular reflectivity component
-const s_cd = 0.25; #diffuse reflectivity component
-=#
-
-# TODO: check units
-
-"""
     Gas{T}
 
 Gas atomic weights
@@ -30,7 +7,7 @@ Gas atomic weights
 - `m::T`    # molecular mass [g/mol]
 """
 struct Gas{T}
-    m::T    # molecular mass [g/mol]
+    m::T
 end
 
 const O = Gas(15.9994)

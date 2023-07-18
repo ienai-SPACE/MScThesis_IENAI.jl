@@ -1,7 +1,3 @@
-
-# using LinearAlgebra, StaticArrays, SatelliteToolbox
-# SV3{T} = SVector{3,T}
-
 using Random
 
 abstract type RaySampler end
@@ -70,7 +66,8 @@ Create a uniformly distributed source of rays
 -`distance`
 #OUTPUT:
 -`points_new::SVector{3,Float64}`
--`Norig::Int` : number of ray origins 
+-`Norig::Int`       : number of ray origins
+- `Aray`            : equivalent area of a ray
 """
 
 function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
@@ -115,7 +112,8 @@ Source: http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-spher
 -`distance`
 #OUTPUT:
 -`points_new::SVector{3,Float64}`
--`Norig::Int` : number of ray origins 
+-`Norig::Int`       : number of ray origins 
+- `Aray`            : equivalent area of a ray
 """
 
 function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
@@ -157,7 +155,8 @@ Source: Xuhong Jina et al,"Monte Carlo simulation for aerodynamic coefficients o
 -`distance`
 #OUTPUT:
 -`points_new::SVector{3,Float64}`
--`Norig::Int` : number of ray origins 
+-`Norig::Int`       : number of ray origins 
+- `Aray`            : equivalent area of a ray
 """
 
 function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
@@ -189,69 +188,4 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
 
     points_new, Int(length(points)), Aray
 end
-
-
-# export generate_two_normals
-
-#TEST
-#-------------------------------
-
-# dir = SV3([1 / sqrt(2) 1 / sqrt(2) 0])
-# rmax = 2
-# distance = 10
-# samplerG = GridFilter(10)
-# samplerF = FibonacciSampler(10)
-# samplerMC = MonteCarloSampler(1)
-# PN, Norig = generate_ray_origins(samplerMC, dir, rmax, distance);
-
-
-
-
-
-
-
-#=
-function generate_ray_origins_old(dir, rmax::T, distance) where {T}
-
-
-    Dangle = 20           #Delta angle for the polar definition of origins
-
-    #------pre-allocation-------------------
-    xt = zeros(T, Int(360 / Dangle))
-    yt = zeros(rmax, Int(360 / Dangle))
-    zt = zeros(rmax, Int(360 / Dangle))
-    Xg = zeros(rmax * Int(360 / Dangle), 3)
-    #---------------------------------------
-
-    λ = atan(dir[2] / dir[1])
-    θ = asin(dir[3] / norm(dir))
-
-
-    #rotation matrix: from the local ref. frame at the center of the satellite to the center of the source ref. frame
-    R = [-sin(λ) cos(λ) 0; -sin(θ)*cos(λ) -sin(θ)*sin(λ) cos(θ); cos(θ)*cos(λ) cos(θ)*sin(λ) sin(θ)]
-
-    x0_v = dir * distance
-
-    #create origin coordinates on the plane's local ref. frame
-    for gg ∈ 0:Int((360 / Dangle - 1))
-        for rr ∈ 1:rmax
-            xt[rr, gg+1] = rr * cos(gg * Dangle * π / 180)
-            yt[rr, gg+1] = rr * sin(gg * Dangle * π / 180)
-            zt[rr, gg+1] = 0
-        end
-    end
-
-    #transform origin coordinates into the local satellite ref. frame    
-    counter = 0
-    for gg ∈ 0:Int((360 / Dangle - 1))
-        for rr ∈ 1:rmax
-            counter += 1
-            Xg[counter, :] = transpose(R) * [xt[rr, gg+1]; yt[rr, gg+1]; zt[rr, gg+1]] + x0_v
-        end
-    end
-
-    Norig = rmax * Int(360 / Dangle)
-    return Xg, Norig
-end
-=#
 

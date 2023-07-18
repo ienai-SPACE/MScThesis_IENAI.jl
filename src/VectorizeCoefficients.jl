@@ -4,6 +4,13 @@ include("unitaryDirections.jl")
     vectorizeCoeffs(aero_coeffs, normals, Vrel_v)
 
 Provide a vectorial direction to all `coeffs_vec = coefficients.*area` and find the resultant direction
+
+#INPUT
+- `aero_coeffs::Vector`
+- `normals::Vector`
+- `Vrel_v::Vector`
+#OUTPUT
+- `coeffs_vec::Vector{Vector{Float64}}`
 """
 
 function vectorizeCoeffs(aero_coeffs, normals, Vrel_v)

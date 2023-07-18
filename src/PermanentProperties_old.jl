@@ -1,28 +1,37 @@
-""" Permanent properties parameters are defined in this function: properties of the surface/material, gases """
-#INPUTS:
-# Gindex: gas element (mass) identifier
-# Mindex: material (solar radiation) identifier
-# Sindex: material surface (masses) identifier
+# Permanent properties parameters are defined in this function: properties of the surface/material, gases
 
+"""
+    SurfaceAtomProps{T}
 
-
-#= Definition of mass of surface atom (to calculate the accommodation 
-coefficient in the drag calcultion) =#
+mass::T      :mass of an atom [g]
+amass::T     :atomic mass [u]
+"""
 struct SurfaceAtomProps{T}
 
-    #struct to store mass of the surface atom
-
-    mass::T      #mass of an atom [g]
-    amass::T     #atomic mass [u]
+    mass::T
+    amass::T
 
 end
 
-# Definition of molecular mass 
+"""
+    GasProps{T}
+
+mass::T         :molecular mass [g/mol]
+"""
 struct GasProps{T}
-    #struct to store mass of the surface atom
-    mass::T      #molecular mass [g/mol]
+    mass::T
 end
 
+"""
+permProps(Gindex, Mindex, Sindex)
+
+#INPUTS:
+- `Gindex`        : gas element (mass) identifier
+- `Mindex`        : material (solar radiation) identifier
+- `Sindex`        : material surface (masses) identifier
+#OUTPUTS
+- `gasProperties`
+"""
 
 function permProps(Gindex, Mindex, Sindex)
 
