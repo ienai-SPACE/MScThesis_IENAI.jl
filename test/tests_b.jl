@@ -1,12 +1,12 @@
-using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations
+using Test, SatelliteToolbox, StaticArrays, SatelliteGeometryCalculations, SpecialFunctions
 using FilePathsBase
 using FilePathsBase: /
 
-@testset "analyzeAreas and compute_coefficients" begin
+@testset "analyzeAreas and compute_coefficients for CONVEX" begin
 
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "T_SatMesh.obj")
-    geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
     #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
     outSurfaceProps = SurfaceProps(0.0, 300.0, 0.0, 0.0, 26.9815)                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
@@ -30,7 +30,53 @@ using FilePathsBase: /
     v = Viewpoint(geo, α, ϕ)
 
     #---- Area calculations --------------------------------------------------------------------
-    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
+    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v, "homogeneous")
+
+    @test Aproj ≈ 0.7773743802882257
+    @test Aref ≈ 1.552052015831979
+    @test length(intercept_info) == 308
+    @test length(normals) == 308
+
+    coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
+    @test coeffs[1] ≈ 2.2393444265693843
+    @test coeffs[3] ≈ 0.0004955217635818692
+    @test coeffs[5] ≈ 1.210758832881363
+    @test coeffs[7] ≈ 1.0285862895743416
+    @test coeffs[2] ≈ [-1.0, 0.0, 0.0]
+    @test coeffs[4] ≈ [0.0, -0.4242967712738129, 0.9055231912472577]
+    @test coeffs[6] ≈ [-0.9999996646571998, 0.00034397188560096874, 0.0007432151973150171]
+    @test coeffs[8] ≈ [-0.9999997181888721, -0.0006092977220194402, -0.00043860969250936286]
+end
+
+@testset "analyzeAreas and compute_coefficients for NON-CONVEX" begin
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "T_SatMesh.obj")
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
+    outSurfaceProps = SurfaceProps(0.0, 300.0, 0.0, 0.0, 26.9815)                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
+
+    #----Orbit and date inputs------------------------------------------------------------------
+    JD = date_to_jd(2018, 6, 19, 18, 35, 0)     #Julian Day [UTC].
+    h = 300
+    alt = h * 1000                                #Altitude [m].
+    g_lat = deg2rad(-22)                        #Geodetic latitude [rad].
+    g_long = deg2rad(-45)                       #Geodetic longitude [rad].
+    f107A = 73.5                                #81 day average of F10.7 flux (centered on day of year doy).
+    f107 = 79                                   #Daily F10.7 flux for previous day.
+    ap = 5.13                                   #Magnetic index.
+    Vrel = 7629.8875635332
+    Vrel_v = [1.0, 0.0, 0.0] * Vrel
+    # JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
+
+    α = deg2rad(0)
+    ϕ = deg2rad(0)
+    v = Viewpoint(geo, α, ϕ)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v, "homogeneous")
 
     @test Aproj ≈ 0.20992818441580555
     @test Aref ≈ 0.2099296371694464
@@ -47,6 +93,9 @@ using FilePathsBase: /
     @test coeffs[6] ≈ [-0.9999999999940649, 3.436514327611419e-6, 2.461974684398811e-7]
     @test coeffs[8] ≈ [-0.00019754849590484602, -0.9940389292201997, -0.10902553906929591]
 end
+
+
+
 
 @testset "DRIA_GSI" begin
 
@@ -150,5 +199,65 @@ end
     max = SatelliteGeometryCalculations.euclidean_norm(MeshVerticesCoords::Matrix{Float64})
 
     @test max ≈ 8.660254037844387
+
+end
+
+@testset "Check forward facing" begin
+
+    Vrel_v = [1.0, 0.0, 0.0] #only direction is necessary for this test
+    viewpoint1 = SatelliteGeometryCalculations.Viewpoint(0.0, 0.0, Vrel_v)
+    Vrel_v2 = [-1.0, 0.0, 0.0] #only direction is necessary for this test
+    viewpoint2 = SatelliteGeometryCalculations.Viewpoint(0.0, 0.0, Vrel_v2)
+    Vrel_v3 = [0.0, 1.0, 0.0] #only direction is necessary for this test
+    viewpoint3 = SatelliteGeometryCalculations.Viewpoint(0.0, 0.0, Vrel_v3)
+    v1 = SVector(0.0, 0.0, 0.0)
+    v2 = SVector(0.0, 1.0, 0.0)
+    v3 = SVector(0.0, 0.0, 1.0)
+    face = SatelliteGeometryCalculations.TriangleFace(v1, v2, v3)
+
+    @test SatelliteGeometryCalculations.is_visible(face, viewpoint1) == true
+    @test SatelliteGeometryCalculations.is_visible(face, viewpoint2) == false
+    @test SatelliteGeometryCalculations.is_visible(face, viewpoint3) == false  #90º wrt normal is not included to avoid numerical errors
+
+end
+
+@testset "MT algorithm" begin
+    v1 = SVector(0.0, 0.0, 0.0)
+    v2 = SVector(0.0, 1.0, 0.0)
+    v3 = SVector(0.0, 0.0, 1.0)
+    triangle = SatelliteGeometryCalculations.TriangleFace(v1, v2, v3)
+
+    origin = SVector(10.0, 0.0, 0.0)
+    direction = SVector(-1.0, 0.0, 0.0)
+    ray = SatelliteGeometryCalculations.Ray(origin, direction)
+
+    MT_result = SatelliteGeometryCalculations.MTalgorithm(triangle, ray; ϵ=sqrt(eps(Float64)))
+
+    # @test (MT_result.mode == FrontFaceIntersection) == true       #doubts here
+    @test MT_result.t ≈ 10.0
+    @test MT_result.γ_dir ≈ 0.0
+    @test MT_result.area ≈ 0.5
+    @test MT_result.face_index ≈ 0
+
+end
+
+@testset "projection" begin
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    α = deg2rad(0)
+    ϕ = deg2rad(0)
+    viewpoint = Viewpoint(geo, α, ϕ)
+
+    #back-face culling
+    filtered_geometry = SatelliteGeometryCalculations.filter_backfaces(geo, viewpoint)
+    #Number of triangles
+    Ntri = SatelliteGeometryCalculations.n_faces(filtered_geometry)
+    #Calculate areas
+
+    Aproj = sum(SatelliteGeometryCalculations.projection(filtered_geometry, viewpoint, Ntri))
+    @test Aproj ≈ 0.7773512745188897
 
 end

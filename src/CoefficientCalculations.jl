@@ -16,18 +16,34 @@ struct ElementInteractionProps{T}
     Tw::T
 end
 
-ElementInteractionProps(surfprops::SurfaceProps, angle) = ElementInteractionProps(angle, surfprops.m_srf, surfprops.Tw)
+ElementInteractionProps(surfprops::SurfaceProps, srfMat, angle) = ElementInteractionProps(angle, srfMat, surfprops.Tw)
+
+
+abstract type InteractionGeometry end
 
 """
-    InteractionGeometry{T}
+    InteractionGeometryHomo{T}
 
 - `area::T`       : [m^2]
 - `angle::T`      : [rad]
 """
 
-struct InteractionGeometry{T}
+struct InteractionGeometryHomo{T} <: InteractionGeometry
     area::T
     angle::T
+end
+
+"""
+    InteractionGeometryHetero{T}
+
+- `area::T`       : [m^2]
+- `angle::T`      : [rad]
+- `index::T`      : global index relating material property
+"""
+struct InteractionGeometryHetero{T} <: InteractionGeometry
+    area::T
+    angle::T
+    index::T
 end
 
 
@@ -107,21 +123,41 @@ Base.:+(a::AerodynamicCoefficients, b::AerodynamicCoefficients) = AerodynamicCoe
 Base.:/(a::AerodynamicCoefficients, d::Real) = AerodynamicCoefficients(a.Cd / d, a.Cl / d, a.Cp / d, a.Ctau / d)
 
 """
-    compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometry, Vrel_v)
+    compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHomo, Vrel_v)
 
 Compute the toal drag, lift, pressure, and shear coefficients evaluated for a single area element
 
 #INPUT:
 - `surfprops::SurfaceProps`
 - `gasprops::GasStreamProperties`
-- `intgeo::InteractionGeometry`
+- `intgeo::InteractionGeometryHomo`
 - `Vrel_v:: Vector{Float64}`     [m/s]
 #OUTPUT:
 - `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
 """
 
-function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometry, Vrel_v, normals)
-    element_interaction = ElementInteractionProps(surfprops, intgeo.angle)
+function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHomo, Vrel_v, normals)
+    element_interaction = ElementInteractionProps(surfprops, surfprops.m_srf, intgeo.angle)
+    Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, normals)
+    AerodynamicCoefficients(Cd, Cl, Cp, Ctau)
+end
+
+"""
+    compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHetero, Vrel_v)
+
+Compute the toal drag, lift, pressure, and shear coefficients evaluated for a single area element
+
+#INPUT:
+- `surfprops::SurfaceProps`
+- `gasprops::GasStreamProperties`
+- `intgeo::InteractionGeometryHetero`
+- `Vrel_v:: Vector{Float64}`     [m/s]
+#OUTPUT:
+- `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
+"""
+
+function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHetero, Vrel_v, normals)
+    element_interaction = ElementInteractionProps(surfprops, intgeo.index, intgeo.angle)
     Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, normals)
     AerodynamicCoefficients(Cd, Cl, Cp, Ctau)
 end
@@ -168,4 +204,4 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
 end
 
-export InteractionGeometry, compute_coefficients
+export InteractionGeometryHomo, InteractionGeometryHetero, compute_coefficients

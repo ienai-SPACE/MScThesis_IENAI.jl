@@ -18,7 +18,7 @@ struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
     function Geometry{GT}(faces::Vector{F}) where {GT,F}
-        # rmax = 1.1maximum([_max_coord(face) for face in faces])
+
         rmax = maximum([_max_coord_euclidean(face) for face in faces])
         new{GT,F}(faces, rmax)
     end
@@ -34,13 +34,15 @@ end
 
 struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     faces::Vector{F}
-    surface_props::SurfaceProps{T}
+    indices::Vector{T}
+    # surface_props::SurfaceProps{T}
     rmax::Float64
-    function HomogeneousGeometry{GT}(faces::Vector{F}, surface_props::SurfaceProps{T}) where {GT,F,T}
-        # rmax = 1.1maximum([_max_coord(face) for face in faces])
+
+    function HomogeneousGeometry{GT}(faces::Vector{F}, indices::Vector{T}) where {GT,F,T}
+
         rmax = maximum([_max_coord_euclidean(face) for face in faces])
 
-        new{GT,T,F}(faces, surface_props, rmax)
+        new{GT,T,F}(faces, indices, rmax)
     end
 end
 
@@ -70,7 +72,7 @@ unit_dict = Dict("m" => 1, "mm" => 1e-3)
 - `HomogeneousGeometry{gtype}(faces, surface_props)`
 """
 
-function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units::String)
+function load_geometry(path, is_convex::Bool, units::String)
 
     scale_factor = unit_dict[units]
 
@@ -82,7 +84,8 @@ function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units
         push!(faces, face_geometry)
     end
     gtype = is_convex ? Convex : NonConvex
-    HomogeneousGeometry{gtype}(faces, surface_props)
+    indices = collect(1:length(faces))
+    HomogeneousGeometry{gtype}(faces, indices)
 end
 
 """
@@ -162,7 +165,7 @@ function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-    mesh = load(pkg_path / "test" / "samples" / "T_Sat_fineMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
+    mesh = load(pkg_path / "test" / "inputs_models_data" / "T_Sat_fineMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
 
 
     MeshVerticesCoords = finputMesh(mesh)
@@ -222,7 +225,7 @@ Calculate the angle between two vectors (the velocity direction vector and the n
 
 #INPUT
 - `dir`
-- `normal`
+- `normal`          :either scalar or vector may be used
 #OUTPUT
 - `gamma = acos.(dp_v) `
 """
@@ -241,11 +244,25 @@ Filter out all the non-forward facing face_vertices
 - `geometry::HomogeneousGeometry{GT}`
 - `viewpoint::Viewpoint`
 #OUTPUTS
-- `HomogeneousGeometry{GT}(new_faces, geometry.surface_props)`
+- `HomogeneousGeometry{GT}(new_faces, new_indices)`
 """
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
+
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
-    HomogeneousGeometry{GT}(new_faces, geometry.surface_props)
+    counter = 0
+    new_indices = []
+    for ii ∈ 1:length(geometry.faces)
+        if is_visible(geometry.faces[ii], viewpoint)
+            counter += 1
+            if counter == 1
+                new_indices = geometry.indices[ii]
+            else
+                new_indices = vcat(new_indices, geometry.indices[ii])
+            end
+        end
+    end
+
+    HomogeneousGeometry{GT}(new_faces, new_indices)
 end
 
 """
@@ -269,6 +286,7 @@ shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal
+face_idx(geometry::HomogeneousGeometry, idx) = geometry.indices[idx]
 
 """
     Grid{T}
@@ -305,3 +323,4 @@ function interpolator(_look_up_table::Matrix, aa_in, pp_in)
     P = BicubicInterpolator(_phi, _alpha, _look_up_table, StrictBoundaries())
     return P(pp_in, aa_in)  #[deg] P(phi, alpha)
 end
+

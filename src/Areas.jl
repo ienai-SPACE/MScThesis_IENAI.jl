@@ -19,12 +19,9 @@ end
 
 _eltype(::OutGeometry{T}) where {T} = T
 
-# struct sInterceptInfo{T}
-#     area::T
-#     angle::T
-#     normal::SVector{3,T}
-#     Nrays::T
-# end
+
+homogeneity_dict = Dict("homogeneous" => 1, "heterogeneous" => 2)
+
 """ 
     areas(rmax, distance, dir, triangles, convexFlag)
 
@@ -196,11 +193,11 @@ export OutGeometry
 - `areas_nonconvex(geometry, viewpoint)`
 """
 
-function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
+function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint, materialDistribution::String)
     if is_convex(geometry)
-        return areas_convex(geometry, viewpoint)
+        return areas_convex(geometry, viewpoint, materialDistribution::String)
     else
-        return areas_nonconvex(geometry, viewpoint)
+        return areas_nonconvex(geometry, viewpoint, materialDistribution::String)
     end
 end
 
@@ -218,7 +215,7 @@ end
 - `culling_ratio`
 """
 
-function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist::String)
     #view.direction --> dir (particle beam direction)
     samplerG = GridFilter(1e5)
     samplerF = FibonacciSampler(1e5)
@@ -236,16 +233,22 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
     # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
+    _face_indices = [face_idx(filtered_geometry, idx) for idx in hit_idx]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
 
+    if homogeneity_dict[matDist] == 1 #homogeneous --> single material
+        intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
-    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
+        #TO DO: HETEROGENEOUS NEEDS SURFACE PROPERTIES TO BE ASSIGNED DEPENDING ON FACE INDEX
+    elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
+        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], Float64.(_face_indices[ii])), 1:lastindex(hit_idx))
+    end
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, _face_indices
 end
 
 
@@ -261,7 +264,7 @@ end
 - `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and angles of intercepted triangles, ordered in increasing index
 - `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
 """
-function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist::String)
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
     #Number of triangles
@@ -272,6 +275,7 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     _face_areas = [face_area(filtered_geometry, idx) for idx in 1:Ntri]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
+    _face_indices = [face_idx(filtered_geometry, idx) for idx in 1:Ntri]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
 
     intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:Ntri)

@@ -1,0 +1,202 @@
+{
+    "materials": [
+        {
+            "name": "aluminum",
+            "atomic mass": 26.9815
+        },
+        {
+            "name": "silicon",
+            "atomic mass": 28.0855
+        }
+    ],
+    "mesh_facets": [
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 1,
+            "material_index": 1
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        },
+        {
+            "facet_index": 0,
+            "material_index": 0
+        }
+    ]
+}
