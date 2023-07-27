@@ -2,6 +2,7 @@ include("MTalgorithm.jl")
 include("Origins.jl")
 include("Convex.jl")
 include("NonConvex.jl")
+include("materialInputs.jl")
 
 """
     OutGeometry{T}
@@ -241,14 +242,15 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDi
     if homogeneity_dict[matDist] == 1 #homogeneous --> single material
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
-        #TO DO: HETEROGENEOUS NEEDS SURFACE PROPERTIES TO BE ASSIGNED DEPENDING ON FACE INDEX
+        #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
     elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
-        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], Float64.(_face_indices[ii])), 1:lastindex(hit_idx))
+        mesh_facets_material, materials = loadMaterialProperties()
+        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], materials[mesh_facets_material[_face_indices[ii]]["material_index"]+1]["atomic mass"]), 1:lastindex(hit_idx))
     end
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, _face_indices
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, _face_indices, hit_idx
 end
 
 
@@ -278,7 +280,15 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist:
     _face_indices = [face_idx(filtered_geometry, idx) for idx in 1:Ntri]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
 
-    intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:Ntri)
+    # intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:Ntri)
+    if homogeneity_dict[matDist] == 1 #homogeneous --> single material
+        intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:Ntri)
+
+        #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
+    elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
+        mesh_facets_material, materials = loadMaterialProperties()
+        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], materials[mesh_facets_material[_face_indices[ii]]["material_index"]+1]["atomic mass"]), 1:Ntri)
+    end
 
     return Aproj, Atot, intercept_info, _face_normals
 end

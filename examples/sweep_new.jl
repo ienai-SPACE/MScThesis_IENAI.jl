@@ -7,7 +7,7 @@ using FilePathsBase
 using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-mesh_path = FilePathsBase.join(pkg_path, "test", "samples", "GRACE.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "GRACE.obj")
 geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------

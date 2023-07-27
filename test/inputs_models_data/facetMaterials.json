@@ -11,191 +11,72 @@
     ],
     "mesh_facets": [
         {
-            "facet_index": 0,
             "material_index": 0
         },
         {
-            "facet_index": 1,
             "material_index": 1
         },
         {
-            "facet_index": 0,
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
+            "material_index": 1
+        },
+        {
             "material_index": 0
         },
         {
-            "facet_index": 0,
-            "material_index": 0
+            "material_index": 1
         },
         {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
-            "material_index": 0
-        },
-        {
-            "facet_index": 0,
             "material_index": 0
         }
     ]

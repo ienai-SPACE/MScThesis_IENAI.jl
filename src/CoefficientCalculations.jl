@@ -43,7 +43,7 @@ end
 struct InteractionGeometryHetero{T} <: InteractionGeometry
     area::T
     angle::T
-    index::T
+    material::T
 end
 
 
@@ -157,7 +157,7 @@ Compute the toal drag, lift, pressure, and shear coefficients evaluated for a si
 """
 
 function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHetero, Vrel_v, normals)
-    element_interaction = ElementInteractionProps(surfprops, intgeo.index, intgeo.angle)
+    element_interaction = ElementInteractionProps(surfprops, intgeo.material, intgeo.angle)
     Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, normals)
     AerodynamicCoefficients(Cd, Cl, Cp, Ctau)
 end

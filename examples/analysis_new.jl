@@ -9,7 +9,7 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 # mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh4.obj")
 # load_geometry(mesh_path, SurfaceProps(), true)
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "T_Sat_fineMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "boxMesh.obj")
 geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 # VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
@@ -30,7 +30,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Aref, intercept_info, normals, cullingRatio, filteredGeo, hitIDX = analyze_areas(geo, v, "homogeneous")
+Aproj, Aref, intercept_info, normals, cullingRatio, filteredGeo, face_indices, hitIDX = analyze_areas(geo, v, "heterogeneous")
 
 
 
