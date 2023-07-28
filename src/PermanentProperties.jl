@@ -31,6 +31,8 @@ struct SurfaceAtomProperties{T}
     amass::T     #atomic mass [g/mol]
 end
 
+SurfaceAtomProperties(; atomic_mass=amass) = SurfaceAtomProperties(atomic_mass / 6.02214076e23, atomic_mass)
+
 const Aluminum = SurfaceAtomProperties(4.48e-23, 26.9815)
 const Silicon = SurfaceAtomProperties(4.664e-23, 28.0855)
 

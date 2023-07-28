@@ -13,12 +13,10 @@ abstract type AbstractGeometry{GT} end
 - `faces::Vector{F}`
 - `rmax::Float64` 
 """
-
 struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
     faces::Vector{F}
     rmax::Float64
     function Geometry{GT}(faces::Vector{F}) where {GT,F}
-
         rmax = maximum([_max_coord_euclidean(face) for face in faces])
         new{GT,F}(faces, rmax)
     end
@@ -37,21 +35,21 @@ struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
     indices::Vector{T}
     # surface_props::SurfaceProps{T}
     rmax::Float64
-
     function HomogeneousGeometry{GT}(faces::Vector{F}, indices::Vector{T}) where {GT,F,T}
-
         rmax = maximum([_max_coord_euclidean(face) for face in faces])
-
         new{GT,T,F}(faces, indices, rmax)
     end
 end
 
 is_convex(geo::AbstractGeometry{Convex}) = true
 is_convex(geo::AbstractGeometry{NonConvex}) = false
+is_homogeneous(geo::HomogeneousGeometry) = true
+is_homogeneous(geo::Geometry) = false
 
 _max_coord(face::Face) = _max_coord(face.geometry)
 _max_coord(face::TriangleFace) = maximum([maximum(v) for v ∈ face.vertices])
 _max_coord_euclidean(face::TriangleFace) = maximum([norm(v) for v ∈ face.vertices])
+_max_coord_euclidean(face::Face) = _max_coord_euclidean(face.geometry)
 
 get_point_data(point) = point.main.data
 get_point_data(point::Point) = point.data
@@ -73,9 +71,7 @@ unit_dict = Dict("m" => 1, "mm" => 1e-3)
 """
 
 function load_geometry(path, is_convex::Bool, units::String)
-
     scale_factor = unit_dict[units]
-
     mesh = load(path)
     faces = TriangleFace{Float64}[]
     for triangle in mesh
@@ -87,6 +83,26 @@ function load_geometry(path, is_convex::Bool, units::String)
     indices = collect(1:length(faces))
     HomogeneousGeometry{gtype}(faces, indices)
 end
+
+function load_geometry(path, materials_path, is_convex::Bool, units::String)
+    mesh_facets, materials = load_material_properties(materials_path)
+    materials = [SurfaceAtomProperties(; atomic_mass=material["atomic mass"]) |> SurfaceProps for material in materials]
+    scale_factor = unit_dict[units]
+    mesh = load(path)
+    faces = Face{TriangleFace{Float64},Float64}[]
+    for (triangle, mat_index) in zip(mesh, mesh_facets)
+        points = map(i -> get_point_data(triangle.points[i]) |> SVector{3,Float64} |> p -> p * scale_factor, 1:3)
+        face_geometry = TriangleFace(points...)
+        idx = mat_index["material_index"] + 1
+        face = Face(face_geometry, materials[idx])
+        push!(faces, face)
+    end
+    gtype = is_convex ? Convex : NonConvex
+    indices = collect(1:length(faces))
+    Geometry{gtype}(faces)
+end
+
+
 
 """
     Viewpoint(geo::AbstractGeometry, azimuth, elevation)
@@ -247,7 +263,6 @@ Filter out all the non-forward facing face_vertices
 - `HomogeneousGeometry{GT}(new_faces, new_indices)`
 """
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
-
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
     counter = 0
     new_indices = []
@@ -261,9 +276,14 @@ function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoin
             end
         end
     end
-
     HomogeneousGeometry{GT}(new_faces, new_indices)
 end
+
+function filter_backfaces(geometry::Geometry{GT}, viewpoint::Viewpoint) where {GT}
+    new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
+    Geometry{GT}(new_faces)
+end
+
 
 """
     is_visible(face::TriangleFace, viewpoint::Viewpoint)
@@ -282,11 +302,17 @@ function is_visible(face::TriangleFace, viewpoint::Viewpoint)
     dot(normal, viewpoint.direction) < -1e-3
 end
 
+is_visible(face::Face, viewpoint) = is_visible(face.geometry, viewpoint)
+
 shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal
 face_idx(geometry::HomogeneousGeometry, idx) = geometry.indices[idx]
+face_area(geometry::Geometry, idx) = geometry.faces[idx].geometry.area
+face_vertices(geometry::Geometry, idx) = geometry.faces[idx].geometry.vertices
+face_normal(geometry::Geometry, idx) = geometry.faces[idx].geometry.normal
+
 
 """
     Grid{T}

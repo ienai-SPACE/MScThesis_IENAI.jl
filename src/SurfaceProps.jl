@@ -25,8 +25,10 @@ Store properties of the satellite surface into a struct
 """
 
 "Default constructor - assumes aluminum at 300 K"
-function SurfaceProps()
-    m_srf = Aluminum.amass                 #[g/mol] atomic mass of the surface atom
+SurfaceProps() = SurfaceProps(Aluminum)
+
+function SurfaceProps(sfatom::SurfaceAtomProperties)
+    m_srf = sfatom.amass                 #[g/mol] atomic mass of the surface atom
     η = 0.0   #generator efficiency  
     Tw = 300.0 #[K] temperature at the wall        
     #Solar radiation pressure coefficients (for calculation of force of the satellite due to solar radiation according to [Luthcke et al., 1997])

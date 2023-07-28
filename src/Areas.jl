@@ -194,11 +194,11 @@ export OutGeometry
 - `areas_nonconvex(geometry, viewpoint)`
 """
 
-function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint, materialDistribution::String)
+function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
     if is_convex(geometry)
-        return areas_convex(geometry, viewpoint, materialDistribution::String)
+        return areas_convex(geometry, viewpoint)
     else
-        return areas_nonconvex(geometry, viewpoint, materialDistribution::String)
+        return areas_nonconvex(geometry, viewpoint)
     end
 end
 
@@ -215,8 +215,7 @@ end
 - `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
 - `culling_ratio`
 """
-
-function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist::String)
+function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #view.direction --> dir (particle beam direction)
     samplerG = GridFilter(1e5)
     samplerF = FibonacciSampler(1e5)
@@ -229,28 +228,30 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDi
 
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
-
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
     face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
     # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
-    _face_indices = [face_idx(filtered_geometry, idx) for idx in hit_idx]
+    # _face_indices = [face_idx(filtered_geometry, idx) for idx in hit_idx]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
 
-    if homogeneity_dict[matDist] == 1 #homogeneous --> single material
+    if is_homogeneous(geometry)
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
         #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
-    elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
-        mesh_facets_material, materials = loadMaterialProperties()
-        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], materials[mesh_facets_material[_face_indices[ii]]["material_index"]+1]["atomic mass"]), 1:lastindex(hit_idx))
+    else
+        intercept_info = map(ii -> InteractionGeometryHetero(
+                _face_areas[ii],
+                _face_angles[ii],
+                filtered_geometry.faces[hit_idx[ii]].properties.m_srf
+            ), eachindex(hit_idx))
     end
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, _face_indices, hit_idx
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, hit_idx
 end
 
 
@@ -286,7 +287,7 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist:
 
         #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
     elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
-        mesh_facets_material, materials = loadMaterialProperties()
+        mesh_facets_material, materials = load_material_properties()
         intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], materials[mesh_facets_material[_face_indices[ii]]["material_index"]+1]["atomic mass"]), 1:Ntri)
     end
 
