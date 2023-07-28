@@ -3,7 +3,7 @@ import FilePathsBase
 using FilePathsBase: /
 
 """
-    loadMaterialProperties()
+    load_material_properties()
 
 Load .json file linking the facet index with its corresponding surface material
 
@@ -12,10 +12,10 @@ Load .json file linking the facet index with its corresponding surface material
 - `materials::Vector`       : vector of `Dict{String, Any}` containing the fields `"name"` and `"atomic mass"`
 """
 
-function loadMaterialProperties()
-    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+function load_material_properties(path)
+    # pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
     # Load the materials and mesh facets from "materials.json" file
-    json_data = open(pkg_path / "test" / "inputs_models_data" / "facetMaterials.json") do file
+    json_data = open(path) do file
         read(file, String)
     end
 
@@ -35,4 +35,9 @@ function loadMaterialProperties()
 
     return mesh_facets, materials
 
+end
+
+function load_material_properties()
+    pkg_path = (FilePathsBase.@__FILEPATH__() |> parent |> parent)
+    load_material_properties(pkg_path / "test" / "inputs_models_data" / "facetMaterials.json")
 end

@@ -62,9 +62,8 @@ Identify intercepted triangles by the MT algorithm and filter out back-face inte
 - `rti :: MTalgorithm(face, ray)`
 """
 
-function ray_mesh_intersection(geo::HomogeneousGeometry, ray::Ray{T}) where {T}
+function ray_mesh_intersection(geo::AbstractGeometry, ray::Ray{T}) where {T}
     Ntri = n_faces(geo)
-
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
         face = geo.faces[ii]
