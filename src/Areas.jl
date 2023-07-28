@@ -53,16 +53,16 @@ end
 
 For convex shapes: calculation of reference and projected areas, and normals and areas of each forward-facing element
 
-#INPUTS
+# Inputs
 - `Vdir`             : direction of the oncoming particle
 - `triangles`       : vertices coordinates of the triangular/quad mesh element
-#OUTPUTS
+
+# Outputs
 - `OutLMNTs:: OutGeometry{T}`                                   : struct of 3 fields (`area`, `angle`, and `normals`) each containing a vector with the respective magnitude of all intercepted surfaces
 - `InteractionGeometry_v::Vector{InteractionGeometry{T}}`       : vector of struct storing the areas and angles of all intercepted surfaces       
 - `Aproj`                                                       : projection of the intercepted triangular areas onto the selected direction 
 - `Aref`                                                        : sum of all intercepted triangular areas
 """
-
 function areas_convex(Vdir, triangles)
     #Number of triangles
     Ntri = size(triangles, 1)
