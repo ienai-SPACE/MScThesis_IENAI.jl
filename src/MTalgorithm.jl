@@ -111,3 +111,6 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
     t = invDet * dot(edge2, qvec) # distance from the ray origin to P 
     RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0)
 end
+
+MTalgorithm(face::Face, ray) = MTalgorithm(face.geometry, ray)
+

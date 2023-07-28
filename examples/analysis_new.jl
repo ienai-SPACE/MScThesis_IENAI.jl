@@ -10,7 +10,10 @@ pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 # load_geometry(mesh_path, SurfaceProps(), true)
 
 mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "boxMesh.obj")
-geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "facetMaterials.json")
+geo = load_geometry(mesh_path, materials_path, false, "mm")
+geo = load_geometry(mesh_path, false, "mm")
 
 # VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
 # writedlm("GRACE_VERTICES.txt", VERTICES)
@@ -30,7 +33,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Aref, intercept_info, normals, cullingRatio, filteredGeo, face_indices, hitIDX = analyze_areas(geo, v, "heterogeneous")
+Aproj, Aref, intercept_info, normals, cullingRatio, filteredGeo, hitIDX = analyze_areas(geo, v)
 
 
 
