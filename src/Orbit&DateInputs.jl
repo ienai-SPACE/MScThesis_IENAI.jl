@@ -3,7 +3,7 @@
 
 Define orbital elements and date to obtain relative velocity of the satellite and atmospheric SurfaceProps
     
-#OUTPUT:
+# Output:
 - `JD`          : Julian date
 - `alt`         : altitude [m]
 - `g_lat`       : [rad]

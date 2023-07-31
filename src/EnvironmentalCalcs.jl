@@ -10,7 +10,7 @@ include("OPartPress.jl")
 
 Access atomospheric model function `nrlmsise00`
 
-INPUT:
+# Input:
 - `Julian date::Number`
 - `altitude::Number`
 - `g_lat::Number`
@@ -19,7 +19,7 @@ INPUT:
 - `f107::Number`
 - `ap::Number`
 
-OUTPUT:
+# Output:
 - `GasStreamProperties(nrlmsise00_output)`
 """
 function GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
@@ -32,7 +32,7 @@ end
 
 Compute the concentration of the 6 main gas species in the thermosphere, the temperature, the oxygen partial pressure and the mean molecular mass.
 
-OUTPUT:
+# Output:
 - `GasStreamProperties(C, PO, mmean, nrlmsise00_output.T_alt)::GasStreamProperties{T}`
 """
 

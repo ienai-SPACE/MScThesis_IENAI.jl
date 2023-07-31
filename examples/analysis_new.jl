@@ -6,14 +6,14 @@ using FilePathsBase
 using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-# mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh4.obj")
-# load_geometry(mesh_path, SurfaceProps(), true)
 
 mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "boxMesh.obj")
-# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "facetMaterials.json")
-geo = load_geometry(mesh_path, materials_path, false, "mm")
-geo = load_geometry(mesh_path, false, "mm")
+
+#HETEROGENEOUS CASE
+geo = load_geometry(mesh_path, materials_path, true, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+#HOMOGENEOUS CASE
+# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 # VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
 # writedlm("GRACE_VERTICES.txt", VERTICES)
@@ -25,7 +25,7 @@ JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
 α = deg2rad(90)
-ϕ = deg2rad(0)
+ϕ = deg2rad(90)
 v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
@@ -33,7 +33,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Aref, intercept_info, normals, cullingRatio, filteredGeo, hitIDX = analyze_areas(geo, v)
+Aproj, Aref, intercept_info, normals, filteredGeo = analyze_areas(geo, v)
 
 
 

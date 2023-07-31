@@ -127,12 +127,12 @@ Base.:/(a::AerodynamicCoefficients, d::Real) = AerodynamicCoefficients(a.Cd / d,
 
 Compute the toal drag, lift, pressure, and shear coefficients evaluated for a single area element
 
-#INPUT:
+# Input:
 - `surfprops::SurfaceProps`
 - `gasprops::GasStreamProperties`
 - `intgeo::InteractionGeometryHomo`
 - `Vrel_v:: Vector{Float64}`     [m/s]
-#OUTPUT:
+# Output:
 - `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
 """
 
@@ -147,12 +147,12 @@ end
 
 Compute the toal drag, lift, pressure, and shear coefficients evaluated for a single area element
 
-#INPUT:
+# Input:
 - `surfprops::SurfaceProps`
 - `gasprops::GasStreamProperties`
 - `intgeo::InteractionGeometryHetero`
 - `Vrel_v:: Vector{Float64}`     [m/s]
-#OUTPUT:
+# Output:
 - `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
 """
 
@@ -167,12 +167,12 @@ end
 
 Compute the toal drag, lift, pressure, and shear coefficients evaluated for all areas of the element
 
-#INPUT:
+# Input:
 - `surfprops::SurfaceProps`
 - `gasprops::GasStreamProperties`
 - `intgeo::Vector{<:InteractionGeometry}`
 - `Vrel_v::Vector{Float64}`
-#OUTPUT:
+# Output:
 - `AerodynamicCoefficients{Float64}` : total Cd, Cl, Cp, Ctau
 - `Atot::Float64`                    : [m^2]
 - `Aproj:.Float64`                   : [m^2]

@@ -34,9 +34,9 @@ end
 
 Generate an orthogonal plane defined by unit vectors `v` and `w` w.r.t. the input vector `u`
 
-#INPUT:
+# Input:
 -`u::SVector{3,T}`
-#OUTPUT:
+# Output:
 -`v::Vector`
 -`w::Vector`
 """
@@ -59,12 +59,12 @@ end
 
 Create a uniformly distributed source of rays
 
-#INPUTS:
+# Inputs:
 -`gf::GridFilter` : density of rays [rays/m^2]
 -`dir`
 -`rmax`
 -`distance`
-#OUTPUT:
+# Output:
 -`points_new::SVector{3,Float64}`
 -`Norig::Int`       : number of ray origins
 - `Aray`            : equivalent area of a ray
@@ -105,12 +105,12 @@ end
 Create a uniformly distributed source of rays using Fibonacci algorithm
 Source: http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-sphere-more-effectively-than-the-canonical-fibonacci-lattice/
 
-#INPUTS:
+# Inputs:
 -`gf::FibonacciSampler` : density of rays [rays/m^2]
 -`dir`
 -`rmax`
 -`distance`
-#OUTPUT:
+# Output:
 -`points_new::SVector{3,Float64}`
 -`Norig::Int`       : number of ray origins 
 - `Aray`            : equivalent area of a ray
@@ -148,12 +148,12 @@ end
 Create a randomly distributed source of rays using Monte Carlo algorithm, based on test particle Monte Carlo method
 Source: Xuhong Jina et al,"Monte Carlo simulation for aerodynamic coefficients of satellites in LowEarth Orbit"
 
-#INPUTS:
+# Inputs:
 -`gf::FibonacciSampler` : density of rays [rays/m^2]
 -`dir`
 -`rmax`
 -`distance`
-#OUTPUT:
+# Output:
 -`points_new::SVector{3,Float64}`
 -`Norig::Int`       : number of ray origins 
 - `Aray`            : equivalent area of a ray

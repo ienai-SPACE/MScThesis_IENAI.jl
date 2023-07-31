@@ -7,7 +7,7 @@ using FilePathsBase: /
 
 Load .json file linking the facet index with its corresponding surface material
 
-#OUTPUT
+# Output
 - `mesh_facets::Vector`     : vector of `Dict{String, Any}` containing the field `"material_index"` (indexing starts in 0). The field `"material_index"` corresponds to the position of the material in the vector `materials`
 - `materials::Vector`       : vector of `Dict{String, Any}` containing the fields `"name"` and `"atomic mass"`
 """

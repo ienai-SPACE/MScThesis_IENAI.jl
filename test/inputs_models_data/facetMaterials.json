@@ -5,6 +5,10 @@
             "atomic mass": 26.9815
         },
         {
+            "name": "monocrystalline silicon",
+            "atomic mass": 32.12
+        },
+        {
             "name": "silicon",
             "atomic mass": 28.0855
         }
@@ -14,16 +18,10 @@
             "material_index": 0
         },
         {
-            "material_index": 1
-        },
-        {
             "material_index": 0
         },
         {
             "material_index": 1
-        },
-        {
-            "material_index": 0
         },
         {
             "material_index": 1
@@ -32,49 +30,70 @@
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
         },
         {
             "material_index": 0
         },
         {
-            "material_index": 1
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
+        },
+        {
+            "material_index": 0
         },
         {
             "material_index": 0

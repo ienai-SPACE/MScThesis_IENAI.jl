@@ -7,8 +7,11 @@ using FilePathsBase
 using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "GRACE.obj")
-geo = load_geometry(mesh_path, SurfaceProps(), false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
+#HETEROGENEOUS CASE
+# geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+#HOMOGENEOUS CASE
+geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
@@ -26,13 +29,8 @@ if sweepFlag == 1
     # LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, grid)
     LookUpTable, AprojLookUpTable, CdLookUp, ClLookUp, CpLookUp, CtauLookUp, culling = SatelliteGeometryCalculations.sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
-    writedlm("GRACE_AprojLookUpTable.txt", AprojLookUpTable)
-    writedlm("GRACE_CDlookup.txt", CdLookUp)
-    writedlm("GRACE_CLlookup.txt", ClLookUp)
-    writedlm("GRACE_CPlookup.txt", CpLookUp)
-    writedlm("GRACE_CTAUlookup.txt", CtauLookUp)
-    writedlm("GRACE_cullingRatio", culling)
-    # writedlm("TSAT_AprojLookUpTable.txt", AprojLookUpTable)
+    writedlm("homo_TSAT_coarse_AprojLookUpTable.txt", AprojLookUpTable)
+    writedlm("homo_TSAT_coarse_CDlookup.txt", CdLookUp)
 
 end
 

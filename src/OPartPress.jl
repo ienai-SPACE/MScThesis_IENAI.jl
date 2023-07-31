@@ -4,9 +4,9 @@
 
 Calculate the partial pressure of oxygen in the atmosphere. Source: A. Walker, P. M. Mehta, and J. Koller, “Drag coefficient model using the cercignani-lampis-lord gas- surface interaction model,” Journal of Spacecraft and Rockets, 2014
 
-#INPUT
+# Input
 -`nrlmsise00_output::SatelliteToolbox.NRLMSISE00Output`     : atmospheric model
-#OUTPUT
+# Output
 - `P0`                                                      : oxygen partial pressure
 """
 function oxygen_partial_pressure(nrlmsise00_output)

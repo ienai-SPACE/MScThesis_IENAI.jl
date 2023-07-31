@@ -42,10 +42,10 @@ end
 
 Select which of the two input magnitudes is the biggest one
 
-#INPUTS
+# Inputs
 - `rti1::RayTriangleIntersection`
 - `rti2::RayTriangleIntersection`
-#OUTPUTS
+# Outputs
 - `rti1::RayTriangleIntersection`
 - `rti2::RayTriangleIntersection`
 """
@@ -71,10 +71,10 @@ no_intersection(::Type{T}) where {T} = RayTriangleIntersection(NoIntersection, z
 Identify the triangular mesh elements that are intercepted by the direction vector through a ray-tracing algorithm (Möller-Trumbore algorithm)
 Also, calculate the area of the triangular element and angle between the triangle's normal and the direction (velocity) vector is also provided
 
-#INPUT
+# Input
 - `triangle::TriangleFace{T}`       : it stores `vertices::SVector{3, SV3{T}}`, `area::T` and `normal::SVector{3, T}` fields
 - `ray::Ray{T}`                     : it stores the ray information with fields `direction` and `origin`
-#OUTPUT
+# Output
 - `RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0)`     : it contains the fields `mode::IntersectionMode`, `t::T`, `γ_dir::T` [rad], `area::T` [m^2], `face_index::Int64`
 """
 

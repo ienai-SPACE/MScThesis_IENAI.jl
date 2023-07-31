@@ -5,12 +5,12 @@ using StaticArrays
 
 Reference: [DOORNBOS 2012, Thermospheric Density and Wind Determination from Satellite Dynamics] + modification based on atomic oxygen aborption
 
-#INPUTS:
+# Inputs:
 - `element_interaction::ElementInteractionProps{T}`       : struct with `δ`, `SRF`, and `Tw` as fields
 - `gasprops::GasStreamProperties`                         : mass of the atoms of the surface particles
 - `Vrel:Vector`    
 
-#OUTPUTS:
+# Outputs:
 -`Cd_facet`     : Drag Coefficient
 -`Cl_facet`     : Lift Coefficient
 -`Cp_facet`     : Pressure Coefficient
@@ -103,12 +103,12 @@ end
 
 Reference: P. M. Mehta, A. Walker, C. Mclaughlin, and J. Koller, “Comparing physical drag coefficients computed using different gas surface interaction models,” Journal of spacecraft and rockets, vol. 51, no. 3, 2014.
 
-#INPUTS:
+# Inputs:
 - `element_interaction::ElementInteractionProps{T}`       : struct with `δ`, `SRF`, and `Tw` as fields
 - `gasprops::GasStreamProperties`                         : mass of the atoms of the surface particles
 - `Vrel:Vector`    
 
-#OUTPUTS:
+# Outputs:
 -`CD_sph`           : sphere drag coefficient
 - `cd_j::MMatrix`   : drag coefficient contribution for every gas species and both clean and contaminated surface (without mass or oxygen partial pressure scaling)
 - `sumM`            : sum of gas species molecular weights

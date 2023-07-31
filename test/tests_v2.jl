@@ -30,7 +30,7 @@ using FilePathsBase: /
     v = Viewpoint(geo, α, ϕ)
 
     #---- Area calculations --------------------------------------------------------------------
-    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v, "homogeneous")
+    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
     @test Aproj ≈ 0.7773743802882257
     @test Aref ≈ 1.552052015831979
@@ -76,7 +76,7 @@ end
     v = Viewpoint(geo, α, ϕ)
 
     #---- Area calculations --------------------------------------------------------------------
-    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v, "homogeneous")
+    Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
     @test Aproj ≈ 0.20992818441580555
     @test Aref ≈ 0.2099296371694464

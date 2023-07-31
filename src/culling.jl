@@ -3,10 +3,10 @@
 
 Filter out all non-forward facing faces_hit_idx_nonunique
 
-#INPUT
+# Input
 - `MeshVertices::Matrix`   : coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3;...]
 - `Vdir::Vector`           : vector with the direction to be analyzed
-#OUTPUT
+# Output
 - `triangles::Transpose{Float64,Matrix{Float64}}`       :triangles that pass the culling filter
 """
 

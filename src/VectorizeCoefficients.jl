@@ -5,11 +5,11 @@ include("unitaryDirections.jl")
 
 Provide a vectorial direction to all `coeffs_vec = coefficients.*area` and find the resultant direction
 
-#INPUT
+# Input
 - `aero_coeffs::Vector`
 - `normals::Vector`
 - `Vrel_v::Vector`
-#OUTPUT
+# Output
 - `coeffs_vec::Vector{Vector{Float64}}`
 """
 

@@ -5,10 +5,10 @@ using LinearAlgebra
 
 Obtain the directions of the drag, lift, shear and pressure coefficients on a plate
 
-#INPUTS
+# Inputs
 -`velocity::Vector`
 -`normal::Vector`
-#OUTPUTS
+# Outputs
 -`u_D::Vector`
 -`u_L::Vector`
 -`u_tau::Vector`

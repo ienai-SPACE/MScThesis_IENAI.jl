@@ -25,14 +25,14 @@ end
 
 Create a 2D matrix as function of azimuth and elevation storing the projected `Aproj` and total area `Aref`, and the specific data of each impinged element `OutLMNTs`
 
-#INPUTS:
+# Inputs:
 - `rmax`            : radius of the circular plane from where rays originate
 - `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
 - `convexFlag`      :1 for convex, 0 for non-convex
 - `MeshVerticesCoords::Matrix`  : coordinates of the vertices of all area elements
 - `step::Float64`               : step used in the definition of `α::StepRangeLen{Float64}` `ϕ::StepRangeLen{Float64}`
 
-#OUTPUTS:
+# Outputs:
 - `AlphaPhiStorage:: Matrix(undef, lastindex(ϕ), lastindex(α))`     : it contains `SweepStorage{Float64}` with fields `azimuth`, `altitude`, `Aproj`, `Aref`, `OutLMNTs`
 - `AprojLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`          : matrix storing the projected areas for each α, ϕ pair 
 """

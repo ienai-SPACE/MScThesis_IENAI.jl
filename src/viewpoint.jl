@@ -16,12 +16,12 @@ end
 
 Storage of: viewpoint information (azimuth and elevation wrt to local reference frame), maximum Euclidean distance (`rmax`), and `distance` to a perpendicular plane
 
-#INPUTS
+# Inputs
 - `rmax::T`
 - `distance::T`
 - `azimuth::T`
 - `elevation::T`
-#OUTPUTS
+# Outputs
 - `Viewpoint{T}`  : fields are `rmax`, `distance`, `dir`
 """
 
@@ -40,11 +40,11 @@ end
 
 Storage of: viewpoint information (azimuth and elevation wrt to local reference frame), maximum Euclidean distance (`rmax`), and `distance` to a perpendicular plane
 
-#INPUTS
+# Inputs
 - `rmax::T`
 - `distance::T`
 - `Vrel::Vector{T}`
-#OUTPUTS
+# Outputs
 - `Viewpoint{T}`        : fields are `rmax`, `distance`, `dir`
 """
 

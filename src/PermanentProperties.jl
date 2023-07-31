@@ -35,6 +35,7 @@ SurfaceAtomProperties(; atomic_mass=amass) = SurfaceAtomProperties(atomic_mass /
 
 const Aluminum = SurfaceAtomProperties(4.48e-23, 26.9815)
 const Silicon = SurfaceAtomProperties(4.664e-23, 28.0855)
+const Monocrystalline_Silicon = SurfaceAtomProperties(5.333651448335449e-23, 32.12)
 
 """
     SolarMatProps{T} 

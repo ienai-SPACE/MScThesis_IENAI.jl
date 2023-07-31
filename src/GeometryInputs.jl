@@ -23,21 +23,18 @@ struct Geometry{GT,F<:Face} <: AbstractGeometry{GT}
 end
 
 """
-    HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
+    HomogeneousGeometry{GT,F<:FaceGeometry} <: AbstractGeometry{GT}
 
 - `faces::Vector{F}`
 - `surface_props::SurfaceProps{T}`
 - `rmax::Float64`
 """
-
-struct HomogeneousGeometry{GT,T,F<:FaceGeometry} <: AbstractGeometry{GT}
+struct HomogeneousGeometry{GT,F<:FaceGeometry} <: AbstractGeometry{GT}
     faces::Vector{F}
-    indices::Vector{T}
-    # surface_props::SurfaceProps{T}
     rmax::Float64
-    function HomogeneousGeometry{GT}(faces::Vector{F}, indices::Vector{T}) where {GT,F,T}
+    function HomogeneousGeometry{GT}(faces::Vector{F}) where {GT,F}
         rmax = maximum([_max_coord_euclidean(face) for face in faces])
-        new{GT,T,F}(faces, indices, rmax)
+        new{GT,F}(faces, rmax)
     end
 end
 
@@ -59,17 +56,16 @@ n_faces(geo::AbstractGeometry) = length(geo.faces)
 unit_dict = Dict("m" => 1, "mm" => 1e-3)
 
 """
-    load_geometry(path, surface_props::SurfaceProps, is_convex::Bool, units::String)
+    load_geometry(path, is_convex::Bool, units::String)
 
-#INPUTS
+# Inputs
 - `path
 - `surface_props::SurfaceProps`
 - `is_convex::Bool`
 - `units::String`
-#OUTPUTS
+# Outputs
 - `HomogeneousGeometry{gtype}(faces, surface_props)`
 """
-
 function load_geometry(path, is_convex::Bool, units::String)
     scale_factor = unit_dict[units]
     mesh = load(path)
@@ -80,10 +76,21 @@ function load_geometry(path, is_convex::Bool, units::String)
         push!(faces, face_geometry)
     end
     gtype = is_convex ? Convex : NonConvex
-    indices = collect(1:length(faces))
-    HomogeneousGeometry{gtype}(faces, indices)
+    HomogeneousGeometry{gtype}(faces)
 end
 
+"""
+    load_geometry(path, materials_path, is_convex::Bool, units::String)
+
+# Inputs
+- `path
+- `surface_props::SurfaceProps`
+- `is_convex::Bool`
+- `units::String`
+
+# Outputs
+- `Geometry{gtype}(faces)`
+"""
 function load_geometry(path, materials_path, is_convex::Bool, units::String)
     mesh_facets, materials = load_material_properties(materials_path)
     materials = [SurfaceAtomProperties(; atomic_mass=material["atomic mass"]) |> SurfaceProps for material in materials]
@@ -107,14 +114,13 @@ end
 """
     Viewpoint(geo::AbstractGeometry, azimuth, elevation)
 
-#INPUTS
+# Inputs
 - `geo::AbstractGeometry`
 - `azimuth`
 - `elevation`
-#OUTPUTS
+# Outputs
 - `Viewpoint(rmax, distance, azimuth, elevation)`
 """
-
 function Viewpoint(geo::AbstractGeometry, azimuth, elevation)
     rmax = get_rmax(geo)
     distance = 100 * rmax
@@ -124,10 +130,10 @@ end
 """
     Viewpoint(geo::AbstractGeometry, , Vdir)
 
-#INPUTS
+# Inputs
 - `geo::AbstractGeometry`
 - `Vdir:: Vector`
-#OUTPUTS
+# Outputs
 - `Viewpoint(rmax, distance, azimuth, elevation)`
 """
 function Viewpoint(geo::AbstractGeometry, Vdir)
@@ -138,18 +144,6 @@ end
 
 get_rmax(geo::AbstractGeometry) = geo.rmax
 
-# regular Geometry
-# function load_geometry(path, surface_props::SurfaceProps, is_convex::Bool)
-#     mesh = load(path)
-#     faces = Face{TriangleFace{Float64},Float64}[]
-#     for triangle in mesh
-#         points = map(i -> triangle.points[i].data |> SVector{3,Float64}, 1:3)
-#         geometry = TriangleFace(points...)
-#         push!(faces, Face(geometry, surface_props))
-#     end
-#     gtype = is_convex ? Convex : NonConvex
-#     Geometry{gtype}(faces)
-# end
 
 export load_geometry
 
@@ -162,11 +156,11 @@ Define whether the object is convex or non-convex
 Define if the direction of "particle impingement" is set manually or by the velocity vector
 Load the the meshed element
 
-#INPUT:
+# Input:
 - `Vrel_v`      : [m/s] relative velocity vector
 - `VdirFlag`   : flag for direction criterion
 - `convexFlag` : flag = 1 for convex shape and flag = 0 for non-convex
-#OUTPUT:
+# Output:
 - `MeshVerticesCoords`
 - `dir`
 - `rmax`, distance
@@ -174,7 +168,6 @@ Load the the meshed element
         - rmax               : radius of the source for ray-tracing algorithm
         - distance           : distance between source origin and local coordinate system for ray-tracing algorithm
 """
-
 function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
 
@@ -215,12 +208,11 @@ end
 
 Calculate the euclidean norm from the datum of the body reference frame to the furthest point in the object
 
-#INPUT
+# Input
 - `MeshVerticesCoords::Matrix{Float64}`
-#OUTPUT
+# Output
 - 'rmax = maximum(_maxVertex)'
 """
-
 function euclidean_norm(MeshVerticesCoords::Matrix{Float64})
     Ntri = lastindex(MeshVerticesCoords[:, 1])
     maxVertex = [0.0, 0.0, 0.0]
@@ -239,10 +231,10 @@ end
 
 Calculate the angle between two vectors (the velocity direction vector and the normal vector of the surface)
 
-#INPUT
+# Input
 - `dir`
 - `normal`          :either scalar or vector may be used
-#OUTPUT
+# Output
 - `gamma = acos.(dp_v) `
 """
 function angle_V_n(dir, normal)
@@ -256,27 +248,15 @@ end
 
 Filter out all the non-forward facing face_vertices
 
-#INPUT
+# Input
 - `geometry::HomogeneousGeometry{GT}`
 - `viewpoint::Viewpoint`
-#OUTPUTS
+# Outputs
 - `HomogeneousGeometry{GT}(new_faces, new_indices)`
 """
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
-    counter = 0
-    new_indices = []
-    for ii ∈ 1:length(geometry.faces)
-        if is_visible(geometry.faces[ii], viewpoint)
-            counter += 1
-            if counter == 1
-                new_indices = geometry.indices[ii]
-            else
-                new_indices = vcat(new_indices, geometry.indices[ii])
-            end
-        end
-    end
-    HomogeneousGeometry{GT}(new_faces, new_indices)
+    HomogeneousGeometry{GT}(new_faces)
 end
 
 function filter_backfaces(geometry::Geometry{GT}, viewpoint::Viewpoint) where {GT}
@@ -290,10 +270,10 @@ end
 
 Forward-facing check
 
-#INPUT
+# Input
 - `face::TriangleFace`
 - `viewpoint::Viewpoint`
-#OUTPUT
+# Output
 - ::Bool
 """
 function is_visible(face::TriangleFace, viewpoint::Viewpoint)
@@ -304,11 +284,16 @@ end
 
 is_visible(face::Face, viewpoint) = is_visible(face.geometry, viewpoint)
 
+"""
+    shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint)
+    
+It calls the function `Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)` to adapt the viewpoint to the filtered geometry
+"""
 shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal
-face_idx(geometry::HomogeneousGeometry, idx) = geometry.indices[idx]
+# face_idx(geometry::HomogeneousGeometry, idx) = geometry.indices[idx]
 face_area(geometry::Geometry, idx) = geometry.faces[idx].geometry.area
 face_vertices(geometry::Geometry, idx) = geometry.faces[idx].geometry.vertices
 face_normal(geometry::Geometry, idx) = geometry.faces[idx].geometry.normal
@@ -336,11 +321,11 @@ end
 
 Interpolator to access the look-up table
 
-#INPUT
+# Input
 - `_look_up_table::Matrix`
 - `aa_in`               : alpha [deg] value to be accessed in the look-up table
 - `pp_in`               : phi [deg] value to be accessed in the look-up table
-#OUTPUT
+# Output
 - `P(pp_in, aa_in)`     : Interpolated value of the look-up table
 """
 function interpolator(_look_up_table::Matrix, aa_in, pp_in)

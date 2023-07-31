@@ -5,9 +5,9 @@ include("culling.jl")
 
 Return the normal of a triangle
 
-#INPUT
+# Input
 - `triangle::Vector`
-#OUTPUT
+# Output
 - `normal::SVector{3, T}`
 """
 
@@ -23,10 +23,10 @@ end
 
 Identify intercepted triangles by the MT algorithm and filter out back-face intersections. Add index to each intercepted triangle.
 
-#INPUTS
+# Inputs
 - `triangles::Transpose{Float64,Matrix{Float64}}`
 - `ray::Ray`
-#OUTPUTS
+# Outputs
 - `rti :: MTalgorithm(face, ray)`
 """
 
@@ -55,10 +55,10 @@ end
 
 Identify intercepted triangles by the MT algorithm and filter out back-face intersections. Add index to each intercepted triangle.
 
-#INPUTS
+# Inputs
 - `geo::HomogeneousGeometry`
 - `ray::Ray`
-#OUTPUTS
+# Outputs
 - `rti :: MTalgorithm(face, ray)`
 """
 
@@ -80,12 +80,12 @@ end
 Obtain the areas of triangular elements that are impinged by the oncoming particles. 
 A ray-tracing algorithm is used. The sampler for the generation of the rays can be selected.
 
-#INPUT:
+# Input:
 - `MeshVertices::Matrix`   : coordinates of each vertex in the format [x1y1z1x2y2z2x3y3z3;...]
 - `dir`                 : vector with the direction to be analyzed
 - `rmax`                : radius of the circular plane from where the rays are originated  
 - `distance`            : distance of the perpendicular plane from where the rays are originated
-#OUTPUT:
+# Output:
 - `OutTriangles::Matrix(6,_)` : it stores index (1), area (2), angle (3), triangle's normal (4,5,6)
 """
 function areasConcave(dir, rmax, distance, MeshVertices, Ntri)

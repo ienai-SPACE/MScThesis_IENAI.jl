@@ -22,14 +22,14 @@ end
 
 Create a 2D matrix as function of azimuth and elevation storing the projected `Aproj` and total area `Aref`, and the aerodynamic coefficients
 
-#INPUTS:
+# Inputs:
 - `geo::AbstractGeometry`
 - `grid::Grid{T}`       : with fields `alpha::Vector` and `phi::Vector`
 - `outSurfaceProps::SurfaceProps{T}`
 - `outGasStreamProps::GasStreamProperties{T}`
 - `Vrel_v::Vector`
 
-#OUTPUTS:
+# Outputs:
 - `AlphaPhiStorage:: Matrix(undef, lastindex(ϕ), lastindex(α))`     : it contains `SweepStorage{Float64}` with fields `azimuth`, `altitude`, `Aproj`, `Aref`, `OutLMNTs`
 - `AprojLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`          : matrix storing the projected areas for each α, ϕ pair 
 - `CdLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`

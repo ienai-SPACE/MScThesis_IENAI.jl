@@ -10,7 +10,6 @@ include("materialInputs.jl")
 - `area::Vector{T}`
 - `angle::Vector{T}`
 """
-
 struct OutGeometry{T}
     area::Vector{T}
     angle::Vector{T}
@@ -21,20 +20,19 @@ end
 _eltype(::OutGeometry{T}) where {T} = T
 
 
-homogeneity_dict = Dict("homogeneous" => 1, "heterogeneous" => 2)
 
 """ 
     areas(rmax, distance, dir, triangles, convexFlag)
 
 Obtaining all the areas and perpendicular angles of the triangular mesh elements that have been intercepted by the rays 
         - It has two inner functions `areasConvex(vertices, dir)` and `areasConcave(dir, rmax, distance, triangles, Ntri)`, for convex and non-convex shapes, respectively
-#INPUT:
+# Input:
 - `rmax`            : radius of the circular plane from where rays originate
 - `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
 - `dir`             : direction of the oncoming particle
 - `triangles`       : vertices coordinates of the triangular/quad mesh element
 - `convexFlag`      :1 for convex, 0 for non-convex
-#OUTPUT:
+# Output:
 - `OutLMNTs:: OutGeometry{T}`                                   : struct of 3 fields (`area`, `angle`, and `normals`) each containing a vector with the respective magnitude of all intercepted surfaces
 - `InteractionGeometry_v::Vector{InteractionGeometry{T}}`       : vector of struct storing the areas and angles of all intercepted surfaces       
 - `Aproj`                                                       : projection of the intercepted triangular areas onto the selected direction 
@@ -121,18 +119,17 @@ end
 
 For convex shapes: calculation of reference and projected areas, and normals and areas of each forward-facing element
 
-#INPUTS
+# Inputs
 - `rmax`            : radius of the circular plane from where rays originate
 - `distance`        : distance at which the circular plane is located (it should be out from the satellite body)
 - `dir`             : direction of the oncoming particle
 - `triangles`       : vertices coordinates of the triangular/quad mesh element
-#OUTPUTS
+# Outputs
 - `OutLMNTs:: OutGeometry{T}`                                   : struct of 3 fields (`area`, `angle`, and `normals`) each containing a vector with the respective magnitude of all intercepted surfaces
 - `InteractionGeometry_v::Vector{InteractionGeometry{T}}`       : vector of struct storing the areas and angles of all intercepted surfaces       
 - `Aproj`                                                       : projection of the intercepted triangular areas onto the selected direction 
 - `Aref`                                                        : sum of all intercepted triangular areas
 """
-
 function areas_nonconvex(rmax, distance, dir, triangles)
 
     #Number of triangles
@@ -186,14 +183,13 @@ export OutGeometry
 """
     analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
-#INPUTS
--`geometry::AbstractGeometry`
--`viewpoint::Viewpoint`
-#OUTPUTS
+# Inputs
+- `geometry::AbstractGeometry`
+- `viewpoint::Viewpoint`
+# Outputs
 - `areas_convex(geometry, viewpoint)`
 - `areas_nonconvex(geometry, viewpoint)`
 """
-
 function analyze_areas(geometry::AbstractGeometry, viewpoint::Viewpoint)
     if is_convex(geometry)
         return areas_convex(geometry, viewpoint)
@@ -205,10 +201,10 @@ end
 """
     areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
-#INPUTS
+# Inputs
 -`geometry::AbstractGeometry`
 -`viewpoint::Viewpoint`
-#OUTPUTS
+# Outputs
 - `Aproj`
 - `Aref`
 - `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and incidence angles of intercepted triangles, ordered in increasing index
@@ -229,10 +225,9 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
-    face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
+    # face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
     # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
-    # _face_indices = [face_idx(filtered_geometry, idx) for idx in hit_idx]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
@@ -240,7 +235,6 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     if is_homogeneous(geometry)
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
 
-        #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
     else
         intercept_info = map(ii -> InteractionGeometryHetero(
                 _face_areas[ii],
@@ -251,47 +245,48 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, filtered_geometry, hit_idx
+    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry, culling_ratio, hit_idx
 end
 
 
 """
     areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
-#INPUTS
+# Inputs
 -`geometry::AbstractGeometry`
 -`viewpoint::Viewpoint`
-#OUTPUTS
+# Outputs
 - `Aproj`
 - `Aref`
 - `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and angles of intercepted triangles, ordered in increasing index
 - `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
 """
-function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint, matDist::String)
+function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
     #Number of triangles
     Ntri = n_faces(filtered_geometry)
-    #Calculate areas
-    Aproj = sum(projection(filtered_geometry, viewpoint, Ntri))
-    Atot = sum([filtered_geometry.faces[idx].area for idx in 1:Ntri])
 
     _face_areas = [face_area(filtered_geometry, idx) for idx in 1:Ntri]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
-    _face_indices = [face_idx(filtered_geometry, idx) for idx in 1:Ntri]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
 
-    # intercept_info = map(ii -> InteractionGeometry(_face_areas[ii], _face_angles[ii]), 1:Ntri)
-    if homogeneity_dict[matDist] == 1 #homogeneous --> single material
+    #Calculate areas
+    Aproj = sum(projection(filtered_geometry, viewpoint, Ntri))
+    Aref = sum([_face_areas[ii] for ii in 1:Ntri])
+
+    if is_homogeneous(geometry)
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:Ntri)
 
-        #TODO: CHECK THAT _face_indices IS DOING THE JOB RIGHT
-    elseif homogeneity_dict[matDist] == 2 #heterogeneous --> more than one material 
-        mesh_facets_material, materials = load_material_properties()
-        intercept_info = map(ii -> InteractionGeometryHetero(_face_areas[ii], _face_angles[ii], materials[mesh_facets_material[_face_indices[ii]]["material_index"]+1]["atomic mass"]), 1:Ntri)
+    else
+        intercept_info = map(ii -> InteractionGeometryHetero(
+                _face_areas[ii],
+                _face_angles[ii],
+                filtered_geometry.faces[ii].properties.m_srf
+            ), 1:Ntri)
     end
 
-    return Aproj, Atot, intercept_info, _face_normals
+    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry
 end
 
 """
@@ -299,17 +294,16 @@ end
 
 Perform back-face culling and ray-tracing
 
-#INPUTS
+# Inputs
 - `geometry::AbstractGeometry`      : storage of information about the 3D CAD model
 - `viewpoint::Viewpoint`
 - `sampler`                         : identification of Fibonacci, Monte Carlo or Grid Filter sampling methods
-#OUTPUTS
+# Outputs
 - `rt_vec`                          : distance from origin of local ref.frame to the perpendicular source plane
 - `w`                               : weight = (pi * rmax^2) / (number of rays)
 - `filtered_geometry`               : only faces that have been intercepted by the rays
 - `Aray`                            : area of each ray [m^2]
 """
-
 function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     Ntri = n_faces(geometry)
     Ntri_preculling = Ntri
@@ -337,6 +331,20 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     return rt_vec, w, filtered_geometry, Aray
 end
 
+"""
+    _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
+
+Aid `raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)` function in performing its tasks
+
+# Inputs
+- `filtered_geometry::AbstractGeometry`      : storage of information about the 3D CAD model
+- `new_viewpoint::Viewpoint`
+- `sampler`                         : identification of Fibonacci, Monte Carlo or Grid Filter sampling methods
+# Outputs
+- `rt_vec`                          : distance from origin of local ref.frame to the perpendicular source plane
+- `w`                               : weight = (pi * rmax^2) / (number of rays)
+- `Aray`                            : area of each ray [m^2]
+"""
 function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     dir = viewpoint.direction
     rmax = viewpoint.rmax

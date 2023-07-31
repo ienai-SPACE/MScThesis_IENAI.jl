@@ -25,11 +25,11 @@ end
 """
 permProps(Gindex, Mindex, Sindex)
 
-#INPUTS:
+# Inputs:
 - `Gindex`        : gas element (mass) identifier
 - `Mindex`        : material (solar radiation) identifier
 - `Sindex`        : material surface (masses) identifier
-#OUTPUTS
+# Outputs
 - `gasProperties`
 """
 
@@ -55,7 +55,7 @@ function permProps(Gindex, Mindex, Sindex)
 
 
 
-    #Output parameters:
+    # Output parameters:
 
     return gasProperties[Gindex].mass
 
