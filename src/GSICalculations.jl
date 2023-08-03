@@ -16,7 +16,6 @@ Reference: [DOORNBOS 2012, Thermospheric Density and Wind Determination from Sat
 -`Cp_facet`     : Pressure Coefficient
 -`Ctau_facet`   : Shear Coefficient
 """
-
 function DRIA_GSI(element_interaction, gasprops, Vrel, normals)
 
     δ = element_interaction.δ

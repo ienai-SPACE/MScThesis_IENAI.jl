@@ -11,7 +11,6 @@ Load .json file linking the facet index with its corresponding surface material
 - `mesh_facets::Vector`     : vector of `Dict{String, Any}` containing the field `"material_index"` (indexing starts in 0). The field `"material_index"` corresponds to the position of the material in the vector `materials`
 - `materials::Vector`       : vector of `Dict{String, Any}` containing the fields `"name"` and `"atomic mass"`
 """
-
 function load_material_properties(path)
     # pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
     # Load the materials and mesh facets from "materials.json" file

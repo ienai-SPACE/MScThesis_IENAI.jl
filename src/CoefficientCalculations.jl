@@ -9,7 +9,6 @@ include("VectorizeCoefficients.jl")
 - `SRF::T`  : molecular mass of the surface atom
 - `Tw::T`   : temperature at the wall
 """
-
 struct ElementInteractionProps{T}
     δ::T
     SRF::T
@@ -27,7 +26,6 @@ abstract type InteractionGeometry end
 - `area::T`       : [m^2]
 - `angle::T`      : [rad]
 """
-
 struct InteractionGeometryHomo{T} <: InteractionGeometry
     area::T
     angle::T
@@ -73,9 +71,7 @@ end
 - `CP_dir::Vector{T}`
 - `CTau_norm::T`
 - `CTau_dir::Vector{T}`
-
 """
-
 struct CoefficientsVectorized{T}
     CD_norm::T
     CD_dir::Vector{T}
@@ -135,7 +131,6 @@ Compute the toal drag, lift, pressure, and shear coefficients evaluated for a si
 # Output:
 - `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
 """
-
 function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHomo, Vrel_v, normals)
     element_interaction = ElementInteractionProps(surfprops, surfprops.m_srf, intgeo.angle)
     Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, normals)
@@ -155,7 +150,6 @@ Compute the toal drag, lift, pressure, and shear coefficients evaluated for a si
 # Output:
 - `AerodynamicCoefficients(Cd, Cl, Cp, Ctau)`
 """
-
 function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::InteractionGeometryHetero, Vrel_v, normals)
     element_interaction = ElementInteractionProps(surfprops, intgeo.material, intgeo.angle)
     Cd, Cl, Cp, Ctau = DRIA_GSI(element_interaction, gasprops, Vrel_v, normals)
@@ -177,7 +171,6 @@ Compute the toal drag, lift, pressure, and shear coefficients evaluated for all 
 - `Atot::Float64`                    : [m^2]
 - `Aproj:.Float64`                   : [m^2]
 """
-
 function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::Vector{<:InteractionGeometry}, Vrel_v, normals)
     aero_coeffs = map(intgeo) do intgeo
         compute_coefficients(surfprops, gasprops, intgeo, Vrel_v, normals)

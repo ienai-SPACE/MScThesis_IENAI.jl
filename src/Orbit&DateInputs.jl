@@ -13,9 +13,6 @@ Define orbital elements and date to obtain relative velocity of the satellite an
 - `ap`
 - `Vrel_v`      : relative velocity vector [m/s]
 """
-
-
-
 function OrbitandDate()
 
     #Orbital elements

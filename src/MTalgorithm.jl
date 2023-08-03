@@ -4,7 +4,6 @@
 - `origin::SV3{T}`
 - `direction::SV3{T}`
 """
-
 struct Ray{T}
     origin::SV3{T}
     direction::SV3{T}
@@ -28,7 +27,6 @@ end
 - `area::T`
 - `face_index::Int64`
 """
-
 struct RayTriangleIntersection{T}
     mode::IntersectionMode
     t::T
@@ -49,7 +47,6 @@ Select which of the two input magnitudes is the biggest one
 - `rti1::RayTriangleIntersection`
 - `rti2::RayTriangleIntersection`
 """
-
 function earlier_intersection(rti1::RayTriangleIntersection, rti2::RayTriangleIntersection)
     if rti1.mode == NoIntersection
         return rti2
@@ -77,7 +74,6 @@ Also, calculate the area of the triangular element and angle between the triangl
 # Output
 - `RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0)`     : it contains the fields `mode::IntersectionMode`, `t::T`, `γ_dir::T` [rad], `area::T` [m^2], `face_index::Int64`
 """
-
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
 
     Vdir = -ray.direction

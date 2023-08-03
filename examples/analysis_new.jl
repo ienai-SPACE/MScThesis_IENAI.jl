@@ -11,9 +11,9 @@ mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "boxMesh.
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "facetMaterials.json")
 
 #HETEROGENEOUS CASE
-geo = load_geometry(mesh_path, materials_path, true, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+# geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 #HOMOGENEOUS CASE
-# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 # VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
 # writedlm("GRACE_VERTICES.txt", VERTICES)
@@ -26,14 +26,14 @@ outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)
 
 α = deg2rad(90)
 ϕ = deg2rad(90)
-v = Viewpoint(geo, α, ϕ)
-# v = Viewpoint(geo, Vrel_v)
+# v = Viewpoint(geo, α, ϕ)
+v = Viewpoint(geo, Vrel_v)
 
 #DRIA - Sphere
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Aref, intercept_info, normals, filteredGeo = analyze_areas(geo, v)
+Aproj, Aref, intercept_info, normals, filteredGeo, culling, sampler2, dir2, rmax2, distance2 = analyze_areas(geo, v)
 
 
 
@@ -65,3 +65,30 @@ SatelliteGeometryCalculations.tock()
 # println("CD_inhouse = ", coeffs[1])
 # println("CD_DRIA = ", CD_sph)
 
+#CHECK TEST:
+# using SatelliteGeometryCalculations, DelimitedFiles
+
+# using FilePathsBase
+# using FilePathsBase: /
+
+# pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+# mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
+# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+# α = deg2rad(90)
+# ϕ = deg2rad(90)
+# v = Viewpoint(geo, α, ϕ)
+
+# abstract type RaySampler end
+# struct FibonacciSampler <: RaySampler
+#     ray_density::Float64 # rays / m²  
+
+# end
+# samplerF = FibonacciSampler(1e5)
+# sampler = samplerF
+
+# O, Norig, Aray = SatelliteGeometryCalculations.generate_ray_origins(sampler, v.direction, v.rmax, v.distance)
+
+# rti_vec, w, filtered_geometry, Aray = SatelliteGeometryCalculations.raytrace(geo, v, sampler)
+
+# rti_vec, w, filtered_geometry, Aray = SatelliteGeometryCalculations.areas_nonconvex(geo, v)

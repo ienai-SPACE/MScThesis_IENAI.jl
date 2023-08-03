@@ -14,7 +14,6 @@ Obtain the directions of the drag, lift, shear and pressure coefficients on a pl
 -`u_tau::Vector`
 -`u_P::Vector`
 """
-
 function unitaryDirections(velocity, normal)
 
     #Depending on the numbering direction of the triangle, normals will go in one or another direction

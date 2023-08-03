@@ -218,7 +218,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
-    rti_vec, w, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
+    rti_vec, w, filtered_geometry, Aray, sampler2, dir2, rmax2, distance2 = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
     Aproj = w * length(valid_rti)
 
@@ -245,7 +245,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry, culling_ratio, hit_idx
+    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry, culling_ratio, sampler2, dir2, rmax2, distance2
 end
 
 
@@ -309,8 +309,6 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     Ntri_preculling = Ntri
 
     #Preculling: Meshed satellite
-    # _face_vertices_preCulling = [face_vertices(geometry, idx) for idx in 1:Ntri]
-    # _face_normals_preCulling = [face_normal(geometry, idx) for idx in 1:Ntri]
     println("Ntri_preculling=", Ntri_preculling)
     println("max in MeshVertices (preculling)=", viewpoint.rmax)
     println("viewpoint.direction=", viewpoint.direction)
@@ -320,15 +318,13 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     #Number of triangles
     Ntri = n_faces(filtered_geometry)
-    # _face_vertices_preRT = [face_vertices(filtered_geometry, idx) for idx in 1:Ntri]
-    # _face_normals_preRT = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
 
     new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
     println("culling ratio =", Ntri / Ntri_preculling)
 
-    rt_vec, w, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
+    rt_vec, w, Aray, sampler2, dir2, rmax2, distance2 = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
-    return rt_vec, w, filtered_geometry, Aray
+    return rt_vec, w, filtered_geometry, Aray, sampler2, dir2, rmax2, distance2
 end
 
 """
@@ -352,8 +348,6 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     Ntri = n_faces(geometry)
     println("Ntri in _raytrace=", Ntri)
-    # _face_vertices_preRT2 = [face_vertices(geometry, idx) for idx in 1:Ntri]
-    # _face_normals_preRT2 = [face_normal(geometry, idx) for idx in 1:Ntri]
 
     m = Map(jj -> begin
         orig = O[jj]
@@ -363,7 +357,7 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     rti_vec = 1:Norig |> m |> tcollect
 
-    return rti_vec, (pi * rmax^2) / (Norig), Aray
+    return rti_vec, (pi * rmax^2) / (Norig), Aray, sampler, dir, rmax, viewpoint.distance
 end
 
 export analyze_areas

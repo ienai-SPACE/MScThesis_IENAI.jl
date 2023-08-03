@@ -21,10 +21,20 @@ Documenter.makedocs(root=joinpath(@__DIR__),
                         "reference/types.md",
                         "reference/functions.md"
                 ],
-        ],
+                "Explanation" => [
+                        "Explanation/explanation.md",
+                        "Explanation/input_output.md"
+                ],
+                "How-to guide" => [
+                        "how-to guide/example0.md",
+                        "how-to guide/example1.md",
+                        "how-to guide/example2.md",
+                        "how-to guide/example3.md",
+                        "how-to guide/example4.md"
+                ],],
         format=Documenter.HTML(
                 ansicolor=true,
                 prettyurls=get(ENV, "CI", nothing) == "true",
-                sidebar_sitename=false
+                sidebar_sitename=true
         )
 )

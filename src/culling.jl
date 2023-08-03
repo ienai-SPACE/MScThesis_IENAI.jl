@@ -9,7 +9,6 @@ Filter out all non-forward facing faces_hit_idx_nonunique
 # Output
 - `triangles::Transpose{Float64,Matrix{Float64}}`       :triangles that pass the culling filter
 """
-
 function culling(MeshVertices, Vdir)
     #Number of triangles
     Ntri = size(MeshVertices, 1)

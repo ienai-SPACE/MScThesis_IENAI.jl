@@ -12,7 +12,6 @@ Provide a vectorial direction to all `coeffs_vec = coefficients.*area` and find 
 # Output
 - `coeffs_vec::Vector{Vector{Float64}}`
 """
-
 function vectorizeCoeffs(aero_coeffs, normals, Vrel_v)
 
     coeffs_vec = [zeros(3), zeros(3), zeros(3), zeros(3)]

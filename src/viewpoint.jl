@@ -4,7 +4,6 @@
 - `distance::T`
 - `direction::SV3{T}`  
 """
-
 struct Viewpoint{T}
     rmax::T
     distance::T
@@ -24,7 +23,6 @@ Storage of: viewpoint information (azimuth and elevation wrt to local reference 
 # Outputs
 - `Viewpoint{T}`  : fields are `rmax`, `distance`, `dir`
 """
-
 function Viewpoint(rmax::T, distance::T, azimuth::T, elevation::T) where {T}
     α = azimuth
     ϕ = elevation
@@ -47,7 +45,6 @@ Storage of: viewpoint information (azimuth and elevation wrt to local reference 
 # Outputs
 - `Viewpoint{T}`        : fields are `rmax`, `distance`, `dir`
 """
-
 function Viewpoint(rmax::T, distance::T, Vrel::Vector{T}) where {T}
     Vdir = normalize(Vrel)
     dir = SV3(-Vdir)

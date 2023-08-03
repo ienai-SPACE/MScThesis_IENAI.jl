@@ -20,9 +20,7 @@ include("Areas.jl") #
 # include("NonConvex.jl")
 
 include("Orbit&DateInputs.jl")
-# include("IlluminationConvex.jl")        #NOT NEEDED: substituted by "areasSphericalInput.jl"
-# include("IlluminationNonConvex.jl")     #NOT NEEDED: substituted by "areasSphericalInput.jl"
-# include("DragOrientationConvex.jl")     #NOT NEEDED: substituted by "areasSphericalInput.jl"
+
 
 include("areasSphericalInput.jl")
 include("sweep.jl")
@@ -31,8 +29,6 @@ include("projection.jl")
 
 # include("VectorizeCoefficients.jl")
 
-# include("SweepConvex.jl")
-# include("SweepNonConvex.jl")
 
 end
 

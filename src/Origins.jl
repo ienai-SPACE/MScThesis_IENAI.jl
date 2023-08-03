@@ -1,3 +1,6 @@
+# using StaticArrays, LinearAlgebra
+# SV3{T} = SVector{3,T}
+##
 using Random
 
 abstract type RaySampler end
@@ -15,7 +18,6 @@ Definition of the method to be used to populate the disk of ray origins
 #field
 -`ray_density::Float64` : [rays / m²]
 """
-
 struct GridFilter <: RaySampler
     ray_density::Float64 # rays / m²
 end
@@ -40,7 +42,6 @@ Generate an orthogonal plane defined by unit vectors `v` and `w` w.r.t. the inpu
 -`v::Vector`
 -`w::Vector`
 """
-
 function generate_two_normals(u::SV3)
     u = normalize(u)
     v_trial = [1.0, 1.0, 1.0] |> normalize
@@ -69,7 +70,6 @@ Create a uniformly distributed source of rays
 -`Norig::Int`       : number of ray origins
 - `Aray`            : equivalent area of a ray
 """
-
 function generate_ray_origins(gf::GridFilter, dir, rmax, distance)
 
     dir = -dir #same sense as velocity vector
@@ -115,7 +115,6 @@ Source: http://extremelearning.com.au/how-to-evenly-distribute-points-on-a-spher
 -`Norig::Int`       : number of ray origins 
 - `Aray`            : equivalent area of a ray
 """
-
 function generate_ray_origins(gf::FibonacciSampler, dir, rmax, distance)
 
     dir = -dir #same sense as velocity vector
@@ -158,7 +157,6 @@ Source: Xuhong Jina et al,"Monte Carlo simulation for aerodynamic coefficients o
 -`Norig::Int`       : number of ray origins 
 - `Aray`            : equivalent area of a ray
 """
-
 function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
 
     dir = -dir #same sense as velocity vector
@@ -189,3 +187,8 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
     points_new, Int(length(points)), Aray
 end
 
+
+
+# samplerF = FibonacciSampler(1e5)
+# sampler = samplerF
+# O, Norig, Aray = generate_ray_origins(sampler, SV3(0.1, 0.1, 0.1), 0.5, 10.0)

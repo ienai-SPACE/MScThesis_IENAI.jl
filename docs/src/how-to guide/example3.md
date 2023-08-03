@@ -1,0 +1,1 @@
+# Example 3: full execution of the code
