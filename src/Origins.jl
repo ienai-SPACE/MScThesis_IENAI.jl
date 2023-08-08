@@ -187,7 +187,7 @@ function generate_ray_origins(gf::MonteCarloSampler, dir, rmax, distance)
     points_new, Int(length(points)), Aray
 end
 
-
+export FibonacciSampler, MonteCarloSampler, GridFilter
 
 # samplerF = FibonacciSampler(1e5)
 # sampler = samplerF

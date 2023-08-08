@@ -32,7 +32,7 @@ using FilePathsBase: /
     #---- Area calculations --------------------------------------------------------------------
     Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
-    @test Aproj ≈ 0.7773743802882257
+    @test Aproj ≈ 0.7773842779770798
     @test Aref ≈ 1.552052015831979
     @test length(intercept_info) == 308
     @test length(normals) == 308
@@ -78,7 +78,7 @@ end
     #---- Area calculations --------------------------------------------------------------------
     Aproj, Aref, intercept_info, normals = analyze_areas(geo, v)
 
-    @test Aproj ≈ 0.20992818441580555
+    @test Aproj ≈ 0.2099296370954245
     @test Aref ≈ 0.2099296371694464
     @test length(intercept_info) == 80
     @test length(normals) == 80
@@ -260,4 +260,52 @@ end
     Aproj = sum(SatelliteGeometryCalculations.projection(filtered_geometry, viewpoint, Ntri))
     @test Aproj ≈ 0.7773512745188897
 
+end
+
+@testset "sampler origins" begin
+    using SatelliteGeometryCalculations, DelimitedFiles
+
+    using FilePathsBase
+    using FilePathsBase: /
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    α = deg2rad(90)
+    ϕ = deg2rad(90)
+    v = Viewpoint(geo, α, ϕ)
+
+    samplerF = FibonacciSampler(1e5)
+    sampler = samplerF
+
+    O, Norig, Aray = SatelliteGeometryCalculations.generate_ray_origins(sampler, v.direction, v.rmax, v.distance)
+
+    @test Norig == 144515
+    @test Aray ≈ 9.999932351268763e-6
+    @test Aray * Norig / (pi * v.rmax^2) < 1.00001
+    @test Aray * Norig / (pi * v.rmax^2) > 0.99999
+end
+
+@testset "raytrace" begin
+    using SatelliteGeometryCalculations, DelimitedFiles
+
+    using FilePathsBase
+    using FilePathsBase: /
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "boxMesh.obj")
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    α = deg2rad(90)
+    ϕ = deg2rad(90)
+    v = Viewpoint(geo, α, ϕ)
+
+    samplerF = FibonacciSampler(1e5)
+    sampler = samplerF
+
+    rti_vec, filtered_geometry, Aray = SatelliteGeometryCalculations.raytrace(geo, v, sampler)
+
+    @test rti_vec[1].area ≈ 0.12499849701503256
+    @test Aray ≈ 9.999976615704741e-6
 end

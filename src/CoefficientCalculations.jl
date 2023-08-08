@@ -167,9 +167,7 @@ Compute the toal drag, lift, pressure, and shear coefficients evaluated for all 
 - `intgeo::Vector{<:InteractionGeometry}`
 - `Vrel_v::Vector{Float64}`
 # Output:
-- `AerodynamicCoefficients{Float64}` : total Cd, Cl, Cp, Ctau
-- `Atot::Float64`                    : [m^2]
-- `Aproj:.Float64`                   : [m^2]
+- `CoefficientsVectorized{T}` : magnitudes and directions of aerodynamic coefficients
 """
 function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProperties, intgeo::Vector{<:InteractionGeometry}, Vrel_v, normals)
     aero_coeffs = map(intgeo) do intgeo
@@ -181,20 +179,12 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
     angles = map(intgeo) do x
         x.angle
     end
-    # num = sum(aero_coeffs .* areas)
-    num = aero_coeffs .* areas
 
-    # print(normals, //)
+    num = aero_coeffs .* areas
 
     coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
 
-    # print(coeffs_vec, //)
-    # print(areas, //)
-    # print(cos.(angles), //)
-    # print(rad2deg.(angles), //)
-    # return scaled_coefficients = sum(C*A_i)/Aref, A_tot
     CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
-    # coeffs_vec ./ sum(areas .* cos.(angles)), sum(areas), sum(areas .* cos.(angles))
 end
 
 export InteractionGeometryHomo, InteractionGeometryHetero, compute_coefficients

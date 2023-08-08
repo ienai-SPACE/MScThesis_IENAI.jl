@@ -10,7 +10,7 @@ The outputs the software offers are:
 
 ## Inputs
 
-For both functionalities, information about the environmental and dynamic conditions, and geometry needs to be set.
+For both functionalities, information about the environmental and dynamic conditions, the geometry, and surface properties need to be set.
 
 * **Orbital information**: orbital elements are used to determine the relative velocity and altitude.
 * **Julian date, geodetic coordinates, and solar/magnetic indices**: as inputs of the atmospheric model.

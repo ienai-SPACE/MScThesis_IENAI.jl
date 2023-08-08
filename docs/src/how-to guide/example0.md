@@ -2,7 +2,7 @@
 
 ## Geometry input .obj file example
 
-As mentioned in the *Input/Output discussion*, it is essential that all triangular facets follow the same wind-up scheme. For this, an *.obj* file exported from *Blender* (after wind-up scheme unification) is a fast method to ensure input correctness.
+As mentioned in the [Inputs/Outputs discussion](@ref), it is essential that all triangular facets follow the same wind-up scheme. For this, an *.obj* file exported from *Blender* (after wind-up scheme unification) is a fast method to ensure input correctness.
 
 ```
 # Blender 3.5.1

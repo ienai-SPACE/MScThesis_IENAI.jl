@@ -218,9 +218,9 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
-    rti_vec, w, filtered_geometry, Aray, sampler2, dir2, rmax2, distance2 = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
+    rti_vec, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
-    Aproj = w * length(valid_rti)
+    Aproj = Aray * length(valid_rti)
 
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
@@ -245,7 +245,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry, culling_ratio, sampler2, dir2, rmax2, distance2
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
 end
 
 
@@ -260,6 +260,7 @@ end
 - `Aref`
 - `intercept_info::Vector{InteractionGeometry{Float64}}`                  : areas and angles of intercepted triangles, ordered in increasing index
 - `_face_normals::Vector{StaticArraysCore.SVector{3, Float64}}`           : normal vector of all intercepted triangles
+- `culling_ratio`
 """
 function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #back-face culling
@@ -286,7 +287,9 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
             ), 1:Ntri)
     end
 
-    return Aproj, Aref, intercept_info, _face_normals, filtered_geometry
+    culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
+
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
 end
 
 """
@@ -300,7 +303,6 @@ Perform back-face culling and ray-tracing
 - `sampler`                         : identification of Fibonacci, Monte Carlo or Grid Filter sampling methods
 # Outputs
 - `rt_vec`                          : distance from origin of local ref.frame to the perpendicular source plane
-- `w`                               : weight = (pi * rmax^2) / (number of rays)
 - `filtered_geometry`               : only faces that have been intercepted by the rays
 - `Aray`                            : area of each ray [m^2]
 """
@@ -322,9 +324,9 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
     println("culling ratio =", Ntri / Ntri_preculling)
 
-    rt_vec, w, Aray, sampler2, dir2, rmax2, distance2 = _raytrace(filtered_geometry, new_viewpoint, sampler)
+    rt_vec, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
-    return rt_vec, w, filtered_geometry, Aray, sampler2, dir2, rmax2, distance2
+    return rt_vec, filtered_geometry, Aray
 end
 
 """
@@ -338,7 +340,6 @@ Aid `raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)` functi
 - `sampler`                         : identification of Fibonacci, Monte Carlo or Grid Filter sampling methods
 # Outputs
 - `rt_vec`                          : distance from origin of local ref.frame to the perpendicular source plane
-- `w`                               : weight = (pi * rmax^2) / (number of rays)
 - `Aray`                            : area of each ray [m^2]
 """
 function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
@@ -357,7 +358,7 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     rti_vec = 1:Norig |> m |> tcollect
 
-    return rti_vec, (pi * rmax^2) / (Norig), Aray, sampler, dir, rmax, viewpoint.distance
+    return rti_vec, Aray
 end
 
 export analyze_areas

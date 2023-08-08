@@ -17,10 +17,6 @@ Documenter.makedocs(root=joinpath(@__DIR__),
         expandfirst=[],
         pages=[
                 "Home" => "intro.md",
-                "Reference" => [
-                        "reference/types.md",
-                        "reference/functions.md"
-                ],
                 "Explanation" => [
                         "Explanation/explanation.md",
                         "Explanation/input_output.md"
@@ -31,7 +27,14 @@ Documenter.makedocs(root=joinpath(@__DIR__),
                         "how-to guide/example2.md",
                         "how-to guide/example3.md",
                         "how-to guide/example4.md"
-                ],],
+                ],
+                "Geometries and materials repository" => "geometries_repo.md",
+                "Validation and Verification" => "VnV.md",
+                "Reference" => [
+                        "reference/types.md",
+                        "reference/functions.md"
+                ]
+        ],
         format=Documenter.HTML(
                 ansicolor=true,
                 prettyurls=get(ENV, "CI", nothing) == "true",
