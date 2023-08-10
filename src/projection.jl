@@ -1,10 +1,10 @@
 """
-    projection(geo::AbstractGeometry, viewpoint::Viewpoint, Ntri)
+    projection(geo::HomogeneousGeometry, viewpoint::Viewpoint, Ntri)
 
 Projection of areas according to a viewpoint direction
 
 # Inputs
-- `geo::AbstractGeometry`
+- `geo::HomogeneousGeometry`
 - `viewpoint::Viewpoint`
 - `Ntri`
 # Outputs
@@ -27,6 +27,18 @@ function projection(geo::HomogeneousGeometry, viewpoint::Viewpoint, Ntri)
 end
 
 
+"""
+    projection(geo::Geometry, viewpoint::Viewpoint, Ntri)
+
+Projection of areas according to a viewpoint direction
+
+# Inputs
+- `geo::Geometry`
+- `viewpoint::Viewpoint`
+- `Ntri`
+# Outputs
+- vector of projected areas
+"""
 function projection(geo::Geometry, viewpoint::Viewpoint, Ntri)
 
     m = Map(jj -> begin

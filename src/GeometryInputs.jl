@@ -51,6 +51,11 @@ _max_coord_euclidean(face::Face) = _max_coord_euclidean(face.geometry)
 get_point_data(point) = point.main.data
 get_point_data(point::Point) = point.data
 
+"""
+    n_faces(geo::AbstractGeometry)
+
+Return the number of faces in `geo`
+"""
 n_faces(geo::AbstractGeometry) = length(geo.faces)
 
 unit_dict = Dict("m" => 1, "mm" => 1e-3)
@@ -170,8 +175,6 @@ Load the the meshed element
 """
 function GeomInputs(Vrel_v::Vector{Float64}, VdirFlag::Int64, convexFlag::Int64)
 
-
-
     #load the mesh
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
     mesh = load(pkg_path / "test" / "inputs_models_data" / "T_Sat_fineMesh.obj") #T_SatMesh  sphereMesh cubeMesh coneMesh T_Sat_fineMesh
@@ -259,6 +262,18 @@ function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoin
     HomogeneousGeometry{GT}(new_faces)
 end
 
+
+"""
+    filter_backfaces(geometry::Geometry{GT}, viewpoint::Viewpoint) where {GT}
+
+Filter out all the non-forward facing face_vertices
+
+# Input
+- `geometry::Geometry{GT}`
+- `viewpoint::Viewpoint`
+# Outputs
+- `Geometry{GT}(new_faces, new_indices)`
+"""
 function filter_backfaces(geometry::Geometry{GT}, viewpoint::Viewpoint) where {GT}
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
     Geometry{GT}(new_faces)

@@ -13,10 +13,8 @@ materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSA
 #HETEROGENEOUS CASE
 geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 #HOMOGENEOUS CASE
-# geo = load_geometry(mesh_path, true, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
-# VERTICES = [SatelliteGeometryCalculations.face_vertices(geo, idx) for idx in 1:length(geo.faces)]
-# writedlm("GRACE_VERTICES.txt", VERTICES)
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
 
@@ -45,8 +43,3 @@ coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, i
 println(coeffs)
 
 SatelliteGeometryCalculations.tock()
-
-
-# println("CD_inhouse = ", coeffs[1])
-# println("CD_DRIA = ", CD_sph)
-

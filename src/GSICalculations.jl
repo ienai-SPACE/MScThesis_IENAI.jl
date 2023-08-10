@@ -1,5 +1,6 @@
 using SpecialFunctions
 using StaticArrays
+
 """
     DRIA_GSI(element_interaction, gasprops, Vrel)
 
@@ -112,7 +113,6 @@ Reference: P. M. Mehta, A. Walker, C. Mclaughlin, and J. Koller, “Comparing ph
 - `cd_j::MMatrix`   : drag coefficient contribution for every gas species and both clean and contaminated surface (without mass or oxygen partial pressure scaling)
 - `sumM`            : sum of gas species molecular weights
 """
-
 function DRIA_sphere(SurfaceProps, gasprops, Vrel)
 
     C = gasprops.C

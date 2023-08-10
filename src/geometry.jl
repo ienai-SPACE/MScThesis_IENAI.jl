@@ -9,7 +9,6 @@ Calculate the area and the normal of a 3D triangular surface defined by three st
 - `area::T`
 - `normal::SVector{3,T}`
 """
-
 struct TriangleFace{T} <: FaceGeometry
     vertices::SVector{3,SV3{T}}
     area::T

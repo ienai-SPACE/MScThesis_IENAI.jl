@@ -10,7 +10,6 @@ Transform the input `mesh` into the approapriate format: x1y1z1x2y2z2x3y3z3 such
 
 -`MeshVerticesCoords`
 """
-
 function finputMesh(mesh; scale=1e-3) # assumes mm input by default
 
 

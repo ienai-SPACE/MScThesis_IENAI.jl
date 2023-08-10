@@ -1,4 +1,4 @@
 #using SatelliteGeometryCalculations
 using Test
 
-include("tests_a.jl")
+include("tests_v2.jl")

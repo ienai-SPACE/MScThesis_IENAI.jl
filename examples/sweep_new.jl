@@ -35,12 +35,12 @@ if sweepFlag == 1
 end
 
 ##---------- Interpolation --------------------------------------------------------------------
-interpFlag = 0
+interpFlag = 1
 if interpFlag == 1
-    _A_look_up_table = readdlm("GRACE_AprojLookUpTable.txt")
-    _Cd_look_up_table = readdlm("GRACE_CDlookup.txt")
-    alpha_in = 142
-    phi_in = -20
+    _A_look_up_table = readdlm("homo_TSAT_coarse_AprojLookUpTable.txt")
+    _Cd_look_up_table = readdlm("homo_TSAT_coarse_CDlookup.txt")
+    alpha_in = 0
+    phi_in = 90
 
     Aproj_int = SatelliteGeometryCalculations.interpolator(_A_look_up_table, alpha_in, phi_in)
     CD_int = SatelliteGeometryCalculations.interpolator(_Cd_look_up_table, alpha_in, phi_in)
