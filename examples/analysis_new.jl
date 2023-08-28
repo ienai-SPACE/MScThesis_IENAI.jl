@@ -1,5 +1,5 @@
 using SatelliteGeometryCalculations, DelimitedFiles
-
+#owenership check
 SatelliteGeometryCalculations.tick()
 
 using FilePathsBase
