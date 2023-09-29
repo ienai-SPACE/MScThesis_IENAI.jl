@@ -24,6 +24,8 @@ include("Orbit&DateInputs.jl")
 include("sweep_v2.jl")
 include("projection.jl")
 
+include("getCoP.jl")
+
 # include("VectorizeCoefficients.jl")
 
 

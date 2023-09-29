@@ -309,3 +309,50 @@ end
     @test rti_vec[1].area ≈ 0.12499849701503256
     @test Aray ≈ 9.999976615704741e-6
 end
+
+@testset "barycenter_triangle" begin
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "singleTriangle.obj")
+    #HOMOGENEOUS CASE
+    geo = load_geometry(mesh_path, true, "mm") #homogeneous, convex case
+
+
+    b = SatelliteGeometryCalculations.face_barycenters(geo, 1)
+    b_theo = [0, 0.2 / 3, 0]
+    eps = 1e-5
+    @test abs(b[1] - b_theo[1]) < eps
+    @test abs(b[2] - b_theo[2]) < eps
+    @test abs(b[3] - b_theo[3]) < eps
+
+end
+@testset "CoP_Circumference" begin
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "flatCircumference.obj")
+    #HOMOGENEOUS CASE
+    geo = load_geometry(mesh_path, true, "mm") #homogeneous, convex case
+
+    outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
+
+    #----Orbit and date inputs------------------------------------------------------------------
+    JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGas
+
+    α = deg2rad(0)  #rotate around z-axis
+    ϕ = deg2rad(90) #rotate around x-axis
+    v = Viewpoint(geo, α, ϕ)
+    # v = Viewpoint(geo, Vrel_v)
+
+    #DRIA - Sphere
+    # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v)
+
+    CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters)
+
+    CoP_theo = [0, 0, 0]
+    eps = 1e-5
+    @test abs(CoP[1] - CoP_theo[1]) < eps
+    @test abs(CoP[2] - CoP_theo[2]) < eps
+    @test abs(CoP[3] - CoP_theo[3]) < eps
+end

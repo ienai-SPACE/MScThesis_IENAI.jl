@@ -350,3 +350,49 @@ function interpolator(_look_up_table::Matrix, aa_in, pp_in)
     return P(pp_in, aa_in)  #[deg] P(phi, alpha)
 end
 
+
+"""
+    face_barycenters(filtered_geo::HomogeneousGeometry, idx)
+
+# Input
+- `filtered_geo::HomogeneousGeometry` 
+- `idx`
+# Outputs
+- Barycenter of the input triangle
+"""
+function face_barycenters(filtered_geo::HomogeneousGeometry, idx)
+    vtx = filtered_geo.faces[idx].vertices
+    (1 / 3) * (vtx[1] + vtx[2] + vtx[3])
+end
+
+"""
+    face_barycenters(filtered_geo::Geometry, idx)
+
+# Input
+- `filtered_geo::Geometry` 
+- `idx`
+# Outputs
+- Barycenter of the input triangle
+"""
+function face_barycenters(filtered_geo::Geometry, idx)
+    vtx = filtered_geo.faces[idx].geometry.vertices
+    (1 / 3) * (vtx[1] + vtx[2] + vtx[3])
+end
+
+"""
+    getBaryceners(filtered_geo::HomogeneousGeometry, hit_idx)
+
+# Input
+- `filtered_geo::HomogeneousGeometry` 
+- `hit_idx`
+# Outputs
+- Vector of barycenters of the filtered geometry
+"""
+function getBarycenters(filtered_geo::AbstractGeometry, hit_idx)
+    b = Vector{Vector}(undef, length(hit_idx))
+    for ii in 1:lastindex(hit_idx)
+        b[ii] = face_barycenters(filtered_geo, hit_idx[ii])
+    end
+    return b
+end
+

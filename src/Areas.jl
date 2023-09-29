@@ -96,6 +96,7 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_areas = [face_area(filtered_geometry, idx) for idx in 1:Ntri]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in 1:Ntri]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
+    _barycenters = getBarycenters(filtered_geometry, 1:Ntri)
 
     #Calculate areas
     Aproj = sum(projection(filtered_geometry, viewpoint, Ntri))
@@ -114,7 +115,7 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters
 end
 
 """
