@@ -182,9 +182,9 @@ function compute_coefficients(surfprops::SurfaceProps, gasprops::GasStreamProper
 
     num = aero_coeffs .* areas
 
-    coeffs_vec = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
+    coeffs_vec, coeffs_v = vectorizeCoeffs(num, normals, Vrel_v) #CD,CL,Cp, Ctau
 
-    CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles)))
+    CoefficientsVectorized(coeffs_vec ./ sum(areas .* abs.(cos.(angles)))), sum(areas), sum(areas .* abs.(cos.(angles))), coeffs_v ./ sum(areas .* abs.(cos.(angles)))
 end
 
 export InteractionGeometryHomo, InteractionGeometryHetero, compute_coefficients

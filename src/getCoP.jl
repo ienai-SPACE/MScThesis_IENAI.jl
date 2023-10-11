@@ -16,6 +16,8 @@ function getCoP(PCSA, intercept_info, barycenters)
     # for ii in 1:lastindex(barycenters)
     #     CoP[ii] = (1 / PCSA) * intercept_info[ii].area * barycenters[ii]
     # end
+    println("length(barycenters) = ", length(barycenters))
+    println("length(intercept_info) = ", length(intercept_info))
     CoP = (1 / PCSA) * sum([intercept_info[ii].area * cos(intercept_info[ii].angle) for ii in 1:lastindex(barycenters)] .* barycenters, dims=1)
     SVector(CoP[1][1], CoP[1][2], CoP[1][3])
 end

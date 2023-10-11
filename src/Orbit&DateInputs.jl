@@ -16,7 +16,7 @@ Define orbital elements and date to obtain relative velocity of the satellite an
 function OrbitandDate()
 
     #Orbital elements
-    a = 300 + R_E     #[km]
+    a = 400 + R_E     #[km]
     e = 0
     #r_p = a * (1 - e);        #[km]
     #r_a = a * (1 + e);        #[km]
@@ -34,7 +34,7 @@ function OrbitandDate()
 
 
     #-----------NRLMSISE-00 INPUTS: Julian date, geodetic coordinates, and solar/magnetic indices-------------------------------
-    JD = date_to_jd(2018, 6, 19, 18, 35, 0)     #Julian Day [UTC].
+    JD = date_to_jd(2000, 1, 4, 0, 0, 0)     #Julian Day [UTC].
     alt = h * 1000                                #Altitude [m].
     g_lat = deg2rad(-22)                        #Geodetic latitude [rad].
     g_long = deg2rad(-45)                       #Geodetic longitude [rad].

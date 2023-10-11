@@ -7,7 +7,7 @@ using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "flatCircumference.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
 
 #HETEROGENEOUS CASE
@@ -22,8 +22,8 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-α = deg2rad(0)  #rotate around z-axis
-ϕ = deg2rad(90) #rotate around x-axis
+α = deg2rad(180)  #rotate around z-axis
+ϕ = deg2rad(0) #rotate around x-axis
 v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
@@ -36,17 +36,30 @@ Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)
 
-#---- Center of pressure ---------------------------------------------------------------
-
-CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
-# #---------------------------------------------------------------------------------------------
-println(CoP)
 
 #---- Aerodynamic coefficients ---------------------------------------------------------------
 
-coeffs, Atot, Aproj = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals);
+coeffs, Atot, Aproj, coeffs_v = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals);
 # #---------------------------------------------------------------------------------------------
-println(coeffs)
+println("Cd = ", coeffs[1], coeffs[2])
+println("Cl = ", coeffs[3], coeffs[4])
+println("Cp = ", coeffs[5], coeffs[6])
+println("Ctau = ", coeffs[7], coeffs[8])
+
+#---- Center of pressure ---------------------------------------------------------------
+#[Not valid: GSI depend on angle, not only on area contribution] 
+# CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
+# println(CoP)
+
+torque_ref = [0, 0, 0]
+T = SatelliteGeometryCalculations.getTorques(coeffs_v, barycenters, torque_ref)
+
+CoP = SatelliteGeometryCalculations.getCoP(T, coeffs, [0, 1, 0])
+
+T2 = SatelliteGeometryCalculations.getTorques(coeffs_v, barycenters, CoP[2])
+
+(T - T2)
+# #---------------------------------------------------------------------------------------------
 
 
 
