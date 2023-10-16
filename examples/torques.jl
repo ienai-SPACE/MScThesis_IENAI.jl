@@ -48,6 +48,7 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
 # println(CoP)
 
+# For the calculation of the aerodynamic torque, the `torque_ref` should be the CoM 
 torque_ref = SVector(100.0, 0.0, 0.0)  # point about which moments are calculated
 CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
 
