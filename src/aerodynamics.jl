@@ -3,16 +3,16 @@ using LinearAlgebra
 """
     getTorques(coeffs_v, bc)
 
-Aerodynamic torques wrt input reference frame
+Non-dimensional aerodynamic torques wrt input reference frame. Normalized with aerodynamic pressure
 
 # Inputs
 - `coeffs_v::Vector{Vector{AbstractVector{Float64}}}`
 - `bc::Vector{Vector}`
 - `ref_point::SVector{3,Float64}`
 # Outputs
-- `::SVector{3, Float64}`   : torques i.e. Mx, My, Mz
+- `::SVector{3, Float64}`   : coefficients of torques (M = CM/(0.5*rho*v^2)) i.e. CMx, CMy, CMz
 """
-function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, bc::Vector{Vector}, ref_point::SVector{3,Float64})
+function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, bc::Vector{Vector}, ref_point::SVector{3,Float64})
     Cp_v = map(ii -> coeffs_v[ii][3], 1:lastindex(bc))
 
     Cp_x = [Cp_v[ii][1] for ii in 1:length(bc)]
@@ -21,12 +21,13 @@ function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, bc::Vecto
     bc_x = [bc[ii][1] - ref_point[1] for ii in 1:lastindex(bc)]
     bc_y = [bc[ii][2] - ref_point[2] for ii in 1:lastindex(bc)]
     bc_z = [bc[ii][3] - ref_point[3] for ii in 1:lastindex(bc)]
+    areas = [intercept_info[ii].area for ii in 1:lastindex(bc)]
 
-    Mx = -sum((Cp_z .* bc_y - Cp_y .* bc_z))
-    My = -sum((Cp_x .* bc_z - Cp_z .* bc_x))
-    Mz = -sum((Cp_y .* bc_x - Cp_x .* bc_y))
+    CMx = -sum((Cp_z .* bc_y - Cp_y .* bc_z) .* areas)
+    CMy = -sum((Cp_x .* bc_z - Cp_z .* bc_x) .* areas)
+    CMz = -sum((Cp_y .* bc_x - Cp_x .* bc_y) .* areas)
 
-    SVector(Mx, My, Mz)
+    SVector(CMx, CMy, CMz)
 end
 
 # """
@@ -91,7 +92,6 @@ Note: cannot be used for GSI because the aerodyn. coeff. also depends on the ang
 # Outputs
 - `CoP::SVector{3,Float64}`
 """
-# CHECK: make sure the areas and barycenters correspond to the same elements!!!!!
 function getCoP(PCSA, intercept_info::Vector{<:InteractionGeometry}, barycenters)
     println("length(barycenters) = ", length(barycenters))
     println("length(intercept_info) = ", length(intercept_info))

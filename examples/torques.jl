@@ -48,15 +48,15 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
 # println(CoP)
 
-torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
-T = SatelliteGeometryCalculations.getTorques(coeffs_v, barycenters, torque_ref)
+torque_ref = SVector(100.0, 0.0, 0.0)  # point about which moments are calculated
+CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
 
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(T, coeffs, chord_plane_n)
 
-T2 = SatelliteGeometryCalculations.getTorques(coeffs_v, barycenters, CoP[2])
+CT2 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
 
-(T - T2)
+(CT - CT2)
 # #---------------------------------------------------------------------------------------------
 
 

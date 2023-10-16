@@ -325,7 +325,8 @@ end
     @test abs(b[3] - b_theo[3]) < eps
 
 end
-@testset "CoP_Circumference" begin
+
+@testset "CoP_Circumference_convex" begin
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
     mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "flatCircumference.obj")
     #HOMOGENEOUS CASE
@@ -348,7 +349,30 @@ end
     @test abs(CoP[3] - CoP_theo[3]) < eps
 end
 
-@testset "CoP_Sphere" begin
+@testset "CoP_Circumference_nonconvex" begin
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "flatCircumference.obj")
+    #HOMOGENEOUS CASE
+    geo = load_geometry(mesh_path, false, "mm") #homogeneous, convex case
+
+    α = deg2rad(0)  #rotate around z-axis
+    ϕ = deg2rad(90) #rotate around x-axis
+    v = Viewpoint(geo, α, ϕ)
+    # v = Viewpoint(geo, Vrel_v)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v)
+
+    CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters)
+
+    CoP_theo = [0, 0, 0]
+    eps = 1e-5
+    @test abs(CoP[1] - CoP_theo[1]) < eps
+    @test abs(CoP[2] - CoP_theo[2]) < eps
+    @test abs(CoP[3] - CoP_theo[3]) < eps
+end
+
+@testset "CoP_Sphere_convex" begin
     pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
     mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
     #HOMOGENEOUS CASE
@@ -369,4 +393,75 @@ end
     @test abs(CoP[1] - CoP_theo[1]) < eps
     @test abs(CoP[2] - CoP_theo[2]) < eps
     @test abs(CoP[3] - CoP_theo[3]) < eps
+end
+
+@testset "CoP_Sphere_nonconvex" begin
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+    #HOMOGENEOUS CASE
+    geo = load_geometry(mesh_path, false, "mm") #homogeneous, convex case
+
+    α = deg2rad(0)  #rotate around z-axis
+    ϕ = deg2rad(90) #rotate around x-axis
+    v = Viewpoint(geo, α, ϕ)
+    # v = Viewpoint(geo, Vrel_v)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v)
+
+    CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters)
+
+    CoP_theo = [0, 0, 0.3298]
+    eps = 1e-3
+    @test abs(CoP[1] - CoP_theo[1]) < eps
+    @test abs(CoP[2] - CoP_theo[2]) < eps
+    @test abs(CoP[3] - CoP_theo[3]) < eps
+end
+
+@testset "Torque and CoP" begin
+    #The sum of moments about the CoP shall be zero
+
+    pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+    mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "T_SatMesh.obj")
+    materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
+
+    #HOMOGENEOUS CASE
+    geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+
+    #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
+    outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
+    #----Orbit and date inputs------------------------------------------------------------------
+    JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
+    outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
+
+    α = deg2rad(180)  #rotate around z-axis
+    ϕ = deg2rad(0) #rotate around x-axis
+    v = Viewpoint(geo, α, ϕ)
+    # v = Viewpoint(geo, Vrel_v)
+
+    #---- Area calculations --------------------------------------------------------------------
+    Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v)
+    #---- Aerodynamic coefficients ---------------------------------------------------------------
+    coeffs, Atot, Aproj, coeffs_v = compute_coefficients(outSurfaceProps, outGasStreamProps, intercept_info, Vrel_v, normals)
+    #----- Torques and CoP ---------------------------------------------------------------------
+
+    torque_ref = SVector(100.0, 0.0, 0.0)  # point about which moments are calculated
+    CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
+
+    chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
+    CoP = SatelliteGeometryCalculations.getCoP(T, coeffs, chord_plane_n)
+
+    CT2 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
+    CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[1])
+
+    check = CT2 #center of pressure on the chord plane
+    check2 = CT3 #center of pressure on a point along the line of application
+    eps = 5e-3
+
+    @test abs(check[1]) < eps
+    @test abs(check[2]) < eps
+    @test abs(check[3]) < eps
+    @test abs(check2[1]) < eps
+    @test abs(check2[2]) < eps
+    @test abs(check2[3]) < eps
 end
