@@ -1,3 +1,5 @@
+""" JUST A TRIAL -  NOT USEFUL"""
+
 using Meshes
 import WGLMakie as Mke
 

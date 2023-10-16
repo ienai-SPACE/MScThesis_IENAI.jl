@@ -56,6 +56,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
+    _barycenters = getBarycenters(filtered_geometry, hit_idx)
 
     if is_homogeneous(geometry)
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
@@ -70,7 +71,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters
 end
 
 

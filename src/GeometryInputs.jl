@@ -383,7 +383,7 @@ end
     getBaryceners(filtered_geo::HomogeneousGeometry, hit_idx)
 
 # Input
-- `filtered_geo::HomogeneousGeometry` 
+- `filtered_geo::AbstractGeometry` 
 - `hit_idx`
 # Outputs
 - Vector of barycenters of the filtered geometry
