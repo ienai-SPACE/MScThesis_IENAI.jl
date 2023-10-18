@@ -51,7 +51,8 @@ export SurfaceProps
 - `geometry::G`
 - `properties::SurfaceProps{T}`
 """
-struct Face{G,T}
+struct Face{G,T,SC}
     geometry::G
     properties::SurfaceProps{T}
+    solarCell::SC
 end

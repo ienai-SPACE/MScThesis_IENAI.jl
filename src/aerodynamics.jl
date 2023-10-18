@@ -3,7 +3,7 @@ using LinearAlgebra
 """
     getTorques(coeffs_v, bc)
 
-Non-dimensional aerodynamic torques wrt input reference frame. Normalized with aerodynamic pressure
+Non-dimensional aerodynamic torques wrt input reference frame. Normalized with aerodynamic pressure.
 
 # Inputs
 - `coeffs_v::Vector{Vector{AbstractVector{Float64}}}`
@@ -49,20 +49,22 @@ This function calculates de center of pressure by applying the opposite of a cro
 for a x b = c, b is not uniquely determined by a and c. Moreover, there is no solution unless a
 and c are orthogonal. If a and c are orthogonal, then the solutions are (c×a)/(a.a)+ta
 for arbitrary scalars t.
-Source: https://www.goengineer.com/  and https://www.youtube.com/watch?v=GARurpX-VXE 
+Source: https://www.goengineer.com/blog/calculating-center-of-pressure-solidworks-flow-simulation#:~:text=To%20do%20this%2C%20create%20a%203D%20sketch%2C%20add,the%20chord%20plane%20is%20the%20center%20of%20pressure.
+  and https://www.youtube.com/watch?v=GARurpX-VXE 
 
 # Inputs
-- `T`               : torque
+- `T`               : coefficient of torque (non-dimensionalized with the dynamic pressure)
 - `coeffs::Tuple`   : aerodynamic coefficients
+- `A`               : projected cross-sectional area
 - `cpn::Vector`     : chord plane normal
 
 # Outputs 
-- `u1::SVector{3, Float64}`
-- `u2::SVector{3, Float64}`  : CoP based on line of action and chord plane
+- `u1::SVector{3, Float64}`     : [m]
+- `u2::SVector{3, Float64}`     : [m] CoP based on line of action and chord plane
 """
-function getCoP(T, coeffs::Tuple, cpn::SVector)
+function getCoP(T, coeffs::Tuple, A, cpn::SVector)
 
-    F = coeffs[1] * coeffs[2] + coeffs[3] * coeffs[4]
+    F = (coeffs[1] * coeffs[2] + coeffs[3] * coeffs[4]) * A #(Cd + Cl)*Aproj
     orthogonal_check = dot(F, T)
     println("orthogonal_check: dot(F, T) = ", orthogonal_check)
     if abs(orthogonal_check) < 1e-3  # F and T are orthogonal
@@ -70,7 +72,7 @@ function getCoP(T, coeffs::Tuple, cpn::SVector)
         FdotF = dot(F, F)
         u1 = SVector{3}(FcrossT / FdotF)
         t = dot(u1, cpn) / dot(F, cpn)
-        u2 = SVector{3}(u1 - t * F)
+        u2 = SVector{3}(u1 - t * F) #CoP
         [u1, u2]
     else
         println("F and T are not orthogonal, hece, no solution found")
@@ -97,4 +99,15 @@ function getCoP(PCSA, intercept_info::Vector{<:InteractionGeometry}, barycenters
     println("length(intercept_info) = ", length(intercept_info))
     CoP = (1 / PCSA) * sum([intercept_info[ii].area * cos(intercept_info[ii].angle) for ii in 1:lastindex(barycenters)] .* barycenters, dims=1)
     SVector(CoP[1][1], CoP[1][2], CoP[1][3])
+end
+
+"""
+    getTa(coeffs::Tuple, CoP::Vector, CoM::Vector, A, rho, V)
+
+Calculation of the aerodynamic torque
+"""
+function getTa(coeffs::Tuple, CoP::Vector, CoM::Vector, A, rho, V)
+    u_v = V / norm(V)
+    d = CoM - CoP
+    0.5 * rho * coeffs[1] * A * norm(V)^2 * cross(u_v, d)
 end

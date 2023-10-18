@@ -71,7 +71,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, filtered_geometry
 end
 
 

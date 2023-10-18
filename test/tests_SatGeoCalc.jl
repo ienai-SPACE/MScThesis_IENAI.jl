@@ -449,7 +449,7 @@ end
     CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
 
     chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
-    CoP = SatelliteGeometryCalculations.getCoP(T, coeffs, chord_plane_n)
+    CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
 
     CT2 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
     CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[1])

@@ -34,6 +34,7 @@ function load_material_properties(path)
 
     return mesh_facets, materials
 
+
 end
 
 function load_material_properties()

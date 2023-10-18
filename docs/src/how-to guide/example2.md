@@ -9,7 +9,7 @@ Two geometric scenarios are possible: **convex** and **non-convex** geometries, 
 
 The generation of the circular source from which the rays are projected onto the satellite can be modified, having 3 options: **Grid Filter**, **Fibonacci Sampler**, and **Monte Carlo Sampler**. Moreover, the density of the sampler [rays/m^3] may also be modified `samplerX = nameSampler(density)`.
 
-![alt](C:\Users\danie\Documents\UC3M\IENAI internship\Overleaf\figures\FibonacciSampling1000.jpg)
+![alt](C:\Users\danie\Documents\UC3M\IENAI\Thesis\Overleaf\figures\FibonacciSampling1000.jpg)
 
 These options may be modified in the function [`SatelliteGeometryCalculations.areas_nonconvex`](@ref)
 

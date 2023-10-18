@@ -5,13 +5,13 @@ using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
 
 #HETEROGENEOUS CASE
-# geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 #HOMOGENEOUS CASE
-geo = load_geometry(mesh_path, true, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+# geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
@@ -29,7 +29,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, barycenters, fg = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)
@@ -46,7 +46,7 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # #---------------------------------------------------------------------------------------------
 
 
-
+#=
 #h = 200
 rho = 5.402465388584428e-7
 v_i360 = 7655.309260090936
@@ -62,3 +62,4 @@ F_D = coeffs[1] * pi * 0.5^2 * 0.5 * v_i360^2 * rho
 rho = 2.3928535687949098e-12
 v_i360 = 7668.372367380956
 F_D = coeffs[1] * pi * 0.5^2 * 0.5 * v_i360^2 * rho
+=#

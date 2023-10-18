@@ -6,13 +6,13 @@ using FilePathsBase: /
 gmsh.initialize()
 
 # --- Merge a file. Equivalent to the `File->Merge` menu in the Gmsh app ---------
-#=Input format: STEP, VRML, IGES, and STL =#
+#=Input format: STEP (STL does not easily allow to re-mesh)  =#
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
-path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphere_solid.stp")
+path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "T_Sat.stl")
 gmsh.merge(string(path))
 
 # --- Mesh size ------------------------------------------------------------------
-lc = 10 #[mm] mesh size
+lc = 300 #[mm] mesh size
 gmsh.option.setNumber("Mesh.MeshSizeMin", lc)
 # gmsh.option.setNumber("Mesh.MeshSizeMax", lc)
 

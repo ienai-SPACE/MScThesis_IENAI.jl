@@ -106,7 +106,8 @@ function load_geometry(path, materials_path, is_convex::Bool, units::String)
         points = map(i -> get_point_data(triangle.points[i]) |> SVector{3,Float64} |> p -> p * scale_factor, 1:3)
         face_geometry = TriangleFace(points...)
         idx = mat_index["material_index"] + 1
-        face = Face(face_geometry, materials[idx])
+        SC_check = mat_index["solar cell"] #solar cell check (1 = SC vs 0 = no SC)
+        face = Face(face_geometry, materials[idx], SC_check)
         push!(faces, face)
     end
     gtype = is_convex ? Convex : NonConvex

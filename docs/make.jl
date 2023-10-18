@@ -30,11 +30,12 @@ Documenter.makedocs(root=joinpath(@__DIR__),
                 ],
                 "Geometries and materials repository" => "geometries_repo.md",
                 "Validation and Verification" => "VnV.md",
+                "Center of pressure and torques" => "Torques.md",
+                "Meshing" => "meshing.md",
                 "Reference" => [
                         "reference/types.md",
                         "reference/functions.md"
-                ]
-        ],
+                ]],
         format=Documenter.HTML(
                 ansicolor=true,
                 prettyurls=get(ENV, "CI", nothing) == "true",

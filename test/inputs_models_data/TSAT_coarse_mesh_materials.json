@@ -15,88 +15,116 @@
     ],
     "mesh_facets": [
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 1
+            "material_index": 1,
+            "solar cell": 1
         },
         {
-            "material_index": 1
+            "material_index": 1,
+            "solar cell": 1
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         },
         {
-            "material_index": 0
+            "material_index": 0,
+            "solar cell": 0
         }
     ]
 }
