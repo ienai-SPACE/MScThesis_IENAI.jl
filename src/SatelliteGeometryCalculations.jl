@@ -25,6 +25,7 @@ include("sweep_v2.jl")
 include("projection.jl")
 
 include("aerodynamics.jl")
+include("solar.jl")
 
 # include("VectorizeCoefficients.jl")
 

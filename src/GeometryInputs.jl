@@ -256,11 +256,15 @@ Filter out all the non-forward facing face_vertices
 - `geometry::HomogeneousGeometry{GT}`
 - `viewpoint::Viewpoint`
 # Outputs
-- `HomogeneousGeometry{GT}(new_faces, new_indices)`
+- `HomogeneousGeometry{GT}(new_faces)`
 """
 function filter_backfaces(geometry::HomogeneousGeometry{GT}, viewpoint::Viewpoint) where {GT}
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
-    HomogeneousGeometry{GT}(new_faces)
+    if isempty(new_faces) == true
+        return false
+    else
+        return HomogeneousGeometry{GT}(new_faces)
+    end
 end
 
 
@@ -273,13 +277,16 @@ Filter out all the non-forward facing face_vertices
 - `geometry::Geometry{GT}`
 - `viewpoint::Viewpoint`
 # Outputs
-- `Geometry{GT}(new_faces, new_indices)`
+- `Geometry{GT}(new_faces)`
 """
 function filter_backfaces(geometry::Geometry{GT}, viewpoint::Viewpoint) where {GT}
     new_faces = filter(face -> is_visible(face, viewpoint), geometry.faces)
-    Geometry{GT}(new_faces)
+    if isempty(new_faces) == true
+        return false
+    else
+        return Geometry{GT}(new_faces)
+    end
 end
-
 
 """
     is_visible(face::TriangleFace, viewpoint::Viewpoint)
@@ -300,12 +307,30 @@ end
 
 is_visible(face::Face, viewpoint) = is_visible(face.geometry, viewpoint)
 
+
+"""
+    filter_solarCell(geometry::Geometry{GT}) where {GT}
+
+Filter out all the non solar cells
+
+# Input
+- `geometry::Geometry{GT}`
+# Outputs
+- `Geometry{GT}(new_faces)`
+"""
+function filter_solarCell(geometry::Geometry{GT}) where {GT}
+    new_faces = filter(face -> face.solarCell == 1, geometry.faces)
+    Geometry{GT}(new_faces)
+end
+
+
 """
     shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint)
     
 It calls the function `Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)` to adapt the viewpoint to the filtered geometry
 """
 shrink_viewpoint(geom::AbstractGeometry, viewpoint::Viewpoint) = Viewpoint(geom.rmax, 100geom.rmax, viewpoint.direction)
+
 face_area(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].area
 face_vertices(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].vertices
 face_normal(geometry::HomogeneousGeometry, idx) = geometry.faces[idx].normal

@@ -43,6 +43,10 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
+    #Solar cells identification + ray-tracing
+    solarCellsGeo = getSolarCellsGeo(geometry, viewpoint, sampler)
+
+    #PCSA: back-face culling + ray-tracing
     rti_vec, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
     Aproj = Aray * length(valid_rti)
@@ -71,7 +75,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, filtered_geometry
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, solarCellsGeo
 end
 
 
@@ -89,6 +93,10 @@ end
 - `culling_ratio`
 """
 function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
+
+    #solar cells geometry calculations
+    solarCell_geometry = getSolarCellsGeo(geometry::AbstractGeometry)
+
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
     #Number of triangles
@@ -116,7 +124,7 @@ function areas_convex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, solarCell_geometry
 end
 
 """
@@ -144,22 +152,26 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
+    if typeof(filtered_geometry) == Bool
+        return 0, 0, 0
+    else
 
-    #Number of triangles
-    Ntri = n_faces(filtered_geometry)
+        #Number of triangles
+        Ntri = n_faces(filtered_geometry)
 
-    new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
-    println("culling ratio =", Ntri / Ntri_preculling)
+        new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
+        println("culling ratio =", Ntri / Ntri_preculling)
 
-    rt_vec, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
+        rt_vec, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 
-    return rt_vec, filtered_geometry, Aray
+        return rt_vec, filtered_geometry, Aray
+    end
 end
 
 """
     _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
-Aid `raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)` function in performing its tasks
+This is where the actual ray-tracer performs its tasks
 
 # Inputs
 - `filtered_geometry::AbstractGeometry`      : storage of information about the 3D CAD model

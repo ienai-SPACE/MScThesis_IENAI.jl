@@ -7,7 +7,6 @@
 -`Aproj::Float64`
 -`Atot::Float64`
 """
-
 struct SweepStorage_v2{Float64}
     azimuth::Float64
     altitude::Float64
@@ -38,8 +37,6 @@ Create a 2D matrix as function of azimuth and elevation storing the projected `A
 - `CtauLookUp::Matrix(undef, lastindex(ϕ), lastindex(α))`
 - `culling::Matrix(undef, lastindex(ϕ), lastindex(α))`
 """
-
-
 function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
     α = grid.alpha
     ϕ = grid.phi
