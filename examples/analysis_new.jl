@@ -11,7 +11,7 @@ materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSA
 #HETEROGENEOUS CASE
 # geo = load_geometry(mesh_path, materials_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 #HOMOGENEOUS CASE
-geo = load_geometry(mesh_path, true, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
+geo = load_geometry(mesh_path, false, "mm") # UNITS: "m" -> meters and "mm" -> milimiters
 
 #---------- # EVALUATION OF A SINGLE VIEWPOINT DIRECTION # --------------------------------------
 outSurfaceProps = SurfaceProps()                                                       #outSurfaceProps.[η, Tw, s_cr, s_cd, m_srf]
@@ -21,7 +21,7 @@ JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
 α = deg2rad(90)  #rotate around z-axis
-ϕ = deg2rad(0) #rotate around x-axis
+ϕ = deg2rad(34) #rotate around x-axis
 v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
@@ -29,7 +29,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, barycenters, solarCellsGeo = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, barycenters, solarCellsGeo, rti_vec, _rti, _rpi, faces_hit_idx_nonsorted = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)

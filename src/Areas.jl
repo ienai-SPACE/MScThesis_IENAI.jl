@@ -51,9 +51,17 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
     Aproj = Aray * length(valid_rti)
 
+    #facet calculations
+    faces_hit_idx_nonsorted = valid_rti .|> rti -> rti.face_index |> collect
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
+
+    #intersections
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
+    _rti = intersectCoords(valid_rti)
+    # println("iC=", _intersectCoords)
+    ###
+
     # face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
     # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
@@ -75,7 +83,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
 
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, solarCellsGeo
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, solarCellsGeo, valid_rti, _rti, ray_per_index, faces_hit_idx_nonsorted
 end
 
 

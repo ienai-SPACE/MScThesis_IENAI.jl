@@ -422,3 +422,40 @@ function getBarycenters(filtered_geo::AbstractGeometry, hit_idx)
     return b
 end
 
+#PENDING DOCS
+#
+struct IntersectCoords{T,I}
+    coords::Vector{T}
+    idx::I
+end
+function intersectCoords(rti)
+    coord = Vector{Vector}(undef, length(rti))
+    for ii in 1:lastindex(rti)
+        coord[ii] = rti[ii].origin + rti[ii].t * rti[ii].direction
+    end
+    map(ii -> IntersectCoords(coord[ii], rti[ii].face_index), 1:lastindex(rti))
+end
+
+#
+# for ii in 1:lastindex(hit_idx)
+#     if ii == 1
+#         valid_rti = [rti |> Filter(rti -> rti.face_index == hit_idx[ii])]
+#         # println(valid_rti)
+#     else
+#         valid_rti = hcat([valid_rti, rti |> Filter(rti -> rti.face_index == hit_idx[ii])])
+#         # println(valid_rti)
+#     end
+# end
+# return valid_rti
+
+
+# coord = rti.origin + rti.t * rti.direction
+
+# for ii in 1:length(rpi)
+#     if ii == 1
+#         coord_tuple = (coord.face_index |> Filter(idx -> idx == hit_idx[ii]))
+#     else
+#         coord_tuple = hcat(coord_tuple, coord_tuple)
+#     end
+# end
+# coord_tuple

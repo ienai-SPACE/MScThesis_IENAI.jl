@@ -33,6 +33,8 @@ struct RayTriangleIntersection{T}
     γ_dir::T
     area::T
     face_index::Int64
+    origin::SV3
+    direction::SV3
 end
 
 """
@@ -59,8 +61,8 @@ end
 
 mode(rti::RayTriangleIntersection) = rti.mode
 
-RayTriangleIntersection(mode::IntersectionMode, t::T, γ_dir::T, area::T, i::Integer) where {T} = RayTriangleIntersection{T}(mode, t, γ_dir, area, i)
-no_intersection(::Type{T}) where {T} = RayTriangleIntersection(NoIntersection, zero(T), zero(T), zero(T), 0)
+RayTriangleIntersection(mode::IntersectionMode, t::T, γ_dir::T, area::T, i::Integer, O::SVector{T}, dir::SVector{T}) where {T} = RayTriangleIntersection{T}(mode, t, γ_dir, area, i, O, dir)
+no_intersection(::Type{T}) where {T} = RayTriangleIntersection(NoIntersection, zero(T), zero(T), zero(T), 0, SV3(0.0, 0.0, 0.0), SV3(0.0, 0.0, 0.0))
 
 """
     MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
@@ -77,7 +79,7 @@ Also, calculate the area of the triangular element and angle between the triangl
 function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) where {T}
 
     Vdir = -ray.direction
-    # println("dir in MT", dir)
+    # println("dir in MT", Vdir)
 
     dot_prod = dot(triangle.normal, Vdir)
 
@@ -105,7 +107,7 @@ function MTalgorithm(triangle::TriangleFace{T}, ray::Ray{T}; ϵ=sqrt(eps(T))) wh
 
     (v < 0.0 || u + v > 1.0) && return no_intersection(T)
     t = invDet * dot(edge2, qvec) # distance from the ray origin to P 
-    RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0)
+    RayTriangleIntersection(which_face, t, γ_dir, triangle.area, 0, ray.origin, ray.direction)
 end
 
 MTalgorithm(face::Face, ray) = MTalgorithm(face.geometry, ray)

@@ -7,7 +7,7 @@ using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
 
 #HETEROGENEOUS CASE
@@ -49,17 +49,34 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # println(CoP)
 
 # For the calculation of the aerodynamic torque, the `torque_ref` should be the CoM 
-torque_ref = SVector(100.0, 0.0, 0.0)  # point about which moments are calculated
+torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
 CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
 
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
+CT2 = SatelliteGeometryCalculations.getAeroTorque(coeffs, CoP[2], torque_ref, Aproj)
 
-CT2 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
+println("CT=", CT)
+println("CT=", CT2)
 
+
+chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
+CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
+
+CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
+println("CT=", CT3)
 
 # #------------------------------------------------------------------------------------------------
 
 
 SatelliteGeometryCalculations.tock()
 
+
+#check
+coeffs_vec = [zeros(3), zeros(3), zeros(3), zeros(3)]
+for ii in 1:362
+
+    coeffs_vec_ii = [coeffs_v[ii][1], coeffs_v[ii][2], coeffs_v[ii][3], coeffs_v[ii][4]]
+    coeffs_vec += coeffs_vec_ii
+
+end
