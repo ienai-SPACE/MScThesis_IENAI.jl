@@ -29,7 +29,7 @@ v = Viewpoint(geo, α, ϕ)
 # CD_sph, cd_j, sumM = SatelliteGeometryCalculations.DRIA_sphere(outSurfaceProps, outGasStreamProps, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, barycenters, solarCellsGeo, rti_vec, _rti, _rpi, faces_hit_idx_nonsorted = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, barycenters, solarCellsGeo, rti_vec, _rti, _rpi, faces_hit_idx_nonsorted, hit_idx = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)

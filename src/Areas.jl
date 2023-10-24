@@ -59,7 +59,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #intersections
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
     _rti = intersectCoords(valid_rti)
-    # println("iC=", _intersectCoords)
+
     ###
 
     # face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
@@ -67,6 +67,7 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_normals = [face_normal(filtered_geometry, idx) for idx in hit_idx]
     _face_angles = angle_V_n(viewpoint.direction, _face_normals)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
+
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
     _barycenters = getBarycenters(filtered_geometry, hit_idx)
 
@@ -79,11 +80,14 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
                 _face_angles[ii],
                 filtered_geometry.faces[hit_idx[ii]].properties.m_srf
             ), eachindex(hit_idx))
-    end
 
+    end
+    # _intercept_info1 = [_face_areas[ii] for ii in 1:hit_idx[end]]
+    # _intercept_info2 = [_face_angles[ii] for ii in 1:hit_idx[end]]
+    # _intercept_info = [_intercept_info1, _intercept_info2]
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, _barycenters, solarCellsGeo, valid_rti, _rti, ray_per_index, faces_hit_idx_nonsorted
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, solarCellsGeo, valid_rti, _rti, ray_per_index, faces_hit_idx_nonsorted, hit_idx
 end
 
 

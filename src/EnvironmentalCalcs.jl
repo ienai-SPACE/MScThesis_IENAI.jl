@@ -35,7 +35,7 @@ Compute the concentration of the 6 main gas species in the thermosphere, the tem
 # Output:
 - `GasStreamProperties(C, PO, mmean, nrlmsise00_output.T_alt)::GasStreamProperties{T}`
 """
-function GasStreamProperties(nrlmsise00_output::SatelliteToolbox.NRLMSISE00_Output)
+function GasStreamProperties(nrlmsise00_output)
     out = nrlmsise00_output
 
     #Concentrations

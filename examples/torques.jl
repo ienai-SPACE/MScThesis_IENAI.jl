@@ -7,7 +7,7 @@ using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
 
 #HETEROGENEOUS CASE
@@ -22,13 +22,13 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-α = deg2rad(180)  #rotate around z-axis
+α = deg2rad(90)  #rotate around z-axis
 ϕ = deg2rad(0) #rotate around x-axis
 v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, barycenters = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, solarCellsGeo, rti_vec, _rti, _rpi, faces_hit_idx_nonsorted, hit_idx = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)
@@ -48,9 +48,13 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
 # println(CoP)
 
+max_idx = maximum([_rti[ii].idx for ii in 1:lastindex(_rti)])
+min_idx = minimum([_rti[ii].idx for ii in 1:lastindex(_rti)])
+max_idx2 = maximum([rti_vec[ii].face_index for ii in 1:lastindex(rti_vec)])
+
 # For the calculation of the aerodynamic torque, the `torque_ref` should be the CoM 
 torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
-CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, torque_ref)
+CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, torque_ref, _rti, _rpi)
 
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
@@ -63,7 +67,7 @@ println("CT=", CT2)
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
 
-CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, barycenters, CoP[2])
+CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, CoP[2], _rti, _rpi)
 println("CT=", CT3)
 
 # #------------------------------------------------------------------------------------------------
@@ -72,11 +76,3 @@ println("CT=", CT3)
 SatelliteGeometryCalculations.tock()
 
 
-#check
-coeffs_vec = [zeros(3), zeros(3), zeros(3), zeros(3)]
-for ii in 1:362
-
-    coeffs_vec_ii = [coeffs_v[ii][1], coeffs_v[ii][2], coeffs_v[ii][3], coeffs_v[ii][4]]
-    coeffs_vec += coeffs_vec_ii
-
-end
