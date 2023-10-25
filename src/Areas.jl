@@ -158,9 +158,9 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     Ntri_preculling = Ntri
 
     #Preculling: Meshed satellite
-    println("Ntri_preculling=", Ntri_preculling)
-    println("max in MeshVertices (preculling)=", viewpoint.rmax)
-    println("viewpoint.direction=", viewpoint.direction)
+    # println("Ntri_preculling=", Ntri_preculling)
+    # println("max in MeshVertices (preculling)=", viewpoint.rmax)
+    # println("viewpoint.direction=", viewpoint.direction)
 
     #back-face culling
     filtered_geometry = filter_backfaces(geometry, viewpoint)
@@ -172,7 +172,7 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
         Ntri = n_faces(filtered_geometry)
 
         new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
-        println("culling ratio =", Ntri / Ntri_preculling)
+        # println("culling ratio =", Ntri / Ntri_preculling)
 
         rt_vec, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
 

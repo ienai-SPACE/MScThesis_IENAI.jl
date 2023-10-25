@@ -1,7 +1,7 @@
 
 using SatelliteGeometryCalculations, DelimitedFiles
 
-SatelliteGeometryCalculations.tick()
+# SatelliteGeometryCalculations.tick()
 
 using FilePathsBase
 using FilePathsBase: /
@@ -29,23 +29,17 @@ if sweepFlag == 1
     # LookUpTable, AprojLookUpTable = SatelliteGeometryCalculations.sweep_v2(geo, grid)
     LookUpTable, AprojLookUpTable, CdLookUp, ClLookUp, CpLookUp, CtauLookUp, culling = SatelliteGeometryCalculations.sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
-    writedlm("homo_TSAT_coarse_AprojLookUpTable.txt", AprojLookUpTable)
-    writedlm("homo_TSAT_coarse_CDlookup.txt", CdLookUp)
-
+    writedlm(string(FilePathsBase.join(pkg_path, "test", "inputs_models_data", "results", "homo_TSAT_coarse_AprojLookUpTable.txt")), AprojLookUpTable)
+    writedlm(string(FilePathsBase.join(pkg_path, "test", "inputs_models_data", "results", "homo_TSAT_coarse_CDlookup.txt")), CdLookUp)
 end
 
 ##---------- Interpolation --------------------------------------------------------------------
-interpFlag = 1
-if interpFlag == 1
-    _A_look_up_table = readdlm("homo_TSAT_coarse_AprojLookUpTable.txt")
-    _Cd_look_up_table = readdlm("homo_TSAT_coarse_CDlookup.txt")
-    alpha_in = 0
-    phi_in = 90
+pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
+full_path = string(FilePathsBase.join(pkg_path, "test", "inputs_models_data", "results", "homo_TSAT_coarse_CDlookup.txt"))
 
-    Aproj_int = SatelliteGeometryCalculations.interpolator(_A_look_up_table, alpha_in, phi_in)
-    CD_int = SatelliteGeometryCalculations.interpolator(_Cd_look_up_table, alpha_in, phi_in)
-
-end
+α = 90  #[deg]
+ϕ = 0   #[deg]
+out_interpolant = SatelliteGeometryCalculations.interpolant_RTPM(full_path, α, ϕ)
 
 
-SatelliteGeometryCalculations.tock()
+# SatelliteGeometryCalculations.tock()

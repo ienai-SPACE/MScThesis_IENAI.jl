@@ -1,3 +1,4 @@
+using DelimitedFiles
 
 """
     SweepStorage_v2{Float64}
@@ -71,7 +72,7 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
             culling[counter, counter2] = culling_ratio
 
             counter3 += 1
-            println("iter num=", counter3)
+            # println("iter num=", counter3)
         end
         counter = 0
     end
@@ -79,8 +80,26 @@ function sweep_v2(geo, grid, outSurfaceProps, outGasStreamProps, Vrel_v)
 
     # return AlphaPhiStorage, AprojLookUp
     return AlphaPhiStorage, AprojLookUp, CdLookUp, ClLookUp, CpLookUp, CtauLookUp, culling
-
 end
 
+
+
+"""
+    interpolant_RTPM(full_path::String, α, ϕ)
+
+2D interpolant 
+
+# Input
+- `full_path::String`
+- `α`   : [deg] rotate around z-axis
+- `ϕ`   : [deg] rotate around x-axis
+
+# Output
+- Interpolated value
+"""
+function interpolant_RTPM(full_path::String, α::T, ϕ::T) where {T}
+    look_up_table = readdlm(full_path)
+    interpolator(look_up_table, α, ϕ)
+end
 
 
