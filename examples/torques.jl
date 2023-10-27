@@ -1,4 +1,5 @@
 using SatelliteGeometryCalculations, DelimitedFiles, LinearAlgebra, StaticArrays
+SGC = SatelliteGeometryCalculations
 
 SatelliteGeometryCalculations.tick()
 
@@ -28,11 +29,10 @@ v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, solarCellsGeo, rti_vec, _rti, _rpi, faces_hit_idx_nonsorted, hit_idx = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, solarCellsGeo, rti_vec, ray_coords, _rpi, faces_hit_idx_nonunique, hit_idx = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)
-
 
 #---- Aerodynamic coefficients ---------------------------------------------------------------
 
@@ -48,13 +48,9 @@ println("Ctau = ", coeffs[7], coeffs[8])
 # CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
 # println(CoP)
 
-max_idx = maximum([_rti[ii].idx for ii in 1:lastindex(_rti)])
-min_idx = minimum([_rti[ii].idx for ii in 1:lastindex(_rti)])
-max_idx2 = maximum([rti_vec[ii].face_index for ii in 1:lastindex(rti_vec)])
-
 # For the calculation of the aerodynamic torque, the `torque_ref` should be the CoM 
 torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
-CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, torque_ref, _rti, _rpi)
+CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, torque_ref, ray_coords, _rpi, hit_idx, faces_hit_idx_nonunique)
 
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
@@ -67,7 +63,7 @@ println("CT=", CT2)
 chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
 CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
 
-CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, CoP[2], _rti, _rpi)
+CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, CoP[2], ray_coords, _rpi, hit_idx, faces_hit_idx_nonunique)
 println("CT=", CT3)
 
 # #------------------------------------------------------------------------------------------------

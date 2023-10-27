@@ -422,18 +422,63 @@ function getBarycenters(filtered_geo::AbstractGeometry, hit_idx)
     return b
 end
 
-#PENDING DOCS
-#
+
+"""
+    IntersectCoords{T,I}
+
+- `coords::Vector{T}`
+- `idx::I`
+"""
 struct IntersectCoords{T,I}
     coords::Vector{T}
     idx::I
 end
+
+"""
+    intersectCoords(rti)
+
+Calculation of ray impinging point
+
+# Output.
+- `IntersectCoords{T,I}`
+"""
 function intersectCoords(rti)
     coord = Vector{Vector}(undef, length(rti))
     for ii in 1:lastindex(rti)
         coord[ii] = rti[ii].origin + rti[ii].t * rti[ii].direction
     end
     map(ii -> IntersectCoords(coord[ii], rti[ii].face_index), 1:lastindex(rti))
+end
+
+"""
+    bubbleSort(list::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64, Int64}})
+
+Sorting function with bubble sort algorithm. Source: https://github.com/siegfrkn/JuliaDemoScripts/blob/master/BubbleSort.jl 
+
+# Input:
+- `list::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64, Int64}}`
+
+#Output:
+`list::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64, Int64}}`   : sorted list
+"""
+function bubbleSort(list::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64, Int64}})
+	numberOfSwaps = 0
+	numberOfComparisons = 0
+	len = length(list)
+	for i = 1:len-1
+		for j = 2:len
+			numberOfComparisons += 1
+			if list[j-1].idx > list[j].idx
+				tmp = list[j-1]
+				list[j-1] = list[j]
+				list[j] = tmp
+				numberOfSwaps += 1
+			end
+		end
+	end
+	# println("Number of swaps: ", numberOfSwaps)
+	# println("Number of comparisons: ", numberOfComparisons)
+    return list
 end
 
 #

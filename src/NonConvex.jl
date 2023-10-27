@@ -29,7 +29,6 @@ Identify intercepted triangles by the MT algorithm and filter out back-face inte
 # Outputs
 - `rti :: MTalgorithm(face, ray)`
 """
-
 function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ray::Ray)
     Ntri = size(triangles, 1)
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
@@ -44,8 +43,9 @@ function ray_mesh_intersection(triangles::Transpose{Float64,Matrix{Float64}}, ra
         face = TriangleFace(V1, V2, V3)
 
         rti = MTalgorithm(face, ray)
-
+        
         @set rti.face_index = ii
+        
     end)
     foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(eltype(triangles)))
 end
@@ -61,14 +61,15 @@ Identify intercepted triangles by the MT algorithm and filter out back-face inte
 # Outputs
 - `rti :: MTalgorithm(face, ray)`
 """
-
 function ray_mesh_intersection(geo::AbstractGeometry, ray::Ray{T}) where {T}
     Ntri = n_faces(geo)
     f = Filter(rti -> rti.mode ∈ (BackFaceIntersection, FrontFaceIntersection))
     m = Map(ii -> begin   #iterate over all triangles
         face = geo.faces[ii]
         rti = MTalgorithm(face, ray)
+        
         @set rti.face_index = ii
+        
     end)
     foldl(earlier_intersection, 1:Ntri |> m |> f; init=no_intersection(T))
 end

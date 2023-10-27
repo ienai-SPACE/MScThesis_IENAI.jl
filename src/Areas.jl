@@ -49,18 +49,18 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #PCSA: back-face culling + ray-tracing
     rti_vec, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
+    
     Aproj = Aray * length(valid_rti)
 
     #facet calculations
-    faces_hit_idx_nonsorted = valid_rti .|> rti -> rti.face_index |> collect
+    faces_hit_idx_unsorted = valid_rti .|> rti -> rti.face_index |> collect
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
+   
 
     #intersections
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
-    _rti = intersectCoords(valid_rti)
-
-    ###
+    ray_coords = bubbleSort(intersectCoords(valid_rti))
 
     # face_areas = [face_area(filtered_geometry, idx) for idx in hit_idx]
     # _face_vertices = [face_vertices(filtered_geometry, idx) for idx in hit_idx]
@@ -82,12 +82,10 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
             ), eachindex(hit_idx))
 
     end
-    # _intercept_info1 = [_face_areas[ii] for ii in 1:hit_idx[end]]
-    # _intercept_info2 = [_face_angles[ii] for ii in 1:hit_idx[end]]
-    # _intercept_info = [_intercept_info1, _intercept_info2]
+    
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, solarCellsGeo, valid_rti, _rti, ray_per_index, faces_hit_idx_nonsorted, hit_idx
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, solarCellsGeo, valid_rti, ray_coords, ray_per_index, faces_hit_idx_nonunique, hit_idx
 end
 
 
@@ -170,12 +168,14 @@ function raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
 
         #Number of triangles
         Ntri = n_faces(filtered_geometry)
+        # println("Ntri = ",Ntri)
 
         new_viewpoint = shrink_viewpoint(filtered_geometry, viewpoint)
         # println("culling ratio =", Ntri / Ntri_preculling)
 
         rt_vec, Aray = _raytrace(filtered_geometry, new_viewpoint, sampler)
-
+        # max_idx = maximum([rt_vec[ii].face_index for ii in 1:lastindex(rt_vec)])
+        # println("max_idx_rt_vec = ", max_idx)
         return rt_vec, filtered_geometry, Aray
     end
 end

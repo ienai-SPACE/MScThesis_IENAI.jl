@@ -62,20 +62,9 @@ function getCoP(PCSA, intercept_info::Vector{<:InteractionGeometry}, barycenters
     SVector(CoP[1][1], CoP[1][2], CoP[1][3])
 end
 
-# """
-# [Not valid] It returns a singular matrix because the CoP in 3D is a line, not a point
-# """
-# function getCoP(T, coeffs)
-#     F = coeffs[1] * coeffs[2] + coeffs[3] * coeffs[4]
-#     mat = [0 -F[3] F[2]; F[3] 0 -F[1]; -F[2] F[1] 0]
-#     println("det(mat) = ", det(mat))
-#     CoP = mat \ T
-
-#     return CoP
-# end
 
 """
-    getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, bc::Vector{Vector}, ref_point::SVector{3,Float64})
+    getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, ref_point::SVector{3,Float64}, ray_coords::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64,Int64}}, Nray_idx, hit_idx, f_hit_idx)
 
 Non-dimensional aerodynamic torques wrt input reference frame. Normalized with aerodynamic pressure.
 
@@ -88,8 +77,7 @@ Non-dimensional aerodynamic torques wrt input reference frame. Normalized with a
 # Outputs
 - `::SVector{3, Float64}`               : coefficients of torques (M = CM/(0.5*rho*v^2)) i.e. CMx, CMy, CMz
 """
-
-function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, ref_point::SVector{3,Float64}, ray_coords::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64,Int64}}, Nray_idx)
+function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, ref_point::SVector{3,Float64}, ray_coords::Vector{SatelliteGeometryCalculations.IntersectCoords{Float64,Int64}}, Nray_idx, hit_idx, f_hit_idx)
 
     areas = [intercept_info[ii].area * cos(intercept_info[ii].angle) for ii in 1:lastindex(intercept_info)]
     Cnet_v = map(ii -> coeffs_v[ii][1] + coeffs_v[ii][2], 1:lastindex(intercept_info)) .* areas #(Cd + Cl)*Aproj
@@ -104,33 +92,22 @@ function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept
     bc_y = [ray_coords[ii].coords[2] - ref_point[2] for ii in 1:lastindex(ray_coords)]
     bc_z = [ray_coords[ii].coords[3] - ref_point[3] for ii in 1:lastindex(ray_coords)]
 
+    CMx = 0; CMy = 0; CMz = 0;
+    # jj_v = Vector{Int64}(undef,lastindex(ray_coords))
+    for ii in 1:lastindex(ray_coords)
+        jj = findfirst(x-> x == f_hit_idx[ii],hit_idx)
 
-    CMx = -sum([((Cnet_z[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_y[ray_coords[ii].idx] - (Cnet_y[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_z[ii]) for ii in 1:lastindex(ray_coords)])
-    CMy = -sum([((Cnet_x[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_z[ray_coords[ii].idx] - (Cnet_z[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_x[ii]) for ii in 1:lastindex(ray_coords)])
-    CMz = -sum([((Cnet_y[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_x[ray_coords[ii].idx] - (Cnet_x[ray_coords[ii].idx] / Nray_idx[ray_coords[ii].idx]) * bc_y[ii]) for ii in 1:lastindex(ray_coords)])
-
-    SVector(CMx, CMy, CMz)
-end
-#=
-function getTorques(coeffs_v::Vector{Vector{AbstractVector{Float64}}}, intercept_info::Vector{<:InteractionGeometry}, bc::Vector{Vector}, ref_point::SVector{3,Float64})
-    # Cnet_v = map(ii -> coeffs_v[ii][1] + coeffs_v[ii][2], 1:lastindex(bc)) #Cd + Cl
-    Cnet_v = map(ii -> coeffs_v[ii][3], 1:lastindex(bc))
-
-    Cnet_x = [Cnet_v[ii][1] for ii in 1:length(bc)]
-    Cnet_y = [Cnet_v[ii][2] for ii in 1:length(bc)]
-    Cnet_z = [Cnet_v[ii][3] for ii in 1:length(bc)]
-    bc_x = [bc[ii][1] - ref_point[1] for ii in 1:lastindex(bc)]
-    bc_y = [bc[ii][2] - ref_point[2] for ii in 1:lastindex(bc)]
-    bc_z = [bc[ii][3] - ref_point[3] for ii in 1:lastindex(bc)]
-    areas = [intercept_info[ii].area * cos(intercept_info[ii].angle) for ii in 1:lastindex(bc)]
-
-    CMx = -sum((Cnet_z .* bc_y - Cnet_y .* bc_z) .* areas)
-    CMy = -sum((Cnet_x .* bc_z - Cnet_z .* bc_x) .* areas)
-    CMz = -sum((Cnet_y .* bc_x - Cnet_x .* bc_y) .* areas)
+        CMx_ = (Cnet_z[jj] / Nray_idx[jj]) *  bc_y[ii] - (Cnet_y[jj] / Nray_idx[jj]) * bc_z[ii]
+        CMy_ = (Cnet_x[jj] / Nray_idx[jj]) * bc_z[ii] - (Cnet_z[jj] / Nray_idx[jj]) * bc_x[ii]
+        CMz_ = (Cnet_y[jj] / Nray_idx[jj]) * bc_x[ii] - (Cnet_x[jj] / Nray_idx[jj]) * bc_y[ii]
+        CMx = CMx - CMx_
+        CMy = CMy - CMy_
+        CMz = CMz - CMz_
+        # jj_v[ii] = jj
+    end
 
     SVector(CMx, CMy, CMz)
 end
-=#
 
 """
     getAeroTorque(coeffs::Tuple, CoP::Vector, CoM::Vector, A, rho, V)
