@@ -66,12 +66,12 @@ println("CT=", CT3_A)
 SatelliteGeometryCalculations.tock()
 
 
-#-------------------------------
-coords_v = map(ii-> ray_facet_info.ray_coords[ii].coords, 1:77792)
-hit_idx = map(ii-> ray_facet_info.hit_idx[ii], 1:332)
-f_hit_idx = map(ii-> ray_facet_info.f_hit_idx[ii], 1:77792)
-writedlm("coeffs_v", coeffs_v)
-writedlm("coords_v", coords_v)
-writedlm("hit_idx", hit_idx)
-writedlm("f_hit_idx", f_hit_idx)
-
+#..........................................................
+coords = [ray_coords[ii].coords for ii in 1:lastindex(ray_coords)]
+writedlm("coords", coords)
+f_hit_idx = [faces_hit_idx_nonunique[ii] for ii in 1:lastindex(faces_hit_idx_nonunique)]
+writedlm("f_hit_idx", faces_hit_idx_nonunique)
+idx = [hit_idx[ii] for ii in 1:lastindex(hit_idx)]
+writedlm("hit_idx", idx)
+coeffs_v = [coeffs_v[ii] for ii in 1:lastindex(hit_idx)]
+writedlm("coeffs", coeffs_v)
