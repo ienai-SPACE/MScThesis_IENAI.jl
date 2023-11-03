@@ -43,22 +43,22 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
-    #Solar cells identification + ray-tracing
+    ## Solar cells identification + ray-tracing
     solarCellsGeo = getSolarCellsGeo(geometry, viewpoint, sampler)
 
-    #PCSA: back-face culling + ray-tracing
+    ### PCSA: back-face culling + ray-tracing
     rti_vec, filtered_geometry, Aray = raytrace(geometry, viewpoint, sampler) #culling +  ray tracing
     valid_rti = rti_vec |> Filter(rti -> rti.mode == FrontFaceIntersection) |> tcollect
     
     Aproj = Aray * length(valid_rti)
 
-    #facet calculations
+    ### facet calculations
     faces_hit_idx_unsorted = valid_rti .|> rti -> rti.face_index |> collect
     faces_hit_idx_nonunique = sort(valid_rti .|> rti -> rti.face_index)
     hit_idx = unique(faces_hit_idx_nonunique) |> Filter(idx -> idx > 0) |> collect
    
 
-    #intersections
+    ## intersections
     ray_per_index = [count(x -> x == ii, faces_hit_idx_nonunique) for ii in hit_idx]
     ray_coords = bubbleSort(intersectCoords(valid_rti))
 
@@ -69,7 +69,10 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     _face_areas = [Aray * ray_per_index[ii] / cos(_face_angles[ii]) for ii in 1:length(hit_idx)]
 
     Aref = sum([_face_areas[ii] for ii in 1:length(hit_idx)])
-    _barycenters = getBarycenters(filtered_geometry, hit_idx)
+    # _barycenters = getBarycenters(filtered_geometry, hit_idx)
+
+
+    ## storage of information
 
     if is_homogeneous(geometry)
         intercept_info = map(ii -> InteractionGeometryHomo(_face_areas[ii], _face_angles[ii]), 1:lastindex(hit_idx))
@@ -82,10 +85,12 @@ function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
             ), eachindex(hit_idx))
 
     end
+
+    ray_facet_info = Ray_Facet_info(ray_per_index, hit_idx, faces_hit_idx_nonunique, ray_coords)
     
     culling_ratio = n_faces(filtered_geometry) / n_faces(geometry)
 
-    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, solarCellsGeo, valid_rti, ray_coords, ray_per_index, faces_hit_idx_nonunique, hit_idx
+    return Aproj, Aref, intercept_info, _face_normals, culling_ratio, solarCellsGeo, valid_rti, ray_facet_info 
 end
 
 
@@ -210,6 +215,13 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     rti_vec = 1:Norig |> m |> tcollect
 
     return rti_vec, Aray
+end
+
+struct Ray_Facet_info{I,IC}
+    Nray_idx::I
+    hit_idx::I
+    f_hit_idx::I
+    ray_coords::IC
 end
 
 export analyze_areas

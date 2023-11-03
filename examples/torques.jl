@@ -29,7 +29,7 @@ v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
 #---- Area calculations --------------------------------------------------------------------
-Aproj, Atot, intercept_info, normals, culling, solarCellsGeo, rti_vec, ray_coords, _rpi, faces_hit_idx_nonunique, hit_idx = analyze_areas(geo, v);
+Aproj, Atot, intercept_info, normals, culling, solarCellsGeo, rti_vec, ray_facet_info = analyze_areas(geo, v);
 
 println("Aproj = ", Aproj)
 println("Aref = ", Atot)
@@ -44,31 +44,34 @@ println("Cp = ", coeffs[5], coeffs[6])
 println("Ctau = ", coeffs[7], coeffs[8])
 
 #---- Center of pressure ------------------------------------------------------------------------
-#[Not valid: GSI depend on angle, not only on area contribution] 
-# CoP = SatelliteGeometryCalculations.getCoP(Aproj, intercept_info, barycenters);
-# println(CoP)
 
 # For the calculation of the aerodynamic torque, the `torque_ref` should be the CoM 
-torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
-CT = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, torque_ref, ray_coords, _rpi, hit_idx, faces_hit_idx_nonunique)
+torque_ref = SVector(0.0, 0.0, 0.0)
+CT_A = SGC.getTorques(coeffs_v, intercept_info, torque_ref, ray_facet_info)
 
-chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
-CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
-CT2 = SatelliteGeometryCalculations.getAeroTorque(coeffs, CoP[2], torque_ref, Aproj)
+CoP = SGC.getCoP(CT_A, coeffs, Aproj)
+CT2_A = SGC.getAeroTorque(coeffs, CoP.CoPx, torque_ref, Aproj)
 
-println("CT=", CT)
-println("CT=", CT2)
+println("CT=", CT_A)
+println("CT=", CT2_A)
 
+CoP = SGC.getCoP(CT_A, coeffs, Aproj)
 
-chord_plane_n = SVector(0.0, 1.0, 0.0) #chord plane normal
-CoP = SatelliteGeometryCalculations.getCoP(CT, coeffs, Aproj, chord_plane_n)
-
-CT3 = SatelliteGeometryCalculations.getTorques(coeffs_v, intercept_info, CoP[2], ray_coords, _rpi, hit_idx, faces_hit_idx_nonunique)
-println("CT=", CT3)
+CT3_A = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPy, ray_facet_info)
+println("CT=", CT3_A)
 
 # #------------------------------------------------------------------------------------------------
 
 
 SatelliteGeometryCalculations.tock()
 
+
+#-------------------------------
+coords_v = map(ii-> ray_facet_info.ray_coords[ii].coords, 1:77792)
+hit_idx = map(ii-> ray_facet_info.hit_idx[ii], 1:332)
+f_hit_idx = map(ii-> ray_facet_info.f_hit_idx[ii], 1:77792)
+writedlm("coeffs_v", coeffs_v)
+writedlm("coords_v", coords_v)
+writedlm("hit_idx", hit_idx)
+writedlm("f_hit_idx", f_hit_idx)
 
