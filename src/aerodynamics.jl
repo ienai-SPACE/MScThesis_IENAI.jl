@@ -1,7 +1,7 @@
 using LinearAlgebra
 
 """
-    GetCoP{T}
+	GetCoP{T}
 
 Center of pressure with respect to y-z, x-z, and x-y planes, respectively. Units: [m]
 """
@@ -12,7 +12,7 @@ struct GetCoP{T}
 end
 
 """
-    getCoP(M::SVector, coeffs::Tuple, A)
+	getCoP(M::SVector, coeffs::Tuple, A)
 
 Calculation of center of pressure at y-z, x-z, and x-y planes
 
@@ -22,14 +22,15 @@ Calculation of center of pressure at y-z, x-z, and x-y planes
 - `A`			: projected cross-sectional area
 
 # Outputs:
-- `GetCoP`		: [m] (CoPx, CoPy, CoPz)
+- `GetCoP`		: [m] (CoPx, CoPy, CoPz)	: CoP
+- `GetCoP`		: [m] (CoPx, CoPy, CoPz)	: point on the line of action of forces
 """
 function getCoP(M::SVector, coeffs::Tuple, A)
 	cpn_x = SVector(1.0, 0.0, 0.0)  # chord plane normal
 	cpn_y = SVector(0.0, 1.0, 0.0)
 	cpn_z = SVector(0.0, 0.0, 1.0)
 	CoP_u1u2 = [_getCoP(M, coeffs, A, cpn_x), _getCoP(M, coeffs, A, cpn_y), _getCoP(M, coeffs, A, cpn_z)]
-	GetCoP(SVector(CoP_u1u2[1][2]), SVector(CoP_u1u2[2][2]), SVector(CoP_u1u2[3][2]))
+	GetCoP(SVector(CoP_u1u2[1][2]), SVector(CoP_u1u2[2][2]), SVector(CoP_u1u2[3][2])), GetCoP(SVector(CoP_u1u2[1][1]), SVector(CoP_u1u2[2][1]), SVector(CoP_u1u2[3][1]))
 end
 
 """

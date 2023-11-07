@@ -1,6 +1,7 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 FileIO = "5789e2e9-d7fb-5bc7-8068-2c6fae9b9549"
+FilePathsBase = "48062228-2e41-5def-b9a4-89aafe57970f"
 Revise = "295af30f-e4ad-537b-8983-00126c2a3abe"
 SatelliteGeometryCalculations = "a6f97a21-93c4-462f-b59c-cf4b526cfc64"
 SatelliteToolbox = "6ac157d9-b43d-51bb-8fab-48bf53814f4a"

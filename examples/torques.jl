@@ -8,7 +8,7 @@ using FilePathsBase: /
 
 pkg_path = FilePathsBase.@__FILEPATH__() |> parent |> parent
 
-mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphereMesh.obj")
+mesh_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "sphere_centered.obj")
 materials_path = FilePathsBase.join(pkg_path, "test", "inputs_models_data", "TSAT_coarse_mesh_materials.json")
 
 #HETEROGENEOUS CASE
@@ -23,8 +23,8 @@ outSurfaceProps = SurfaceProps()                                                
 JD, alt, g_lat, g_long, f107A, f107, ap, Vrel_v = SatelliteGeometryCalculations.OrbitandDate()
 outGasStreamProps = GasStreamProperties(JD, alt, g_lat, g_long, f107A, f107, ap)       #outGasStreamProps.[C, PO, mmean, Ta]
 
-α = deg2rad(90)  #rotate around z-axis
-ϕ = deg2rad(0) #rotate around x-axis
+α = deg2rad(0)  #rotate around z-axis
+ϕ = deg2rad(90) #rotate around x-axis
 v = Viewpoint(geo, α, ϕ)
 # v = Viewpoint(geo, Vrel_v)
 
@@ -57,7 +57,7 @@ println("CT=", CT2_A)
 
 CoP = SGC.getCoP(CT_A, coeffs, Aproj)
 
-CT3_A = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPy, ray_facet_info)
+CT3_A = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPz, ray_facet_info)
 println("CT=", CT3_A)
 
 # #------------------------------------------------------------------------------------------------
@@ -67,11 +67,22 @@ SatelliteGeometryCalculations.tock()
 
 
 #..........................................................
-coords = [ray_coords[ii].coords for ii in 1:lastindex(ray_coords)]
-writedlm("coords", coords)
-f_hit_idx = [faces_hit_idx_nonunique[ii] for ii in 1:lastindex(faces_hit_idx_nonunique)]
-writedlm("f_hit_idx", faces_hit_idx_nonunique)
-idx = [hit_idx[ii] for ii in 1:lastindex(hit_idx)]
-writedlm("hit_idx", idx)
-coeffs_v = [coeffs_v[ii] for ii in 1:lastindex(hit_idx)]
-writedlm("coeffs", coeffs_v)
+# coords = [ray_coords[ii].coords for ii in 1:lastindex(ray_coords)]
+# writedlm("coords", coords)
+# f_hit_idx = [faces_hit_idx_nonunique[ii] for ii in 1:lastindex(faces_hit_idx_nonunique)]
+# writedlm("f_hit_idx", faces_hit_idx_nonunique)
+# idx = [hit_idx[ii] for ii in 1:lastindex(hit_idx)]
+# writedlm("hit_idx", idx)
+# coeffs_v = [coeffs_v[ii] for ii in 1:lastindex(hit_idx)]
+# writedlm("coeffs", coeffs_v)
+torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
+	CT_A = SGC.getTorques(coeffs_v, intercept_info, torque_ref, ray_facet_info)
+	CoP, = SGC.getCoP(CT_A, coeffs, Aproj)
+
+	CT_Ax = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPx, ray_facet_info)
+    CT_Ay = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPy, ray_facet_info)
+    CT_Az = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPz, ray_facet_info)
+
+	checkx = norm(CT_Ax) #center of pressure on the chord plane
+	checky = norm(CT_Ay) #center of pressure on the chord plane
+    checkz = norm(CT_Az) #center of pressure on the chord plane

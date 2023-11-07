@@ -16,7 +16,7 @@ Define orbital elements and date to obtain relative velocity of the satellite an
 function OrbitandDate()
 
     #Orbital elements
-    a = 400 + R_E     #[km]
+    a = 200 + R_E     #[km]
     e = 0
     #r_p = a * (1 - e);        #[km]
     #r_a = a * (1 + e);        #[km]
