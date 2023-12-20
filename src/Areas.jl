@@ -39,7 +39,7 @@ end
 function areas_nonconvex(geometry::AbstractGeometry, viewpoint::Viewpoint)
     #view.direction --> dir (particle beam direction)
     samplerG = GridFilter(1e5)
-    samplerF = FibonacciSampler(1e5)
+    samplerF = FibonacciSampler(5e6)
     samplerMC = MonteCarloSampler(1e5)
     sampler = samplerF
 
@@ -217,6 +217,16 @@ function _raytrace(geometry::AbstractGeometry, viewpoint::Viewpoint, sampler)
     return rti_vec, Aray
 end
 
+
+"""
+Ray_Facet_info{I,IC}
+
+# Fields
+- `Nray_idx::I`
+- `hit_idx::I`
+- `f_hit_idx::I`
+- `ray_coords::IC`
+"""
 struct Ray_Facet_info{I,IC}
     Nray_idx::I
     hit_idx::I

@@ -1,7 +1,7 @@
 using SatelliteGeometryCalculations, DelimitedFiles, LinearAlgebra, StaticArrays
 SGC = SatelliteGeometryCalculations
 
-SatelliteGeometryCalculations.tick()
+# SatelliteGeometryCalculations.tick()
 
 using FilePathsBase
 using FilePathsBase: /
@@ -49,21 +49,21 @@ println("Ctau = ", coeffs[7], coeffs[8])
 torque_ref = SVector(0.0, 0.0, 0.0)
 CT_A = SGC.getTorques(coeffs_v, intercept_info, torque_ref, ray_facet_info)
 
-CoP = SGC.getCoP(CT_A, coeffs, Aproj)
+CoP, = SGC.getCoP(CT_A, coeffs, Aproj)
 CT2_A = SGC.getAeroTorque(coeffs, CoP.CoPx, torque_ref, Aproj)
 
 println("CT=", CT_A)
 println("CT=", CT2_A)
 
-CoP = SGC.getCoP(CT_A, coeffs, Aproj)
+CoP, = SGC.getCoP(CT_A, coeffs, Aproj)
 
 CT3_A = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPz, ray_facet_info)
-println("CT=", CT3_A)
+println("CT=", norm(CT3_A))
 
 # #------------------------------------------------------------------------------------------------
 
 
-SatelliteGeometryCalculations.tock()
+# SatelliteGeometryCalculations.tock()
 
 
 #..........................................................
@@ -75,14 +75,15 @@ SatelliteGeometryCalculations.tock()
 # writedlm("hit_idx", idx)
 # coeffs_v = [coeffs_v[ii] for ii in 1:lastindex(hit_idx)]
 # writedlm("coeffs", coeffs_v)
-torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
-	CT_A = SGC.getTorques(coeffs_v, intercept_info, torque_ref, ray_facet_info)
-	CoP, = SGC.getCoP(CT_A, coeffs, Aproj)
 
-	CT_Ax = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPx, ray_facet_info)
-    CT_Ay = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPy, ray_facet_info)
-    CT_Az = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPz, ray_facet_info)
+# torque_ref = SVector(0.0, 0.0, 0.0)  # point about which moments are calculated
+# 	CT_A = SGC.getTorques(coeffs_v, intercept_info, torque_ref, ray_facet_info)
+# 	CoP, = SGC.getCoP(CT_A, coeffs, Aproj)
 
-	checkx = norm(CT_Ax) #center of pressure on the chord plane
-	checky = norm(CT_Ay) #center of pressure on the chord plane
-    checkz = norm(CT_Az) #center of pressure on the chord plane
+# 	CT_Ax = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPx, ray_facet_info)
+#     CT_Ay = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPy, ray_facet_info)
+#     CT_Az = SGC.getTorques(coeffs_v, intercept_info, CoP.CoPz, ray_facet_info)
+
+# 	checkx = norm(CT_Ax) #center of pressure on the chord plane
+# 	checky = norm(CT_Ay) #center of pressure on the chord plane
+#     checkz = norm(CT_Az) #center of pressure on the chord plane
